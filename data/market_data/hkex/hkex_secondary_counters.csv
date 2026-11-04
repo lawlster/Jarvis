@@ -1,0 +1,25 @@
+﻿stock_code,name,category,subcategory,board_lot,isin,expiry_date,shortsell_eligible,trading_currency,rmb_counter,classification,classification_reason,primary_stock_code,counter_relationship
+80016,SHK PPT-R,Equity,Equity Securities (Main Board),500,HK0016000132,,Y,RMB,,include_candidate,equity,00016,secondary_rmb_counter
+80020,SENSETIME-WR,Equity,Equity Securities (Main Board),"1,000",KYG8062L1041,,Y,RMB,,include_candidate,equity,00020,secondary_rmb_counter
+80175,GEELY AUTO-R,Equity,Equity Securities (Main Board),"1,000",KYG3777B1032,,Y,RMB,,include_candidate,equity,00175,secondary_rmb_counter
+80291,CHINARES BEER-R,Equity,Equity Securities (Main Board),500,HK0291001490,,Y,RMB,,include_candidate,equity,00291,secondary_rmb_counter
+80388,HKEX-R,Equity,Equity Securities (Main Board),100,HK0388045442,,Y,RMB,,include_candidate,equity,00388,secondary_rmb_counter
+80700,TENCENT-R,Equity,Equity Securities (Main Board),100,KYG875721634,,Y,RMB,,include_candidate,equity,00700,secondary_rmb_counter
+80737,BAY AREA DEV-R,Equity,Equity Securities (Main Board),500,KYG8088A1168,, ,RMB,,include_candidate,equity,00737,secondary_rmb_counter
+80883,CNOOC-R,Equity,Equity Securities (Main Board),"1,000",HK0883013259,,Y,RMB,,include_candidate,equity,00883,secondary_rmb_counter
+80941,CHINA MOBILE-R,Equity,Equity Securities (Main Board),500,HK0941009539,,Y,RMB,,include_candidate,equity,00941,secondary_rmb_counter
+80992,LENOVO GROUP-R,Equity,Equity Securities (Main Board),"2,000",HK0992009065,,Y,RMB,,include_candidate,equity,00992,secondary_rmb_counter
+81024,KUAISHOU-WR,Equity,Equity Securities (Main Board),100,KYG532631028,,Y,RMB,,include_candidate,equity,01024,secondary_rmb_counter
+81211,BYD COMPANY-R,Equity,Equity Securities (Main Board),100,CNE100000296,,Y,RMB,,include_candidate,equity,01211,secondary_rmb_counter
+81299,AIA-R,Equity,Equity Securities (Main Board),200,HK0000069689,,Y,RMB,,include_candidate,equity,01299,secondary_rmb_counter
+81810,XIAOMI-WR,Equity,Equity Securities (Main Board),200,KYG9830T1067,,Y,RMB,,include_candidate,equity,01810,secondary_rmb_counter
+82020,ANTA SPORTS-R,Equity,Equity Securities (Main Board),200,KYG040111059,,Y,RMB,,include_candidate,equity,02020,secondary_rmb_counter
+82318,PING AN-R,Equity,Equity Securities (Main Board),500,CNE1000003X6,,Y,RMB,,include_candidate,equity,02318,secondary_rmb_counter
+82331,LI NING-R,Equity,Equity Securities (Main Board),500,KYG5496K1242,,Y,RMB,,include_candidate,equity,02331,secondary_rmb_counter
+82333,GWMOTOR-R,Equity,Equity Securities (Main Board),500,CNE100000338,,Y,RMB,,include_candidate,equity,02333,secondary_rmb_counter
+82388,BOC HONG KONG-R,Equity,Equity Securities (Main Board),500,HK2388011192,,Y,RMB,,include_candidate,equity,02388,secondary_rmb_counter
+83690,MEITUAN-WR,Equity,Equity Securities (Main Board),100,KYG596691041,,Y,RMB,,include_candidate,equity,03690,secondary_rmb_counter
+86618,JD HEALTH-R,Equity,Equity Securities (Main Board),50,KYG5074A1004,,Y,RMB,,include_candidate,equity,06618,secondary_rmb_counter
+89618,JD-SWR,Equity,Equity Securities (Main Board),50,KYG8208B1014,,Y,RMB,,include_candidate,equity,09618,secondary_rmb_counter
+89888,BIDU-WR,Equity,Equity Securities (Main Board),50,KYG070341048,,Y,RMB,,include_candidate,equity,09888,secondary_rmb_counter
+89988,BABA-WR,Equity,Equity Securities (Main Board),100,KYG017191142,,Y,RMB,,include_candidate,equity,09988,secondary_rmb_counter

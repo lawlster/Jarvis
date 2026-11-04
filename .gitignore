@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+
+# Temporary files
+*.tmp
+*.bak
+
+# Large generated SEC cache files
+data/market_data/us/sec_issuer_enrichment_cache*

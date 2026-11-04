@@ -1,0 +1,86 @@
+HKEX UNIVERSE NORMALIZATION REPORT
+=======================================================
+Generated: 2026-11-04T18:34:26
+
+SOURCE
+Input file: D:\AiAssistant\data\market_data\hkex\classified_securities.csv
+Total source records: 17309
+
+SOURCE CLASSIFICATIONS
+exclude: 14487
+include: 11
+include_candidate: 2782
+manual_review: 29
+
+NORMALIZATION RESULTS
+Primary candidates: 2769
+Secondary RMB counters: 24
+Manual review records: 29
+Excluded records: 14487
+Unknown classifications: 0
+
+CANDIDATE CATEGORY TOTALS
+Equity: 2758
+Real Estate Investment Trusts: 11
+
+DATA QUALITY
+Candidates missing ISIN: 34
+WVR securities: 30
+REIT candidates: 11
+Duplicate candidate identity groups: 0
+RMB counter link warnings: 0
+
+MISSING ISIN CANDIDATES
+00205 | BFB HEALTH | Equity | Equity Securities (Main Board)
+00290 | GOFINTECH QUANT | Equity | Equity Securities (Main Board)
+00627 | VISION SYNERGY | Equity | Equity Securities (Main Board)
+00936 | KAISACORE | Equity | Equity Securities (Main Board)
+01010 | SKY BLUE 11 | Equity | Equity Securities (Main Board)
+01036 | VANKE OVERSEAS | Equity | Equity Securities (Main Board)
+01255 | TATA HEALTH | Equity | Equity Securities (Main Board)
+01570 | DJSH INT'L | Equity | Equity Securities (Main Board)
+01620 | CINESE INTL | Equity | Equity Securities (Main Board)
+01732 | XIANGXING TECH | Equity | Equity Securities (Main Board)
+01925 | KWUNGS AROMA | Equity | Equity Securities (Main Board)
+01981 | CATHAY GP HLDGS | Equity | Equity Securities (Main Board)
+02175 | TRILLION HLDG | Equity | Equity Securities (Main Board)
+02258 | WATTS INT'L | Equity | Equity Securities (Main Board)
+02329 | GLORY HEALTH | Equity | Equity Securities (Main Board)
+02440 | MEMESTRATEGY | Equity | Equity Securities (Main Board)
+02489 | PERSISTENCEGOLD | Equity | Equity Securities (Main Board)
+02947 | DEEPZERO-OLD | Equity | Equity Securities (Main Board)
+02955 | JINXUN RES-200 | Equity | Equity Securities (Main Board)
+03788 | HANKING GOLD | Equity | Equity Securities (Main Board)
+06608 | BAIRONG AI-W | Equity | Equity Securities (Main Board)
+06998 | EDDING GENOR | Equity | Equity Securities (Main Board)
+08013 | ECI TECH | Equity | Equity Securities (GEM)
+08131 | NOVATECH INTEL | Equity | Equity Securities (GEM)
+08156 | SINOPHARM TECH | Equity | Equity Securities (GEM)
+08208 | RADIANCE GLO GP | Equity | Equity Securities (GEM)
+08232 | THAC GROUP | Equity | Equity Securities (GEM)
+08493 | S. DRAGON | Equity | Equity Securities (GEM)
+08551 | ZXZN QI-HSE-20K | Equity | Equity Securities (GEM)
+08555 | ASIAPAC FIN RTS | Equity | Equity Securities (GEM)
+08572 | GLORY FLAME-OLD | Equity | Equity Securities (GEM)
+08583 | CB GLOBAL-OLD | Equity | Equity Securities (GEM)
+08612 | WORLD SUPER | Equity | Equity Securities (GEM)
+08631 | SUN KONG HLDGS | Equity | Equity Securities (GEM)
+
+DUPLICATE CANDIDATE IDENTITIES
+
+RMB COUNTER LINK WARNINGS
+None
+
+UNKNOWN CLASSIFICATIONS
+None
+
+OUTPUT FILES
+D:\AiAssistant\data\market_data\hkex\hkex_normalized_candidates.csv
+D:\AiAssistant\data\market_data\hkex\hkex_secondary_counters.csv
+D:\AiAssistant\data\market_data\hkex\hkex_manual_review.csv
+D:\AiAssistant\data\market_data\hkex\hkex_normalization_report.txt
+
+Database modified: NO
+Original classified CSV modified: NO
+
+NORMALIZATION COMPLETED

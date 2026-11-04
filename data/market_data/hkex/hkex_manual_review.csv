@@ -1,0 +1,30 @@
+﻿stock_code,name,category,subcategory,board_lot,isin,expiry_date,shortsell_eligible,trading_currency,rmb_counter,classification,classification_reason
+00080,CAI CORP,Equity,Investment Companies,"10,000",KYG211971687,, ,HKD,,manual_review,special_equity_instrument
+00133,CHINA MERCHANTS,Equity,Investment Companies,"2,000",HK0133000726,,Y,HKD,,manual_review,special_equity_instrument
+00204,CAPITAL REALM,Equity,Investment Companies,"5,000",BMG2115B2053,, ,HKD,,manual_review,special_equity_instrument
+00310,PROSP INV HOLD,Equity,Investment Companies,"15,000",BMG727402056,, ,HKD,,manual_review,special_equity_instrument
+00339,WEBX HOLDING,Equity,Investment Companies,"10,000",BMG2423L1019,, ,HKD,,manual_review,special_equity_instrument
+00356,DT CAPITAL,Equity,Investment Companies,"5,000",KYG2848V1225,, ,HKD,,manual_review,special_equity_instrument
+00428,COCOON HOLDINGS,Equity,Investment Companies,"4,000",BMG2365B1292,, ,HKD,,manual_review,special_equity_instrument
+00612,CARMEN CENTURY,Equity,Investment Companies,"8,000",KYG2120F1000,, ,HKD,,manual_review,special_equity_instrument
+00721,C FIN INT INV,Equity,Investment Companies,"10,000",BMG2110W1139,, ,HKD,,manual_review,special_equity_instrument
+00768,UBA INVESTMENTS,Equity,Investment Companies,"2,000",KYG9158X1016,, ,HKD,,manual_review,special_equity_instrument
+00770,EMINENCE CAP GP,Equity,Investment Companies,"1,000",,, ,USD,,manual_review,special_equity_instrument
+00810,CH CASTSON 81,Equity,Investment Companies,"6,000",BMG215271096,, ,HKD,,manual_review,special_equity_instrument
+00905,WALNUT CAP,Equity,Investment Companies,"16,000",BMG3932X1231,, ,HKD,,manual_review,special_equity_instrument
+00913,HARBOUR DIGITAL,Equity,Investment Companies,"10,000",KYG4289D1088,, ,HKD,,manual_review,special_equity_instrument
+01062,CDB INT'L INV,Equity,Investment Companies,"10,000",KYG2125D1007,, ,HKD,,manual_review,special_equity_instrument
+01140,HK.AI CAPITAL,Equity,Investment Companies,"4,000",,, ,HKD,,manual_review,special_equity_instrument
+01160,GOLDSTONE CAP,Equity,Investment Companies,"100,000",BMG987631089,, ,HKD,,manual_review,special_equity_instrument
+01217,CH INNOVATION,Equity,Investment Companies,"40,000",KYG2112R1048,, ,HKD,,manual_review,special_equity_instrument
+01226,CH INV FIN GP,Equity,Investment Companies,"10,000",KYG2114S1425,, ,HKD,,manual_review,special_equity_instrument
+02312,LONG INV CORP,Equity,Investment Companies,"10,000",KYG2153Z2137,, ,HKD,,manual_review,special_equity_instrument
+02324,CAPITAL VC,Equity,Investment Companies,"10,000",KYG1889C2251,, ,HKD,,manual_review,special_equity_instrument
+04332,AMGEN-T,Equity,Trading Only Securities,10,US0311621009,,Y,HKD,,manual_review,special_equity_instrument
+04333,CISCO-T,Equity,Trading Only Securities,10,US17275R1023,,Y,HKD,,manual_review,special_equity_instrument
+04335,INTEL-T,Equity,Trading Only Securities,10,US4581401001,,Y,HKD,,manual_review,special_equity_instrument
+04336,APPL MATERIAL-T,Equity,Trading Only Securities,10,US0382221051,,Y,HKD,,manual_review,special_equity_instrument
+04337,STARBUCKS-T,Equity,Trading Only Securities,20,US8552441094,,Y,HKD,,manual_review,special_equity_instrument
+04338,MICROSOFT-T,Equity,Trading Only Securities,10,US5949181045,,Y,HKD,,manual_review,special_equity_instrument
+06228,MERDEKAGOLD-DRS,Equity,Depositary Receipts,100,US5889221124,, ,HKD,,manual_review,special_equity_instrument
+06288,FAST RETAIL-DRS,Equity,Depositary Receipts,300,US31188H2004,, ,HKD,,manual_review,special_equity_instrument
