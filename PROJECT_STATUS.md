@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 29 — Automated company research reports (PARTIAL — built and tested 2026-11-08; MSFT report generated, DBS degrades to insufficient-data — see Step 29 section below)
-- Current subtask: Step 30 investment thesis tracking
+- Current step: 30 — Investment thesis tracking (PARTIAL — built and tested 2026-11-08; example MSFT thesis created and reviewed, DBS degrades to stale — see Step 30 section below)
+- Current subtask: Step 31 market news collection
 - Overall status: In progress
 
 ## Completed work
@@ -1036,6 +1036,90 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   one stale price snapshot; not wired into `main.py`
   (Step 50); no sending or scheduling.  Sufficient to start
   Step 30 (investment thesis tracking).
+
+### 2026-11-08 — Step 30 investment thesis tracking (PARTIAL, not complete)
+
+- New module: `agents/thesis_tracking.py`; tests:
+  `test_thesis_tracking.py` — **26 tests, OK** (410 total
+  with Steps 16–29, `python -m unittest discover`, run from
+  the project root with
+  `~/workspace/projects/jarvis-venv/bin/python`, no
+  regressions).  Full report:
+  `~/workspace/projects/step30-report.md`; example MSFT
+  thesis file: `~/workspace/projects/step30-msft-thesis.json`.
+  Production DB SHA-256 verified unchanged before and after
+  (`36862922…089187`, post-audit hash).
+- A thesis records the owner's reasoning in the owner's own
+  words — blank thesis text raises `ValueError`; the module
+  never invents it.  Creation snapshots the Step 21–27
+  evidence (valuation range, tier, entry-price ladder, alert
+  price, quality, deterioration, health verdict, latest key
+  figures) via `margin_of_safety_summary`.  Confirm /
+  invalidate conditions are caller-supplied where given,
+  otherwise suggested defaults from the snapshot (Step 23
+  alert price and tier, Step 24 quality, Step 27
+  deterioration), labelled as such.  Conditions are free
+  text plus an optional machine-checkable `rule` (11 rule
+  kinds); a condition with no rule, an unknown rule kind, or
+  a missing input is reported as "not machine-checkable —
+  owner to judge", never guessed at.
+- Review re-runs the pipeline, compares the new snapshot
+  with the creation snapshot field by field, evaluates the
+  conditions and suggests a status: `invalidated` when any
+  invalidate condition is met, `confirmed` when every
+  checkable confirm condition is met, `stale` when no fresh
+  snapshot could be built, otherwise `active`.  Statuses:
+  `active` / `confirmed` / `invalidated` / `stale` /
+  `closed`, every change recorded in `status_history`.
+  No recommendation anywhere; review output contains no
+  "buy"/"sell" as standalone words (tested).
+- Storage is JSON files, one per thesis, under a
+  caller-chosen directory (default `data/theses/` under the
+  project root — the same file-log pattern Step 26 uses for
+  `data/detection_runs.jsonl`).  No new production database
+  tables were created and nothing was written to the
+  production database.  Existing history storage
+  (`agents/valuation_history.py`) was checked and does not
+  fit: it writes valuation snapshots into the production
+  database, which the Step 30 brief forbids for thesis
+  records.
+- **Design decision worth recording:** a default condition
+  already met in the creation snapshot is skipped (a thesis
+  cannot be confirmed or invalidated by the state it was
+  created in) and listed in
+  `conditions_skipped_already_met`.  Caught by the MSFT
+  example: the "tier becomes overvalued" invalidate
+  candidate is already true for MSFT, so carrying it as a
+  live condition would have invalidated the thesis on its
+  first review.
+- **Annual-FCF fallback:** like the Step 25 scanner and the
+  Step 29 report, the snapshot falls back to the labelled
+  annual FCF basis when a ticker has no quarterly rows (no
+  TTM free cash flow exists).  Found by probing: the solid
+  fixture has annual rows only and the TTM-first summary
+  returned no valuation range at all.
+- **Example MSFT thesis** (labelled as an example, not the
+  owner's words; file `step30-msft-thesis.json`): status
+  `active`, tier **overvalued**, quality **excellent**,
+  health **strong**, deterioration **warning** (not
+  material); range $98.52 / $163.30 / $234.64;
+  strongest-alert price $78.82; price $507.12 as of
+  2026-11-03; revenue $331,839m, net income $133,749m,
+  FCF $66,987m.  3 confirm / 2 invalidate conditions, 1
+  skipped.  Review on unchanged data: **active**, no
+  changes.  Review at a hypothetical $70: **confirmed**,
+  3/3 confirm conditions met.  **DBS thesis: `stale`**,
+  snapshot `insufficient_data`.
+- **Step 30 is PARTIAL, not complete.** No real thesis has
+  been tracked over time — the only thesis ever created is
+  the labelled MSFT example, reviewed once on unchanged
+  data and once at a hypothetical price.  The rules cover
+  price, tier, quality, deterioration, margin and
+  conservative value only; narrative conditions (management,
+  moat, competition) stay as free text for the owner to
+  judge.  Not wired into `main.py` (Step 50); no sending or
+  scheduling of reviews.  Sufficient to start Step 31
+  (market news collection).
 
 ### 2026-11-08 — Full codebase audit (verification + repair)
 
