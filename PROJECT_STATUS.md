@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 16 — Unified financial data (PARTIAL — US/SEC standardisation built and tested 2026-11-08; SG/HK not yet real — see Step 16 section below)
-- Current subtask: Step 17 financial ratios on US data; Phase A close-out (15H/15I/15J + 14H/14I decisions pending owner) remains gated on owner decisions
+- Current step: 17 — Financial ratios and metrics engine (PARTIAL — built and tested 2026-11-08; MSFT only, price ratios rest on a stale 2026-11-03 snapshot — see Step 17 section below)
+- Current subtask: Step 18 financial health on US data; Phase A close-out (15H/15I/15J + 14H/14I decisions pending owner) remains gated on owner decisions
 - Overall status: In progress
 
 ## Completed work
@@ -99,6 +99,57 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   statements (needs 14I import + a new collector), restatement
   detection, US coverage beyond MSFT. **Step 16 is PARTIAL, not
   complete.** It is sufficient to start Step 17 (ratios) on US data.
+
+### 2026-11-08 — Step 17 financial ratios and metrics engine (PARTIAL, not complete)
+
+- Built `agents/financial_ratios.py`: computes P/E, P/B, P/S,
+  EV/EBITDA, EV/EBIT, gross / operating / net margin, ROE, ROA,
+  ROIC, debt-to-equity, interest coverage, current ratio and quick
+  ratio from Step 16 standardised statements plus an explicit
+  price/market-cap input. Every ratio records formula, inputs used,
+  period, period type and price as-of date. Missing inputs are
+  missing with a reason; zero denominators are missing, never an
+  exception. No network requests, no production writes.
+- Definitions: ROE/ROA/ROIC use average balances when a prior
+  period exists (basis recorded); ROIC = NOPAT / invested capital,
+  NOPAT = operating_income x (1 - income_tax / income_before_tax),
+  invested capital = total_debt + total_equity -
+  cash_and_equivalents; EV = market_cap + total_debt -
+  cash_and_equivalents (short-term investments not subtracted);
+  quick ratio = (current_assets - inventory) / current_liabilities.
+- TTM: no TTM rows exist and no quarterly row is stored at a fiscal
+  year end, so TTM flows are built as annual + latest quarter -
+  same quarter a year ago (balance concepts from the latest
+  quarterly balance row); a four-quarter sum is used only when the
+  four quarters are actually consecutive (a gap forces the
+  annual-minus-prior-quarter method — caught by a test).
+- Tests: `test_financial_ratios.py` — **21 tests, OK**
+  (`python -m unittest test_financial_ratios`). Covers MSFT FY2026
+  against hand-computed values, FY2025 fundamentals, missing-input
+  and zero-denominator behaviour, TTM construction, quarterly mode,
+  and snapshot-price loading from a temp DB copy.
+- Run against a temp copy of the real DB (production SHA-256
+  unchanged). MSFT FY2026 (price as of 2026-11-03, $507.12):
+  P/E 28.25, P/B 8.54, P/S 11.35, EV/EBIT 24.38, gross margin
+  67.94%, operating margin 46.78%, net margin 40.31%, ROE 34.04%,
+  ROA 19.42%, ROIC 30.59%, debt-to-equity 0.09, current 1.23,
+  quick 1.22. FY2025 fundamentals: gross 68.82%, net 36.15%,
+  ROE 33.28%, ROA 18.00%, ROIC 32.50%, D/E 0.13, current 1.35.
+  TTM to 2026-09-30: P/E 26.47 (matches the snapshot's stored
+  trailing_pe 26.46764, corroborating the TTM construction),
+  P/S 10.87, EV/EBIT 23.17, net margin 41.17%, ROIC 30.37%.
+  19 annual periods computed (FY2008–FY2026); early years degrade
+  gracefully (FY2008 yields only 4 ratios — sparse balance sheets).
+  Full table in `step17-report.md`.
+- Unavailable, not guessed: **EV/EBITDA** (no D&A or EBITDA
+  concept in Step 16, no such key in US raw data) and **interest
+  coverage** (no interest expense concept or key). **Step 17 is
+  PARTIAL, not complete.** Price ratios rest on a single stale
+  2026-11-03 snapshot (earlier years get fundamental ratios only);
+  only MSFT has statements; no SG/HK ratios exist. EV/EBITDA and
+  interest coverage need D&A and interest expense added to the
+  Step 16 concept set (SEC XBRL tags exist for both). Sufficient
+  to start Step 18 (financial health) on US data.
 
 ## Important project rules
 
