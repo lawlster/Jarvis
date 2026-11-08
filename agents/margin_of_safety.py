@@ -59,7 +59,12 @@ Material deterioration (explicit rule, not guessed)
 ---------------------------------------------------
 Deterioration is derived from the Step 18 health, Step 19 growth
 and Step 20 cash-flow assessments, or from an explicit caller
-override.  It is TRUE when any of these holds:
+override.  Since Step 27, the flag takes its verdict from the
+Step 27 deterioration assessment (which itself builds on Steps
+18/19/20) when one is available — see ``assess_deterioration``
+and ``_deterioration_from_step27`` — and the rule below is kept
+as the corroboration and as the fallback when Step 27 cannot
+assess the ticker.  It is TRUE when any of these holds:
 
 * Step 18 health verdict is ``weak`` (a hard distress flag fired),
   or the health verdict fell to ``weak`` from a prior period;
@@ -114,6 +119,7 @@ writes.  It never touches the production database.
 import sqlite3
 
 from agents import business_quality as bq
+from agents import deterioration as det
 from agents import financial_cashflow as cf
 from agents import financial_growth as fg
 from agents import financial_health as fh
@@ -372,14 +378,112 @@ def _latest_value(values, concept):
                            concept))
 
 
+def _deterioration_from_step27(deterioration_27):
+    """Step 23 flag from a Step 27 assessment (see docstring above).
+
+    The boolean comes from Step 27's ``material_deterioration``.
+    Signals are Step 27's high-severity risk flags plus any
+    deteriorating area's evidence.  Step 23's simpler rule is
+    re-run from Step 27's compact ``inputs`` (health verdict,
+    latest YoYs, latest OCF / net income) as a corroboration: if
+    the simple rule would flag deterioration while Step 27 does
+    not, that disagreement is recorded as a caution.  The flag is
+    never unknown when Step 27 assessed the ticker.
+    """
+    inputs = deterioration_27.get("inputs", {})
+    material = deterioration_27.get("material_deterioration")
+    signals = []
+    for flag in deterioration_27.get("risk_flags", []):
+        if flag.get("severity") == "high":
+            signals.append(f"{flag['name']}: {flag['evidence']}")
+    for area_name, area in (deterioration_27.get("areas", {}) or {}).items():
+        if area.get("verdict") == "deteriorating":
+            signals.append(
+                f"Step 27 area '{area_name}' deteriorating: "
+                + "; ".join(area.get("evidence", [])[:2]))
+    cautions = list(deterioration_27.get("cautions", []))
+
+    # Corroboration: Step 23's simpler rule from the same inputs.
+    simple_signals = []
+    if inputs.get("health_verdict") == "weak":
+        simple_signals.append(
+            "Step 18 health verdict is 'weak' (a hard distress flag "
+            "fired)")
+    if inputs.get("health_fell_to_weak"):
+        simple_signals.append(
+            "Step 18 health verdict fell to 'weak' in the latest "
+            "period")
+    revenue_yoy = inputs.get("revenue_yoy_latest_annual")
+    net_income_yoy = inputs.get("net_income_yoy_latest_annual")
+    if (revenue_yoy is not None and net_income_yoy is not None
+            and revenue_yoy < REVENUE_DECLINE_LIMIT
+            and net_income_yoy < NET_INCOME_DECLINE_LIMIT):
+        simple_signals.append(
+            "broad decline: latest annual revenue YoY "
+            f"{revenue_yoy:.1%} and net income YoY "
+            f"{net_income_yoy:.1%} (thresholds -10% and -20%)")
+    ocf = inputs.get("operating_cash_flow_latest_annual")
+    if ocf is not None and ocf < 0:
+        simple_signals.append(
+            "latest annual operating cash flow is negative")
+    net_income = inputs.get("net_income_latest_annual")
+    if net_income is not None and net_income < 0:
+        simple_signals.append("latest annual net income is negative")
+    for signal in simple_signals:
+        if signal not in signals:
+            signals.append(signal)
+    if simple_signals and material is False:
+        cautions.append(
+            "Step 23's simpler rule would flag deterioration "
+            "(" + "; ".join(simple_signals) + ") but Step 27's "
+            "deeper assessment does not — the Step 27 verdict "
+            "governs the flag; the disagreement is recorded here, "
+            "not hidden")
+    if material is True and not signals:
+        signals.append(
+            "Step 27 overall verdict is 'deteriorating': "
+            + "; ".join(deterioration_27.get("overall_reasons", [])))
+    return {
+        "deteriorated": material,
+        "unknown": False,
+        "signals": signals,
+        "cautions": cautions,
+        "rule": DETERIORATION_RULE,
+        "source": ("Step 27 deterioration assessment "
+                   "(Steps 18/19/20 as inputs), corroborated by the "
+                   "Step 23 rule"),
+        "step27_overall_verdict":
+            deterioration_27.get("overall_verdict"),
+        "inputs": {
+            "health_verdict": inputs.get("health_verdict"),
+            "revenue_yoy_latest_annual": revenue_yoy,
+            "net_income_yoy_latest_annual": net_income_yoy,
+            "fcf_yoy_latest_annual":
+                inputs.get("fcf_yoy_latest_annual"),
+            "operating_cash_flow_latest_annual": ocf,
+            "net_income_latest_annual": net_income,
+        },
+    }
+
+
 def assess_deterioration(conn, ticker, health=None, growth=None,
-                         cashflow=None, deterioration_override=None):
+                         cashflow=None, deterioration_override=None,
+                         deterioration_27=None):
     """Material-deterioration flag from Steps 18/19/20 (rule in docstring).
 
     ``health`` / ``growth`` / ``cashflow`` are the Step 18/19/20
     assessment dicts (computed here when not supplied).
     ``deterioration_override`` is an explicit caller input
     (True/False); when given it is used and recorded as the source.
+    ``deterioration_27`` is a Step 27 deterioration assessment
+    (``agents.deterioration.assess_deterioration``); when supplied
+    and usable (overall verdict not ``insufficient data``) the flag
+    takes its boolean from Step 27, its signals from Step 27's
+    high-severity risk flags, and its cautions from Step 27's
+    warnings — corroborated against this module's simpler rule
+    from the same inputs, with any disagreement recorded as a
+    caution, never hidden.  When Step 27 is unavailable the
+    existing Step 18/19/20 logic below runs unchanged.
     Returns {"deteriorated": bool|None, "unknown": bool, "signals":
     [...], "cautions": [...], "rule": ..., "source": ...}.
     ``deteriorated=None`` means unknown — and an unknown blocks a
@@ -398,6 +502,10 @@ def assess_deterioration(conn, ticker, health=None, growth=None,
             "rule": DETERIORATION_RULE,
             "source": "caller-supplied deterioration_override",
         }
+
+    if deterioration_27 is not None and deterioration_27.get(
+            "overall_verdict") not in (None, "insufficient data"):
+        return _deterioration_from_step27(deterioration_27)
 
     if health is None:
         health = fh.assess_health(conn, ticker)
@@ -821,8 +929,20 @@ def margin_of_safety_summary(conn, ticker, price_input=None,
     margin_base = margins["base"]["value"]
     margin_optimistic = margins["optimistic"]["value"]
 
+    # Step 27 deterioration assessment — the deeper verdict that
+    # drives the flag when available (guarded like business
+    # quality: a Step 27 failure never breaks the margin summary,
+    # and then the Step 18/19/20 logic in assess_deterioration
+    # runs instead).
+    deterioration_27 = None
+    deterioration_27_error = None
+    try:
+        deterioration_27 = det.assess_deterioration(conn, ticker)
+    except Exception as exc:  # noqa: BLE001 - report, never crash
+        deterioration_27_error = str(exc)
     deterioration = assess_deterioration(
-        conn, ticker, deterioration_override=deterioration_override)
+        conn, ticker, deterioration_override=deterioration_override,
+        deterioration_27=deterioration_27)
 
     # Business quality (Step 24) — the quality gate: a strongest
     # alert requires quality adequate or better.  Guarded so a
@@ -918,6 +1038,8 @@ def margin_of_safety_summary(conn, ticker, price_input=None,
         "strongest_alert_margin": STRONGEST_ALERT_MARGIN,
         "tier": tier,
         "deterioration": deterioration,
+        "deterioration_27": deterioration_27,
+        "deterioration_27_error": deterioration_27_error,
         "business_quality": quality,
         "business_quality_error": quality_error,
         "sensitivity": sensitivity,

@@ -335,7 +335,7 @@ Do not deduplicate by CIK.
 
 25. Build global market scanner — PARTIAL (2026-11-08: scanner built and tested, 25 tests OK; runs the full 10,619-row universe in ~1.1s but only 1 ticker is scannable (MSFT, overvalued, quality excellent) — 10,617 have no statements, D05 has no price; ranking with strongest-alert first and fresh-name rotation, fixture-proven alert and weak-business block; dual-listing cache bug found and fixed — see PROJECT_STATUS.md Step 25 section)
 26. Build undervalued-company detection — PARTIAL (2026-11-08: detector built and tested, 22 tests OK; fixture-proven strongest-alert + two watch bands + value-trap rejection + "why not" explanations + briefing lines + JSON-lines run log; on real data 0 candidates and 0 traps — only MSFT scannable, overvalued — see PROJECT_STATUS.md Step 26 section)
-27. Build financial risk and deterioration detection — NOT STARTED
+27. Build financial risk and deterioration detection — PARTIAL (2026-11-08: four-area deterioration engine built and tested, 24 tests OK; MSFT FY2026 overall warning, no material deterioration; Step 23 flag now driven by Step 27, MSFT tier unchanged; MSFT only — see PROJECT_STATUS.md Step 27 section)
 28. Build company comparison and competitor analysis — NOT STARTED
 29. Build automated company research reports — NOT STARTED
 30. Build investment thesis tracking — NOT STARTED

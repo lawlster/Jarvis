@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 26 — Undervalued-company detection (PARTIAL — built and tested 2026-11-08; fixture-proven, 0 candidates on real data — see Step 26 section below)
-- Current subtask: Step 27 financial risk and deterioration detection
+- Current step: 27 — Financial risk and deterioration detection (PARTIAL — built and tested 2026-11-08; MSFT warning overall, no material deterioration — see Step 27 section below)
+- Current subtask: Step 28 company comparison and competitor analysis
 - Overall status: In progress
 
 ## Completed work
@@ -717,6 +717,105 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   project run log has no entries yet.  Not wired into `main.py`
   (Step 50); no sending or scheduling.  Sufficient to start
   Step 27 (financial risk and deterioration detection).
+
+### 2026-11-08 — Step 27 financial risk and deterioration detection (PARTIAL, not complete)
+
+- Built `agents/deterioration.py`: a four-area deterioration
+  assessment (trend breaks, margin erosion, leverage/liquidity
+  drift, cash-flow stress) reusing the Step 18 health, Step 19
+  growth and Step 20 cash-flow assessments — nothing
+  re-derived.  Each area gets a verdict (`deteriorating` /
+  `warning` / `stable` / `improving` / `insufficient data`)
+  with its evidence, plus named risk flags with severity
+  (`high` for deteriorating areas, `medium` for warning).
+  Overall rule (explicit, stated on every output): material
+  deterioration is TRUE only when the overall verdict is
+  `deteriorating` — two or more areas deteriorating, OR one
+  deteriorating area plus a Step 18 health verdict of `weak`,
+  OR latest annual net income < 0, OR latest annual OCF < 0.
+  One deteriorating area alone, or two or more warning areas,
+  is a `warning` overall (material FALSE).  A working-capital
+  fall with the current ratio still above 1, an FCF fall
+  alone, and a recovered one-off dip are warnings/cautions,
+  never deterioration on their own.
+- One-offs vs trends: a dip year is an "identified one-off"
+  when the level recovers past the pre-dip level within two
+  years.  MSFT's history names 13 of them, including FY2015
+  net income −44.8% (Nokia write-down, recovered by FY2017)
+  and FY2018 −35.0% (tax charge, recovered by FY2019).  A dip
+  in the latest year has no following year yet, so it is a
+  warning — recovery cannot be observed yet.
+- Step 23 wiring: `margin_of_safety.assess_deterioration`
+  takes an optional `deterioration_27` argument; when supplied
+  and usable the Step 23 flag takes its boolean from Step 27
+  and its signals from Step 27's high-severity flags,
+  corroborated against Step 23's simpler rule from the same
+  inputs (a disagreement is recorded as a caution, never
+  hidden).  When Step 27 cannot assess a ticker, Step 23
+  keeps its existing Step 18/19/20 logic unchanged.
+  `margin_of_safety_summary` computes Step 27 (guarded, like
+  business quality) and returns it as `deterioration_27`.
+- Tests: `test_deterioration.py` — **24 tests, OK**
+  (314 total with Steps 16–26, `python -m unittest discover`).
+  Covers trend breaks (sustained decline vs recovered
+  one-off), margin erosion, leverage drift (working-capital
+  fall as warning, current ratio < 1 as deteriorating),
+  cash-flow stress (payouts exceeding FCF, capex surge),
+  the overall rule (one deteriorating area alone = warning,
+  negative net income = hard distress), insufficient data
+  (no rows, two periods, DBS), MSFT hand-checked values on
+  a temp DB copy, the Step 23 wiring (MSFT tier unchanged,
+  Step 27 deteriorating blocks via Step 23, Step 27
+  insufficient falls back to the old rule, old path
+  unchanged without Step 27).  Two failures found and fixed
+  during the run: both were test/module calibration, not
+  logic errors — the cash-flow area raised a generic "FCF
+  conversion falling" flag when the causal "capex surge
+  compressing FCF" flag also fired (the capex flag now takes
+  precedence), and the solid fixture's 5y net-margin gain
+  (+1.6pp) fell short of the +2pp "improving" threshold
+  (fixture net growth raised to +14%/yr).  Production DB
+  SHA-256 verified unchanged before and after
+  (`36862922…089187`, post-audit hash).
+- MSFT FY2026: overall verdict **warning**,
+  `material_deterioration` **False** — three areas warning,
+  none deteriorating.  Trend breaks warning (revenue +17.8%,
+  net income +31.3%, OCF +34.4%; FCF −6.5% YoY, 3 declines
+  in 5y, 5y CAGR still +3.6% — a capex effect); margins
+  improving (net margin 40.3%, +3.6pp over 5y, CV 0.062);
+  leverage warning (working capital −59.4% over 5y, current
+  ratio 2.08 → 1.23, still above 1; debt −30.7% over 5y,
+  debt/OCF 0.22x); cash-flow warning (FCF/net income 0.50 vs
+  5y mean 0.75; capex/OCF 63.4% vs 26.9% 5y ago; FCF after
+  dividends and buybacks still +$18,271m).  Risk flags, all
+  medium: "free cash flow softening", "working capital
+  falling", "capex surge compressing FCF".  Step 23 result
+  unchanged (tier overvalued, no deterioration).  DBS
+  insufficient data.  Full numbers in `step27-report.md`.
+- History check: `assess_all_periods` over 19 annual periods
+  — FY2008–09 insufficient data, FY2010–11 stable, FY2012–14
+  warning, **FY2015–16 deteriorating** (the Nokia write-down
+  years, correctly flagged point-in-time before the recovery
+  was observable), FY2017–26 warning.  Calibration caveat:
+  the overall verdict has been `warning` for MSFT in every
+  year since 2012 except 2015–16, because working capital
+  has fallen and capex/OCF has risen for a decade — the
+  warning state is persistent, not a new event, and whether
+  it should require a *change* in trend rather than its
+  *level* is an open calibration question for a future step.
+- **Step 27 is PARTIAL, not complete.** MSFT only on real
+  data (plus synthetic fixtures); the `deteriorating`
+  overall verdict is fixture-proven, never observed on a
+  real company.  Thresholds are judgement rules,
+  uncalibrated against a peer set or a genuinely distressed
+  issuer (none exists in the DB).  The module cannot see
+  anything statements cannot show (off-balance-sheet risk,
+  refinancing walls, customer concentration, management
+  intent).  Not wired into `main.py` (Step 50); the scanner
+  and detector consume the Step 23 flag (which now carries
+  the Step 27 verdict) but do not yet surface the named risk
+  flags directly.  Sufficient to start Step 28 (company
+  comparison and competitor analysis).
 
 ### 2026-11-08 — Full codebase audit (verification + repair)
 
