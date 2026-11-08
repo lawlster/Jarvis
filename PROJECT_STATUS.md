@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 15G — US security classification
-- Current subtask: Step 15G Phase 3 implemented and tested from existing cached evidence; issuer-structure gap remains
+- Current step: 16 — Unified financial data (PARTIAL — US/SEC standardisation built and tested 2026-11-08; SG/HK not yet real — see Step 16 section below)
+- Current subtask: Step 17 financial ratios on US data; Phase A close-out (15H/15I/15J + 14H/14I decisions pending owner) remains gated on owner decisions
 - Overall status: In progress
 
 ## Completed work
@@ -29,6 +29,16 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
 - Review the Phase 2 candidates and collect additional SEC filing or issuer-document evidence for unresolved classes and issuer structures; do not treat name/ticker hints or secondary sources as confirmation.
 - Keep Step 15H validation/normalization and Step 15I production import separately gated; no production import or schema change has occurred.
 - Assess the remaining issuer-structure gap before deciding whether to collect targeted official SEC evidence. Phase 3 did not collect data or run SEC requests.
+
+### 2026-11-08 — Step 15G Phase 3 review decision (Muse review of Codex completion report, commits 8f6c7b9 + 1b6a6e1)
+
+- Acceptance criteria checked: v3 outputs preserved untouched; new results in fresh versioned dirs (v4_2 is final, v4/v4_1 marked superseded); 20 tests pass in a clean venv with python-dotenv installed (17 classifier/evidence/phase-3 + 3 pilot); before/after counts reported (confirmed 137 -> 137, provisional 6,120 -> 6,116, conflicting 8 -> 37, unknown 1,360 -> 1,335; 196 material changes, each with old/new values, source and rationale in v3_to_phase3_classification_changes.csv); production DB hash unchanged (812ECB53…89D4CD); 0 network requests in Phase 3 (hash-verified cached snapshots only).
+- Phase 3A done: BSBR, RNP, TPC, VBF, WDH no longer conflict (all provisional, form known, structure unknown); IPB, MHNC, TVC remain conflicting in manual review, as specified.
+- Phase 3B done: MIC reconciliation view built (4,582 rows: XASE 327, ARCX 2,752, XNGS 1,503; review-only, not written into market_universe); explicit description parsing moved 34 unknown -> provisional and 9 provisional -> unknown, and surfaced 34 new genuine Nasdaq/NYSE disagreements (now conflicting, not guessed).
+- Decision: **15G is sufficient to move on.** Do not run another classification round now. Security form is known for 6,239 of 7,625 listings; issuer structure remains unknown for 7,473 — that gap is documented and does not block Step 16 (financial statements are issuer-level, keyed by CIK). Unknown/conflicting rows stay separated from supported instruments; they are not deleted.
+- Workspace synced to origin/main 1b6a6e1 on 2026-11-08; Muse's earlier heuristic classifier (common 6,499 / manual 110) is superseded by the pushed evidence-based classifier and is not to be merged over it.
+- Hygiene fixed in workspace (unpushed, pending GitHub auth): `.env` removed from tracking, `.env.example` added with a neutral placeholder, `requirements.txt` populated (python-dotenv, requests, openpyxl, apscheduler, ddgs — was 0 bytes). Note: removing `.env` from tracking does NOT remove the personal email from earlier Git history; that needs a history rewrite or accepting it stays in old commits.
+- Next: Phase A close-out needs owner decisions — HKEX import (2,793 candidates, country 'Hong Kong') and US 15J import scope — then Step 16 unified financial data.
 
 ## Important project rules
 

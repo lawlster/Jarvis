@@ -309,8 +309,8 @@ Step 11 components:
 - 15C Audit CIK coverage — DONE
 - 15D Investigate multiple tickers per issuer — DONE
 - 15E Audit ticker suffix patterns — DONE
-- 15F Build SEC issuer enrichment module — IN PROGRESS
-- 15G Classify US securities — NOT STARTED
+- 15F Build SEC issuer enrichment module — PILOT-VALIDATED (20-CIK pilot 20/20, 2026-11-08; full-universe enrichment NOT authorised)
+- 15G Classify US securities — PHASE 3 COMPLETE, SUFFICIENT TO MOVE ON (v4_2: 137 confirmed, 6,116 provisional, 37 conflicting, 1,335 unknown; issuer-structure gap remains, see PROJECT_STATUS.md 2026-11-08)
 - 15H Validate and normalize US securities — NOT STARTED
 - 15I Review ETFs, ADRs, funds, preferred shares and REITs — NOT STARTED
 - 15J Import approved US universe records — NOT STARTED
@@ -321,7 +321,7 @@ Do not deduplicate by CIK.
 
 ### Part 4 — Financial intelligence engine
 
-16. Build unified financial-data standard — NOT STARTED
+16. Build unified financial-data standard — PARTIAL (2026-11-08: US/SEC standardiser built and tested, 21 tests OK; SG/HK mappings are candidate tables only — see PROJECT_STATUS.md Step 16 section)
 17. Build financial ratios and metrics engine — NOT STARTED
 18. Build financial health and quality analysis — NOT STARTED
 19. Build historical financial growth analysis — NOT STARTED

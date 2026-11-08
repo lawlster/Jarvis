@@ -1,0 +1,6 @@
+# Runtime dependencies (previously empty; enrichment now requires python-dotenv)
+python-dotenv
+requests
+openpyxl
+apscheduler
+ddgs
