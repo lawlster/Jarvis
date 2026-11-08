@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 21 — Intrinsic valuation (PARTIAL — built and tested 2026-11-08; MSFT only — see Step 21 section below)
-- Current subtask: Step 22 sector-specific valuation; Step 23 margin of safety interprets the Step 21 range
+- Current step: 22 — Sector-specific valuation (PARTIAL — built and tested 2026-11-08; MSFT technology path only validated on real data — see Step 22 section below)
+- Current subtask: Step 23 margin of safety and relative valuation
 - Overall status: In progress
 
 ## Completed work
@@ -382,6 +382,64 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   unavailable as above; the valuation rests on one stale price
   snapshot. Sufficient to start Step 22 (sector-specific
   valuation) and Step 23 (margin of safety).
+
+### 2026-11-08 — Step 22 sector-specific valuation models (PARTIAL, not complete)
+
+- Built `agents/sector_valuation.py`: a sector router plus four
+  sector model families.  Router resolution order: caller-supplied
+  override > `market_universe` sector/industry > `reit`
+  security_type > unknown.  Stored data findings that shaped it:
+  (1) sector is NULL for every US/HK row (Singapore only), so
+  MSFT resolves to "unknown" from stored data; (2) the stored
+  "Financials" sector mixes banks, insurers, exchanges and other
+  financials, so it is treated as ambiguous — no model is selected
+  until the sub-sector is established.
+- Banks: dividend discount (Gordon growth on DPS), excess-return /
+  residual-income on book value (ROE vs cost of equity 10%), and
+  justified P/B ((ROE − g)/(k − g) x BVPS), plus a historical-P/B
+  check for caller-supplied price history.  Insurers: justified
+  P/B (primary); embedded value and the underwriting/investment
+  split unavailable (no premium / underwriting / investment /
+  embedded-value concept in Step 16).  REITs: distribution DDM
+  (dividends paid / shares); FFO/AFFO and NAV unavailable (no
+  D&A, no property concepts).  Technology / general: the Step 21
+  FCF DCF, delegated to `intrinsic_valuation.valuation_summary`
+  (no second DCF built).
+- The FCF DCF is refused for banks, insurers and REITs with an
+  explicit reason (a bank's FCF is meaningless — deposits are raw
+  material, debt is inventory; an insurer's FCF timing says
+  nothing about value; a REIT's capex is mostly property
+  acquisition).  Combined range in Step 21 format: tech/general
+  = DCF scenarios; banks = min / excess-return / max of the
+  three methods; insurers = justified P/B; REITs = DDM.
+- Tests: `test_sector_valuation.py` — **37 tests, OK**
+  (192 total with Steps 16–21, `python -m unittest discover`).
+  Covers router normalisation, FCF-DCF refusals, DDM ($43.33),
+  excess-return ($65.61) and justified-P/B ($66.67) arithmetic
+  against hand-computed fixture values, unavailable-model
+  behaviour, and MSFT/DBS/LINK REIT on a temp DB copy.
+  Production DB SHA-256 verified unchanged before and after
+  (`36862922…089187`, post-audit hash).
+- Real-data results: MSFT technology path reproduces Step 21
+  exactly (bear $98.52, base $163.30, optimistic $234.64;
+  implied growth ~25.8%).  MSFT as an as-if bank cross-check:
+  DDM $74.51, justified P/B $219.49, excess-return $706.94 —
+  the last is the honest warning about that model (it assumes
+  a 30% ROE persists 10 years).  DBS/OCBC/UOB with
+  `sector_override='bank'`: models selected, all missing (SG
+  rows are metadata only, 0 concepts); without the override
+  DBS resolves to "financial" (ambiguous) and nothing is
+  selected.  Great Eastern (insurance): everything missing.
+  LINK REIT (00823): routes to "reit", everything missing.
+  Full numbers in `step22-report.md`.
+- **Step 22 is PARTIAL, not complete.** Only the
+  technology/general path is validated on real data (MSFT);
+  bank, insurer and REIT models are fixture-only until a
+  bank/insurer/REIT has validated statement line items (SG
+  extraction 11D still PAUSED; no HKEX statements).  Cost of
+  equity (10%) and the DDM growth cap (5%) are uncalibrated
+  judgement defaults.  Sufficient to start Step 23 (margin of
+  safety and relative valuation).
 
 ### 2026-11-08 — Full codebase audit (verification + repair)
 
