@@ -1,7 +1,7 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 28 — Portfolio construction and position sizing (PARTIAL — built and tested 2026-11-08; no real candidate ever detected, so nothing sized on real data — see Step 28 section below)
+- Current step: 28b — Company comparison and competitor analysis (PARTIAL — built and tested 2026-11-08; no real peer comparison has ever run — only MSFT has statements — see Step 28b section below)
 - Current subtask: Step 29 automated company research reports
 - Overall status: In progress
 
@@ -886,6 +886,76 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   (Step 50); no sending or scheduling; no live prices (Step 38
   concern).  Sufficient to start Step 29 (automated company
   research reports).
+
+### 2026-11-08 — Step 28b company comparison and competitor analysis (PARTIAL, not complete)
+
+- New module: `agents/company_comparison.py`; tests:
+  `test_company_comparison.py` — **13 tests, OK** (371 total
+  with Steps 16–28, `python -m unittest discover`, run from the
+  project root, no regressions).  Full report:
+  `~/workspace/projects/step28b-report.md`.
+- **Why 28b:** `AGENTS.md` section 10 lists Step 28 as
+  "company comparison and competitor analysis", but Step 28 was
+  built as portfolio construction and position sizing per the
+  Step 28 brief.  Company comparison is built here as Step 28b
+  so the later numbering (Step 29 research reports, Step 30
+  thesis tracking, etc.) is unchanged.
+- The comparator orchestrates Steps 17–24 and 27 and re-derives
+  nothing: per-company profiles with size (revenue, market cap),
+  profitability (margins, ROE, ROA, ROIC), growth (5y/10y
+  CAGRs, latest YoY), health (Step 18 verdict, D/E, current
+  ratio, debt/OCF, debt/FCF), valuation (P/E, P/B, P/S, EV/EBIT,
+  DCF conservative/base range), quality rating and
+  deterioration verdict — every metric carrying its period and
+  missing-data reason.  Per-metric dense ranking (rank 1 best;
+  lower better for D/E, debt/OCF, debt/FCF, P/E, P/B, P/S,
+  EV/EBIT); a peer is ranked only where the metric exists for
+  it, with the ranked count stated.  "Stands out" / "lags" only
+  where at least three tickers are ranked.  No buy/sell call, no
+  "best stock" verdict.
+- **Peer-set rules:** target with no statements → whole
+  comparison `insufficient_data`; peers with no statements are
+  listed as not comparable with exact missing inputs, never
+  silently dropped; fewer than two peers with data → values
+  shown but no ranking presented as meaningful.  Optional
+  sector filter against stored `market_universe` sectors.
+  Prices caller-supplied, or the latest `financial_snapshots`
+  row as a labelled fallback (shared by the price ratios and
+  the DCF range).  No network, no writes.
+- **Real-data run (temp copy of the production DB):** MSFT vs
+  NVDA / AVGO / GOOGL — comparable in form, ranking not
+  meaningful: no peer has statements.  MSFT profile verified
+  against Steps 17–24/27 (revenue $331,839m, market cap
+  $3.776tn at $507.12 as of 2026-11-03, net margin 40.31%,
+  ROIC 30.59%, P/E 28.25, DCF base $163.30, quality excellent,
+  health strong, deterioration warning, not material).  DBS
+  (D05) has rows but no standardised concepts, so its metrics
+  are all missing with reasons.
+- **Fixture example (verified by probe + tests):** MID ($5.00)
+  vs BIG ($20.00) vs WEAK ($0.30) — BIG largest and most
+  profitable, MID cheapest on P/E (3.23) and tied best on
+  current ratio (1.35), WEAK last on every metric (health weak,
+  quality weak, deterioration deteriorating).  10y CAGRs missing
+  for all three fixtures (6 annual periods cannot support an
+  11-period CAGR), reason recorded.
+- **Bugs found and fixed during testing:** Step 19 CAGR
+  entries are dicts, not floats (extractor now takes
+  `["value"]`); `market_cap_for` takes a price-input dict and
+  returns a `(value, method)` tuple (was passed a bare float);
+  price ratios were missing when no price was supplied because
+  `compute_ratios` has no snapshot fallback while
+  `valuation_summary` does — the profile now resolves the
+  snapshot price once, up front; revenue/market cap are raw
+  currency units, not millions (unit labels corrected).
+- **Step 28b is PARTIAL, not complete.** No real peer
+  comparison has ever run (same data gap as Steps 25–26: 15F
+  NOT authorised beyond the pilot, 11D PAUSED, no HKEX
+  statement collector, no price feed).  The sector filter
+  cannot work on real data (sector NULL for every US/HK row).
+  Ranking thresholds are uncalibrated judgement rules.  Not
+  wired into `main.py` (Step 50).  Sufficient to start Step 29
+  (automated company research reports), which can consume
+  these comparisons.
 
 ### 2026-11-08 — Full codebase audit (verification + repair)
 
