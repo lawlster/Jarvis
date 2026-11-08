@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 34 — Company news and event monitoring (PARTIAL — built and tested 2026-11-09; watchlist monitor over stored Step 31 news and Step 33 events, what-changed via Step 30 snapshots, alert records — MSFT only on real data, 10 new articles, 0 alerts — see Step 34 section below)
-- Current subtask: Step 35 portfolio management
+- Current step: 35 — Watchlist and financial tracker foundation (PARTIAL — built and tested 2026-11-09; JSON watchlist store with reasons/sources/notes, per-ticker tracker records refreshed by the Step 25 scanner, watchlist view — seeded with the owner's 38-ticker list, MSFT only scannable on real data — see Step 35 section below)
+- Current subtask: Step 36 portfolio performance and risk analysis
 - Overall status: In progress
 
 ## Completed work
@@ -1765,3 +1765,73 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   is from older steps' `_temp_db_copy` helpers (first
   noted Step 27, again Step 33b). Sufficient to start
   Step 35 (portfolio management).
+
+### 2026-11-09 — Step 35 watchlist and financial tracker foundation (PARTIAL, not complete)
+
+- `agents/watchlist_foundation.py` built and tested (24 new
+  tests, 547 total, `python -m unittest discover` from the
+  project root with `~/workspace/projects/jarvis-venv/bin/python`).
+  Production DB hash unchanged (`36862922…089187`); checks ran
+  on temp DB copies in tests and a temp copy in the real run.
+  Report: `~/workspace/projects/step35-report.md`.
+- Audit first: the legacy `agents/watchlist.py` holds only
+  ticker/company_name/added_at in a SQLite table (3 rows: MSFT,
+  GOOGL, NVDA, from 2026-11-03); `agents/financial_tracker.py`
+  holds 3 Yahoo snapshot rows, all MSFT; `agents/
+  valuation_monitor.py` is unusable for every ticker because
+  `valuation_profiles` is empty; `agents/valuation_history.py`'s
+  table does not exist yet; `agents/daily_summary.py` and
+  `agents/news_monitoring.py` take a caller-supplied ticker
+  list and own no persistent watchlist store.
+- What Step 35 built (only what was missing): a JSON watchlist
+  store (`data/watchlist/watchlist.json`) with reason, sources,
+  notes and date added; per-ticker tracker records
+  (`data/watchlist/tracker.json`) refreshed by running the
+  Step 25 scanner over the watchlist; a one-line-per-ticker
+  watchlist view in the Step 32 note shape; dedupe with
+  sources merged and exits recorded as notes. No DB writes, no
+  new DB tables; the legacy DB watchlist is deliberately not
+  synced (3 rows, untouched).
+- Seeded with the owner's 38-ticker list (core GOOGL/UNH/BRK.B;
+  semis AVGO/NVDA/AMD/INTC/BE; $1,000 basket ALG/VC/HIMX/NRP/
+  MCRI; combined screen BKE/DECK/DPZ/OTIS/DHI; Pabrai HCC/RIG/
+  AMR/KSPI; Ackman UBER/BN/MSFT/AMZN/HHH/QSR/META/V/MA/SPGI/
+  NFLX/ICE/ALC; SG banks DBS/OCBC/UOB), sources recorded per
+  ticker, universe-ticker aliases where they differ (BRK.B →
+  BRK-B, DBS → D05, OCBC → O39, UOB → U11). GOOGL is one entry
+  with source `owner_core` and the note "Ackman exited GOOG/
+  GOOGL in Q2 2026 (13F) — kept as a core watch, not an Ackman
+  holding." Seeding is idempotent.
+- Real refresh (temp DB copy, snapshot prices): 38 tickers, 1
+  scannable, 37 insufficient_data; tiers overvalued 1,
+  insufficient_data 37. MSFT tracker record: tier overvalued,
+  quality excellent, health strong, deterioration warning (not
+  material), price $507.12 (as of 2026-11-03), DCF base $163.30,
+  strongest-alert price $78.82, risk flags: free cash flow
+  softening, working capital falling, capex surge compressing
+  FCF. DBS insufficient_data (no price, no conservative value).
+- Two bugs found and fixed during testing: the MSFT base-value
+  test assertion used `assertEqual` on the unrounded scanner
+  value (163.2961578… vs 163.30), and `_tracker_record` read
+  Step 27 risk flags under `"flag"` while the flag dicts carry
+  the name under `"name"`, so tracker records had empty
+  `risk_flags`. Latent bug flagged, not fixed here:
+  `agents/daily_summary.py` `_watchlist_note` has the same
+  `f.get("flag")` lookup, so its watchlist notes also drop the
+  Step 27 risk flags on real data — one-word fix in a Step 32
+  file, left for the parent to decide.
+- **Step 35 is PARTIAL, not complete.** The tracker has only
+  ever refreshed MSFT on real data; 37 of 38 watchlist tickers
+  are insufficient_data (same data gap as Steps 25–26: 15F NOT
+  authorised beyond the pilot, 11D PAUSED, no HKEX statement
+  collector, no price feed). The legacy valuation flow is still
+  blocked by the empty `valuation_profiles` table. The legacy
+  DB watchlist (3 tickers) and the JSON watchlist (38 tickers)
+  are two separate stores by design. Not wired into `main.py`
+  (Step 50); no sending or scheduling (Step 46). Roadmap label
+  note: the plan lists Step 35 as "portfolio management —
+  BASIC FOUNDATION EXISTS"; this step was built as watchlist
+  and financial tracker foundation per the Step 35 brief (the
+  same foundation Step 10 of the roadmap calls "watchlist and
+  financial tracking foundation", PARTIAL). Sufficient to start
+  Step 36 (portfolio performance and risk analysis).

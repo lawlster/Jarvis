@@ -123,7 +123,9 @@ def _watchlist_note(candidate):
     deterioration_27 = detail.get("deterioration_27") or {}
     overall = deterioration_27.get("overall_verdict")
     flags = deterioration_27.get("risk_flags") or []
-    flag_names = [f.get("flag") for f in flags if f.get("flag")]
+    # Step 27 flag dicts carry the name under "name" (older consumers used "flag"); accept either shape.
+    flag_names = [f.get("name") or f.get("flag")
+                  for f in flags if f.get("name") or f.get("flag")]
     margin = candidate.get("margin_of_safety_vs_conservative")
     margin_text = (f"{margin:.1%} vs conservative value"
                    if margin is not None else "margin unknown")
