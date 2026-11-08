@@ -44,6 +44,7 @@ def record_monitoring_run(
     failed_valuations=0,
     error_message=None
 ):
+    initialise_scheduler_history()
     with get_connection() as conn:
         conn.execute("""
             INSERT INTO monitoring_runs (

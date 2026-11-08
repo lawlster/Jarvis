@@ -333,6 +333,41 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   (Steps 17–20) for the data available; its outputs feed Steps
   21 (valuation), 23 (margin of safety) and 24 (business quality).
 
+### 2026-11-08 — Full codebase audit (verification + repair)
+
+- Full report: `~/workspace/projects/jarvis-audit-report.md`.
+- Checked: git sync (local `d7b6dcc` vs origin `614fcd2`, same
+  content); full unittest suite; `compileall` (0 failures); import
+  of all 57 modules (57 OK); `main.py` smoke run (starts, exits
+  cleanly, Ollama connection failure handled gracefully, no crash);
+  DB integrity (`integrity_check` ok, 0 orphans, universe 10,619
+  with Phase A imports present).
+- Real test suites: **129 tests, all OK** (Steps 16–20: 109; 15G/15F:
+  20). The other 12 `test_*.py` files are manual scripts, not
+  unittest suites — they run live network code and write to the
+  production DB on import.
+- Defects found and fixed: (D1) `requirements.txt` was missing
+  `yfinance` and `pymupdf`, which 6 test files and 5 production
+  modules need — both added. (D2) Valuation/watchlist/history
+  functions crashed with `no such table` on a database that had
+  never had their tables initialised (the valuation monitor crashed
+  outright) — every such function now calls its `initialise_*()`
+  first; verified against a fresh empty database. (D3) `agents/`,
+  `agent/`, `tools/` had no `__init__.py` — empty ones added.
+- Audit-caused DB writes (test scripts saving live snapshots) were
+  removed again; all row counts verified back to the pre-audit
+  state. Note: the DB byte hash differs from the pre-audit hash
+  because SQLite rewrites file headers on any write; no post-import
+  byte backup existed, so a backup of the restored file was taken
+  instead. Logical content is verified identical.
+- Open items: rename/convert the 12 script-style test files
+  (owner decision); `main.py --help` unsupported (cosmetic);
+  Ollama full chat turn untested here (no Ollama on this machine);
+  no valuation profile exists for any ticker yet, so the monitor
+  returns "no profile" until one is created.
+- Verdict: **the program works as intended** after the fixes above.
+  Next step remains Step 21 (intrinsic valuation).
+
 ## Important project rules
 
 - Do not modify `main.py` before integration approval.

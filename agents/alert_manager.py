@@ -56,6 +56,7 @@ def create_alert(ticker, alert_type, message):
 
 
 def get_alert_state(ticker):
+    initialise_alerts()
     with get_connection() as conn:
         row = conn.execute("""
             SELECT last_status
@@ -67,6 +68,7 @@ def get_alert_state(ticker):
 
 
 def update_alert_state(ticker, status):
+    initialise_alerts()
     with get_connection() as conn:
         conn.execute("""
             INSERT INTO alert_states (
@@ -190,6 +192,7 @@ def get_recent_alerts(limit=20):
 
 
 def acknowledge_alert(alert_id):
+    initialise_alerts()
     with get_connection() as conn:
         cursor = conn.execute("""
             UPDATE valuation_alerts

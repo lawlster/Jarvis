@@ -39,6 +39,8 @@ def save_valuation_profile(
 
     ticker = ticker.upper().strip()
 
+    initialise_valuation_profiles()
+
     # Validate assumptions
     if not ticker:
         return "Error: Ticker cannot be empty."
@@ -94,6 +96,8 @@ def get_valuation_profile(ticker):
 
     ticker = ticker.upper().strip()
 
+    initialise_valuation_profiles()
+
     with get_connection() as conn:
         row = conn.execute("""
             SELECT
@@ -123,6 +127,8 @@ def get_valuation_profile(ticker):
 
 
 def get_all_valuation_profiles():
+
+    initialise_valuation_profiles()
 
     with get_connection() as conn:
         rows = conn.execute("""

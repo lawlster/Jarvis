@@ -26,6 +26,8 @@ def initialise_watchlist():
 def add_company(ticker, company_name=None):
     ticker = ticker.upper().strip()
 
+    initialise_watchlist()
+
     if not ticker:
         return "Error: Ticker cannot be empty."
 
@@ -47,6 +49,8 @@ def add_company(ticker, company_name=None):
 def remove_company(ticker):
     ticker = ticker.upper().strip()
 
+    initialise_watchlist()
+
     with get_connection() as conn:
         cursor = conn.execute(
             "DELETE FROM watchlist WHERE ticker = ?",
@@ -60,6 +64,7 @@ def remove_company(ticker):
 
 
 def get_watchlist():
+    initialise_watchlist()
     with get_connection() as conn:
         rows = conn.execute("""
             SELECT ticker, company_name, added_at

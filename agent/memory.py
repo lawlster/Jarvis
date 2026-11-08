@@ -25,6 +25,7 @@ def initialise_memory():
 
 
 def save_message(role, content):
+    initialise_memory()
     with get_connection() as conn:
         conn.execute(
             "INSERT INTO conversations (role, content) VALUES (?, ?)",
@@ -33,6 +34,7 @@ def save_message(role, content):
 
 
 def load_recent_messages(limit=20):
+    initialise_memory()
     with get_connection() as conn:
         rows = conn.execute("""
             SELECT role, content
@@ -49,5 +51,6 @@ def load_recent_messages(limit=20):
 
 
 def clear_memory():
+    initialise_memory()
     with get_connection() as conn:
         conn.execute("DELETE FROM conversations")

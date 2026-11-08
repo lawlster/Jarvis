@@ -229,6 +229,8 @@ def get_market_universe(
     active_only=True
 ):
 
+    initialise_market_universe()
+
     query = """
         SELECT
             id,
@@ -332,6 +334,8 @@ def get_market_universe_summary():
 
 
 def deactivate_company(ticker, exchange):
+
+    initialise_market_universe()
 
     with get_connection() as conn:
 

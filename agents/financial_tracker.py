@@ -29,6 +29,8 @@ def save_financial_snapshot(ticker):
 
     ticker = ticker.upper().strip()
 
+    initialise_financial_tracker()
+
     financials = get_company_financials(ticker)
 
     if "error" in financials:
@@ -51,6 +53,8 @@ def save_financial_snapshot(ticker):
 def get_financial_history(ticker):
 
     ticker = ticker.upper().strip()
+
+    initialise_financial_tracker()
 
     with sqlite3.connect(DB_PATH) as conn:
 

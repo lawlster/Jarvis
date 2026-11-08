@@ -34,6 +34,8 @@ def save_valuation_snapshot(ticker, valuation, classification=None):
 
     ticker = ticker.upper().strip()
 
+    initialise_valuation_history()
+
     if not isinstance(valuation, dict):
         return "Invalid valuation data."
 
@@ -112,6 +114,8 @@ def get_valuation_history(ticker, limit=50):
 
     ticker = ticker.upper().strip()
 
+    initialise_valuation_history()
+
     if not isinstance(limit, int) or limit < 1:
         return []
 
@@ -145,6 +149,8 @@ def get_valuation_history(ticker, limit=50):
 
 
 def get_all_valuation_history(limit=100):
+
+    initialise_valuation_history()
 
     if not isinstance(limit, int) or limit < 1:
         return []
