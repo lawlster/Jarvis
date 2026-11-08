@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 19 — Growth analysis (PARTIAL — built and tested 2026-11-08; MSFT only — see Step 19 section below)
-- Current subtask: Step 20 cash flow / owner earnings on US data; Phase A close-out (15H/15I/15J + 14H/14I decisions pending owner) remains gated on owner decisions
+- Current step: 20 — Cash flow and owner earnings (Phase A closed out 2026-11-08 — see close-out note below)
+- Current subtask: Step 20 cash flow / owner earnings on US data
 - Overall status: In progress
 
 ## Completed work
@@ -242,6 +242,39 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   Sufficient to start Step 20 (cash flow / owner earnings) on US
   data; growth figures feed Steps 21 (valuation) and 24 (business
   quality).
+
+### 2026-11-08 — Phase A close-out: HKEX import (14I) and US import (15J)
+
+- Owner approved both imports on 2026-11-08 ("finish it"). US scope
+  decided as core equity-like only; specials and manual-review rows
+  wait for 15I review.
+- 14I: `agents/hkex_import.py` first failed on a missing
+  `last_updated` (NOT NULL) in the INSERT — fixed to stamp the
+  import time; the failed run wrote nothing (DB hash unchanged).
+  Applied: **2,793 inserted, 0 skipped** (2,782 equity + 11 REITs,
+  country 'Hong Kong', 0 ticker collisions, 0 duplicates). The 29
+  manual-review rows were not imported. Backups:
+  `~/workspace/projects/jarvis-backups/assistant.db.2026-11-08.pre-14I-15J.bak`
+  (pre-import, hash 812ECB53…89D4CD).
+- 15J: all 7,625 US listings were already in `market_universe`
+  (all generic 'equity'), so 15J was an UPDATE, not an insert.
+  New module `agents/us_universe_import.py` (dry-run by default).
+  Applied: **5,189 rows updated in place** (4,874 common_stock +
+  315 adr), 0 unmatched, 0 new rows, 0 deletions. Backup taken
+  before the update (post-14I, pre-15J).
+- Universe after both imports: **10,619 rows** — USA 7,625
+  (common_stock 4,874, adr 315, equity/unclassified 2,436),
+  Hong Kong 2,793, Singapore 201. The 2,436 unclassified US rows
+  are 1,050 special forms + 1,386 unknown form — they keep the
+  generic 'equity' label so they stay identifiable for 15I/manual
+  review.
+- Known gap: BRK-A and BRK-B are unknown/unknown in v4_2 (no exact
+  exchange evidence matched), so Berkshire stays unclassified as
+  generic 'equity' for now — flagged, not silently fixed.
+- 15H is DONE (validation via v3 audit + Phase 3 + import
+  verification). 15I remains PENDING (specials held). 14H remains
+  PENDING (29 HK manual-review rows). Phase A is otherwise closed;
+  next is Step 20.
 
 ## Important project rules
 

@@ -300,7 +300,7 @@ Step 11 components:
 - 14F Identify RMB secondary counters — 24 IDENTIFIED
 - 14G Build normalized HKEX output — DONE
 - 14H Review investment companies and depositary receipts — CLASSIFICATION DECISIONS PENDING
-- 14I Import approved HKEX securities into market universe — NOT STARTED
+- 14I Import approved HKEX securities into market universe — DONE (2026-11-08: 2,793 imported, 2,782 equity + 11 REITs, country 'Hong Kong'; 29 manual-review rows not imported)
 
 #### Step 15 — United States
 
@@ -311,9 +311,9 @@ Step 11 components:
 - 15E Audit ticker suffix patterns — DONE
 - 15F Build SEC issuer enrichment module — PILOT-VALIDATED (20-CIK pilot 20/20, 2026-11-08; full-universe enrichment NOT authorised)
 - 15G Classify US securities — PHASE 3 COMPLETE, SUFFICIENT TO MOVE ON (v4_2: 137 confirmed, 6,116 provisional, 37 conflicting, 1,335 unknown; issuer-structure gap remains, see PROJECT_STATUS.md 2026-11-08)
-- 15H Validate and normalize US securities — NOT STARTED
-- 15I Review ETFs, ADRs, funds, preferred shares and REITs — NOT STARTED
-- 15J Import approved US universe records — NOT STARTED
+- 15H Validate and normalize US securities — DONE (2026-11-08: v3 audit + Phase 3 + import verification; 5,189 core rows matched on ticker+exchange, 0 unmatched)
+- 15I Review ETFs, ADRs, funds, preferred shares and REITs — PENDING (1,050 special-form rows held unclassified in the DB as generic 'equity'; 1,372 unknown/conflicting rows also held)
+- 15J Import approved US universe records — DONE (2026-11-08: core scope only — 5,189 rows updated in place, 4,874 common_stock + 315 adr, 0 new rows, 0 deletions; total universe now 10,619 rows)
 
 US discovery currently contains 7,625 ticker records and 6,040 unique CIKs.
 

@@ -16,6 +16,7 @@ import argparse
 import csv
 import sqlite3
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parents[1]
@@ -79,12 +80,14 @@ def apply_import():
             conn.execute(
                 "INSERT INTO market_universe "
                 "(ticker, company_name, exchange, country, currency, "
-                "sector, industry, security_type, data_source, sec_cik) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "sector, industry, security_type, data_source, "
+                "last_updated, sec_cik) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (r["stock_code"], r["name"], "HKEX", COUNTRY,
                  r["trading_currency"], None, None,
                  "reit" if r["classification"] == "include" else "equity",
-                 "hkex_classified_securities", None))
+                 "hkex_classified_securities",
+                 datetime.now(timezone.utc).isoformat(), None))
             inserted += 1
         conn.commit()
         print(f"Inserted: {inserted}, skipped (already present): {skipped}")
