@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 22 — Sector-specific valuation (PARTIAL — built and tested 2026-11-08; MSFT technology path only validated on real data — see Step 22 section below)
-- Current subtask: Step 23 margin of safety and relative valuation
+- Current step: 23 — Margin of safety (PARTIAL — built and tested 2026-11-08; MSFT only — see Step 23 section below)
+- Current subtask: Step 24 competitive advantage and business quality
 - Overall status: In progress
 
 ## Completed work
@@ -440,6 +440,86 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   equity (10%) and the DDM growth cap (5%) are uncalibrated
   judgement defaults.  Sufficient to start Step 23 (margin of
   safety and relative valuation).
+
+### 2026-11-08 — Step 23 margin of safety and relative valuation (PARTIAL, not complete)
+
+- Built `agents/margin_of_safety.py`: margin of safety vs each
+  point of the Step 21/22 range, entry-price ladder, tier logic,
+  material-deterioration flag wired to Steps 18/19/20,
+  WACC/growth sensitivity, and a relative P/E cross-check.
+  No buy/sell call anywhere; the final decision is the owner's.
+- **Convention warning, recorded here because it matters:**
+  Step 23 defines margin the Graham way, `(value - price) /
+  value`.  Steps 21/22 used `(value - price) / price` (MSFT vs
+  base was -67.8% there; Step 23 gives -210.6%).  Both numbers
+  are shown in every output, labelled, so the two conventions
+  are never confused.
+- Tier logic (owner's standing rule): `strongest_alert` =
+  margin vs conservative value >= 20% (price at or below 80%
+  of conservative value) AND no material deterioration —
+  exactly 20% qualifies.  `reasonable_price` = price at or
+  below base value but not an alert.  `fairly_valued` = price
+  above base but at or below optimistic value.  `overvalued` =
+  price above optimistic value.  `insufficient_data` =
+  conservative value or price missing.  Each verdict carries
+  reasons and the conditions that would change it.
+- Deterioration rule (explicit, not guessed): TRUE when Step 18
+  health verdict is `weak` (or fell to `weak`), latest annual
+  net income is negative, latest annual revenue fell >10% AND
+  net income fell >20%, or latest annual OCF is negative.  NOT
+  deterioration on its own: a `strong`/`adequate` verdict, FCF
+  falling alone (MSFT FY2026 FCF -6.5% on a capex surge), a
+  working-capital decline alone (a Step 18 watch item), or a
+  one-off earnings dip.  Missing inputs make the flag UNKNOWN
+  and block a strongest alert.  A caller-supplied override is
+  supported and recorded as the source.
+- Entry-price ladder: prices at 0% / 20% / 30% / 40% below the
+  conservative value, with the implied FCF growth at each rung
+  (Step 21 inversion) for the DCF path, or implied dividend
+  growth (Gordon inversion) for bank/REIT paths.  Sensitivity:
+  margin across WACC 10%/11%/12% x growth +3%/+10%/+15% (DCF),
+  cost of equity 9%/10%/11% on the DDM (bank/REIT).
+  Relative check: current P/E vs the P/E each range point would
+  imply at latest diluted EPS.
+- Tests: `test_margin_of_safety.py` — **36 tests, OK**
+  (228 total with Steps 16–22, `python -m unittest discover`).
+  Covers margin arithmetic and both conventions, ladder prices
+  and implied growth, tier boundaries (exactly 20% below =
+  alert, 19.9% = not), deterioration blocking (deteriorated and
+  unknown), sensitivity monotonicity and Step 21 reproduction,
+  and hand-checked MSFT values on a temp DB copy.  Two failures
+  found and fixed during the run: a real module bug (an
+  `extra={"value": ...}` overwrote the result's value in
+  `margins_for_range`) and a test bug (Step 21's $98.52 was
+  rounded; exact 98.5207), plus a second real bug found in the
+  same pass (the YoY helper read dict key `"growth"` where Step
+  19 uses `"value"`, so the FCF caution never fired) and a
+  third (latest net income was only loaded in the OCF fallback
+  path, leaving it None when OCF was found).  Production DB
+  SHA-256 verified unchanged before and after
+  (`36862922…089187`, post-audit hash).
+- MSFT (price $507.12 as of 2026-11-03, stale, labelled):
+  margins vs conservative -414.7%, vs base -210.6%, vs
+  optimistic -116.1% (Step 23 convention).  **Tier:
+  `overvalued`** — price above the optimistic value, with no
+  material deterioration (health STRONG, revenue +17.8%, net
+  income +31.3% in FY2026), so the tier is driven by price
+  alone.  Entry ladder: $98.52 (implied FCF growth +3.0%),
+  $78.82 at 20% (implied -0.1% — the strongest-alert threshold
+  price), $68.96 (-2.0%), $59.11 (-4.3%).  Sensitivity: even
+  the most generous cell (10% WACC, +15% growth, $273.27) is
+  46% below the price — the verdict holds across the whole
+  grid.  Relative P/E: current 28.25 vs base-implied 9.1x.
+  DBS returns `insufficient_data` (no statements).  Full
+  numbers in `step23-report.md`.
+- **Step 23 is PARTIAL, not complete.** MSFT only; no
+  `strongest_alert` has ever fired on real data (the alert and
+  deterioration-blocking paths are fixture-tested only);
+  bank/REIT ladder and sensitivity are fixture-only (DBS has
+  no statements); the valuation rests on one stale price
+  snapshot; tier thresholds are the owner's standing rules,
+  uncalibrated.  Sufficient to start Step 24 (competitive
+  advantage and business quality).
 
 ### 2026-11-08 — Full codebase audit (verification + repair)
 
