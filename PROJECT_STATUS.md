@@ -40,6 +40,66 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
 - Hygiene fixed in workspace (unpushed, pending GitHub auth): `.env` removed from tracking, `.env.example` added with a neutral placeholder, `requirements.txt` populated (python-dotenv, requests, openpyxl, apscheduler, ddgs — was 0 bytes). Note: removing `.env` from tracking does NOT remove the personal email from earlier Git history; that needs a history rewrite or accepting it stays in old commits.
 - Next: Phase A close-out needs owner decisions — HKEX import (2,793 candidates, country 'Hong Kong') and US 15J import scope — then Step 16 unified financial data.
 
+### 2026-11-08 — Step 16 unified financial data (PARTIAL, not complete)
+
+- Built `agents/financial_standard.py`: a standardiser over the 34-concept
+  common set (revenue, cost_of_revenue, gross_profit, operating_income,
+  net_income, total_assets, total_liabilities, total_equity,
+  cash_and_equivalents, total_debt, operating_cash_flow,
+  capital_expenditure, free_cash_flow, shares/EPS, plus the extra concepts
+  the SEC collector already produces). Every standardised value carries
+  source key, XBRL tag, unit and currency as reported, filing date/form,
+  and a present/missing flag. Missing is stored, never silently absent;
+  0 is present. No unit conversion, no currency conversion.
+- Derived concepts only, labelled as derived: `total_debt =
+  short_term_debt + long_term_debt` (flagged partial if a component is
+  missing) and `free_cash_flow = operating_cash_flow - capital_expenditure`.
+- Migration (NOT applied to production): `docs/migrations/
+  step16_standardized_statements.sql` and `MIGRATION_SQL` /
+  `create_standardized_statements_table(conn)` in the module, which only
+  ever operates on a caller-supplied connection. Table
+  `standardized_statements`, one row per (statement, concept), unique key
+  (ticker, exchange, statement_type, reporting_period, period_type, concept).
+- Tests: `test_financial_standard.py` — **21 tests, OK**
+  (`python -m unittest test_financial_standard`). Fixture rows + temp DB
+  copies only; no network requests, no production writes. Covers US
+  income/balance/cash-flow mapping, XBRL-tag fallback, missing-vs-zero,
+  currency preserved, SG metadata-only rows inventing nothing, duplicate /
+  unique-key behaviour (re-run idempotent, `on_conflict="error"` skips).
+- Run against a temp copy of the real DB (321 rows in, 321 standardised,
+  3,460 `standardized_statements` rows written, 0 skipped; production
+  SHA-256 verified unchanged before/after). Full numbers in
+  `step16-report.md`. Coverage: USA income 879/962 (91.4%), balance
+  1,091/1,222 (89.3%), cash flow 519/592 (87.7%); Singapore 0% on all
+  statement types; total 2,489/3,460 (71.9%).
+- US data is MSFT only (242 rows, 2007-06-30 to 2026-09-30). Gross profit
+  present 65/74, short-term investments 43/94, operating cash flow 62/74,
+  share-based compensation 49/74; total_debt derived 87/94 (3 partial),
+  free_cash_flow derived 62/74.
+- Singapore (DBS/D05, 79 rows) is 0% by design: rows are announcement
+  metadata only (extraction_status `statement_heading_confirmed_raw_values`
+  / `raw_extraction` / heading-verified; unit "Not yet standardised") with
+  no validated line items. Raw `pages[].rows[]` PDF text was deliberately
+  NOT parsed (unverified, includes non-statement pages). `SG_LABEL_MAP`
+  is a candidate table only, from the SGX collector's
+  `STATEMENT_INDICATORS`; it flags that bank "total income" is not revenue.
+- Hong Kong: no statement collector, no HKEX statement rows, no HKEX
+  rows in `market_universe`. `HK_LABEL_MAP` is a proposed IFRS label
+  table only, unvalidated.
+- Data-quality findings recorded in `step16-report.md`: (1) row
+  `fiscal_year` differs from the reporting-period year in 236/242 US rows
+  (collector stores max fiscal_year across fields; reporting_period is
+  authoritative); (2) 87 US rows mix up to 4 distinct filing dates —
+  restatement detection is NOT implemented; (3) early US balance sheets
+  (2007–2009) are sparse; (4) Singapore years appear twice (12-30 and
+  12-31, same annual report); (5) `changes_in_equity` (21 SG rows) has no
+  concepts in the model yet; (6) no TTM rows exist.
+- Remaining incomplete: SG line-item extraction (needs a validated SG
+  extractor; AGENTS.md 11D is PAUSED / REDESIGN REQUIRED), HKEX
+  statements (needs 14I import + a new collector), restatement
+  detection, US coverage beyond MSFT. **Step 16 is PARTIAL, not
+  complete.** It is sufficient to start Step 17 (ratios) on US data.
+
 ## Important project rules
 
 - Do not modify `main.py` before integration approval.
