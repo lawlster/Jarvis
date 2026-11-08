@@ -344,6 +344,7 @@ Do not deduplicate by CIK.
 ### Part 6 — Market intelligence and portfolio
 
 31. Build market news collection — PARTIAL (2026-11-08: collector built and tested, 29 tests OK; live MSFT collection ran — 5 real dated articles via the ddgs news endpoint, plus 5 hub pages from the earlier text-search probe; storage is JSON run files under data/news/, no DB writes — see PROJECT_STATUS.md Step 31 section)
+32. Build daily market summaries — PARTIAL (2026-11-08: summary generator built and tested, 10 tests OK; real 2026-11-08 summary generated — 10,619 tickers scanned, 1 scannable (MSFT, overvalued), 0 candidates, 0 traps, no same-day news; movers never run on real data — only one stored price point per ticker; no sending/scheduling — see PROJECT_STATUS.md Step 32 section)
 32. Build daily market summaries — NOT STARTED
 33. Build macroeconomic and sector analysis — NOT STARTED
 34. Build company news and event monitoring — NOT STARTED

@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 31 — Market news collection (PARTIAL — built and tested 2026-11-08; live MSFT collection ran, 5 real dated articles + 5 hub pages from the text-search probe — see Step 31 section below)
-- Current subtask: Step 32 daily market summaries
+- Current step: 32 — Daily market summaries (PARTIAL — built and tested 2026-11-08; real 2026-11-08 summary generated — 10,619 tickers scanned, 1 scannable, 0 candidates — see Step 32 section below)
+- Current subtask: Step 33 macroeconomic and sector analysis
 - Overall status: In progress
 
 ## Completed work
@@ -1450,3 +1450,78 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   files are untracked generated data; whether they belong
   in Git is undecided. Sufficient to start Step 32 (daily
   market summaries).
+
+### 2026-11-08 — Step 32 daily market summaries (PARTIAL, not complete)
+
+- New module: `agents/daily_summary.py`; tests:
+  `test_daily_summary.py` — **10 tests, OK** (449 total
+  with Steps 16–31, `python -m unittest discover`, run from
+  the project root with
+  `~/workspace/projects/jarvis-venv/bin/python`, no
+  regressions). Full report:
+  `~/workspace/projects/step32-report.md`. Production DB
+  SHA-256 verified unchanged before and after
+  (`36862922…089187`, post-audit hash). The real summary ran
+  against a temp copy (`/tmp/step32-run/assistant.db`,
+  deleted after the run).
+- Composes earlier steps and derives nothing new about
+  value: candidates and traps from the Step 26 detector,
+  watchlist notes from the Step 23/24/27 outputs on the
+  scan results, news digest from the stored Step 31
+  articles. Sections: headline, coverage, candidates
+  (Step 26 briefing lines), value traps, movers, news
+  digest, watchlist notes, what to watch (caller-supplied,
+  listed as given), limitations. Sends nothing, schedules
+  nothing, no network requests, no production writes.
+- Movers compare caller-supplied current prices against
+  caller-supplied previous prices, ranked by absolute
+  percentage change; a reason is stated only when a stored
+  news article for that ticker exists and is cited,
+  otherwise the line says no stored article exists. A
+  stored article is context, not proof it caused the move.
+- **No buy/sell language in the summary's own words**: the
+  Step 26 briefing-line suffix "(worth a closer look; not a
+  buy recommendation)" is normalised to "(worth a closer
+  look)". Article titles are quoted verbatim and may contain
+  the words (the real summary quotes a U.S. News title
+  "Should You Buy Microsoft (MSFT) Stock?") — the articles'
+  words, not the summary's. Weekday handling claims only
+  the calendar (weekend = US markets closed); a weekday
+  carries no open/closed claim.
+- Storage: Markdown to a caller-chosen path, or to
+  `summaries/daily-summary-<date>.md` in the project, with
+  a `_2` suffix on collision. File output only, never the
+  production DB.
+- **Real summary, 2026-11-08** (temp DB copy, stored MSFT
+  news, 2026-11-03 snapshot prices; saved as
+  `~/workspace/projects/step32-summary-2026-11-08.md`):
+  headline "10619 tickers scanned, 1 scannable, 0
+  candidate(s) (0 strongest alert, 0 watch), 0 value
+  trap(s)". Coverage: 2 with statements, 1 with a price;
+  by tier insufficient_data 10,618, overvalued 1. Movers:
+  none computable — no previous prices were supplied, so
+  the section says so instead of inventing a comparison.
+  News digest: no stored article was published on
+  2026-11-08; latest stored are the 5 dated MSFT articles
+  (2026-11-05 back to 2026-04-22). Watchlist: MSFT tier
+  overvalued, quality excellent, health strong, margin
+  −414.7% vs conservative value (Step 23 convention),
+  price $507.12 as of 2026-11-03, deterioration warning;
+  D05 insufficient data.
+- Bugs found and fixed during testing: (1) a real module
+  bug — `write_summary` built the `_2` filename as
+  `directory / stem + suffix`, and `/` binds tighter than
+  `+`, so a `PosixPath + str` TypeError fired on the second
+  write for the same date; fixed with parentheses, covered
+  by the round-trip test; (2) two test bugs — a 0% mover
+  (FIXW) is still a mover, and the FIXA fixture's Step 27
+  overall verdict is "improving", not "warning".
+- **Step 32 is PARTIAL, not complete.** Only MSFT has ever
+  been summarised as a scannable ticker (same data gaps as
+  Steps 25/26). Movers have never run on real data — only
+  one stored price point per ticker exists, so no previous
+  price is available. No same-day news article has ever
+  appeared in a summary. No sending, no scheduling
+  (Steps 46/50); not wired into `main.py` (Step 50).
+  Sufficient to start Step 33 (macroeconomic and sector
+  analysis).
