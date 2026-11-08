@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 30 — Investment thesis tracking (PARTIAL — built and tested 2026-11-08; example MSFT thesis created and reviewed, DBS degrades to stale — see Step 30 section below)
-- Current subtask: Step 31 market news collection
+- Current step: 31 — Market news collection (PARTIAL — built and tested 2026-11-08; live MSFT collection ran, 5 real dated articles + 5 hub pages from the text-search probe — see Step 31 section below)
+- Current subtask: Step 32 daily market summaries
 - Overall status: In progress
 
 ## Completed work
@@ -1371,3 +1371,82 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
 - The v3 candidates, evidence, report and manifest remain untouched; their SHA-256 values were checked after generation. Cached snapshots matched the hashes in the v3 manifest. No database writes, schema changes, cache writes, imports, SEC/exchange requests, `main.py` changes, commits or pushes occurred.
 - Remaining limitation: security form is improved where the cached exchange issue descriptions explicitly identify the listed security, but issuer structure remains unknown for most rows. Phase 3 is a candidate-classification improvement, not production approval; review the new explicit conflicts and decide separately whether targeted issuer-level SEC evidence collection is worthwhile.
 
+
+### 2026-11-08 — Step 31 market news collection (PARTIAL, not complete)
+
+- New module: `agents/news_collection.py`; tests:
+  `test_news_collection.py` — **29 tests, OK** (439 total
+  with Steps 16–30, `python -m unittest discover`, run from
+  the project root with
+  `~/workspace/projects/jarvis-venv/bin/python`, no
+  regressions). Full report:
+  `~/workspace/projects/step31-report.md`. Production DB
+  SHA-256 verified unchanged before and after
+  (`36862922…089187`, post-audit hash). There is no news
+  table in the database and none was created.
+- Collection only: fetch, dedupe, store, tag. No
+  summarising, no sentiment, no recommendations (Steps
+  32/33). No buy/sell call anywhere. The collector takes an
+  explicit ticker list — the whole universe is never fetched
+  in one run — with a caller-supplied per-ticker cap
+  (default 5) and delay between fetches (default 1.0 s,
+  injectable sleep). The fetcher is pluggable, so tests use
+  fixture fetchers and never touch the network.
+- **Default fetcher**: the ddgs news endpoint first, falling
+  back to the existing `tools/research.py::search_web` text
+  search. Same ddgs library the project already depends on;
+  no new dependency, no second searcher. The switch was
+  driven by a live finding (below), not by preference.
+- Per-article record: title, source (publisher name when
+  the fetcher supplies one, else the URL domain),
+  published_date (raw) + published_date_iso (parsed,
+  None when unparseable), url, snippet, tickers tagged,
+  fetched_at (UTC), query. The query ticker is always
+  tagged; other requested tickers (or company-name aliases
+  via an optional `names` mapping) are tagged on whole-word
+  mention. Dedupe is by normalised URL, else lowercased
+  title + source; a duplicate's ticker tags merge into the
+  kept article.
+- Storage is JSON files, one per run, under a
+  caller-chosen directory (default `data/news/` — the same
+  file-log pattern Step 26 uses for
+  `data/detection_runs.jsonl` and Step 30 uses for
+  `data/theses/`). Each run file carries the fetch
+  parameters, per-ticker counts and errors, and the deduped
+  articles. `list_articles(ticker=None, since=None)` reads
+  all run files, dedupes across runs, newest published
+  date first; corrupt run files are skipped, not fatal.
+- **Live collection, MSFT, cap 5 — two runs.** The first
+  run (text search only) returned 5 aggregator hub pages
+  with no dates (stockanalysis.com MSFT page, Seeking Alpha
+  news/analysis hubs, wallstreetnumbers price history,
+  Reuters company page) — a finding about the text endpoint,
+  kept as run file `20261108_163835_MSFT.json`. The second
+  run (news endpoint) returned 5 real dated articles
+  (`20261108_164957_MSFT.json`): Investopedia 2026-10-28
+  (expected move after earnings), Barchart 2026-10-28
+  (buyouts to 60,000 employees), Blockonomi 2026-11-05
+  (Polen Capital AI growth), TheStreet 2026-10-29 (Q1 FY2027
+  earnings call), U.S. News 2026-04-22 (buy-or-not explainer).
+  The news endpoint is not recency-filtered (the April
+  article proves it), so `since` filtering on read matters;
+  headlines are stored, not endorsed. Stored total for MSFT
+  after both runs: 10 items. Network note: the text path
+  showed intermittent DNS failures immediately after a
+  successful call; the news-first / text-fallback chain and
+  per-ticker error recording are the guards.
+- Bugs found and fixed during testing: (1) dedupe dropped
+  the second ticker's tag — duplicates now merge tags;
+  (2) two runs in the same second collided on filename and
+  the second overwrote the first — filenames now get a
+  `_2`, `_3` suffix.
+- **Step 31 is PARTIAL, not complete.** Live collection has
+  run for MSFT only; no other ticker has ever been
+  collected. No sentiment, summarising, or linking of
+  articles to theses/candidates (Steps 32–34). No
+  scheduling (Step 46), no wiring into `main.py` (Step 50).
+  The stored hub pages from the first run are not articles
+  and nothing filters them out yet. The `data/news/` run
+  files are untracked generated data; whether they belong
+  in Git is undecided. Sufficient to start Step 32 (daily
+  market summaries).
