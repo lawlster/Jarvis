@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 27 — Financial risk and deterioration detection (PARTIAL — built and tested 2026-11-08; MSFT warning overall, no material deterioration — see Step 27 section below)
-- Current subtask: Step 28 company comparison and competitor analysis
+- Current step: 28 — Portfolio construction and position sizing (PARTIAL — built and tested 2026-11-08; no real candidate ever detected, so nothing sized on real data — see Step 28 section below)
+- Current subtask: Step 29 automated company research reports
 - Overall status: In progress
 
 ## Completed work
@@ -814,8 +814,78 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   intent).  Not wired into `main.py` (Step 50); the scanner
   and detector consume the Step 23 flag (which now carries
   the Step 27 verdict) but do not yet surface the named risk
-  flags directly.  Sufficient to start Step 28 (company
-  comparison and competitor analysis).
+  flags directly.  Sufficient to start Step 28 (portfolio
+  construction and position sizing).
+
+### 2026-11-08 — Step 28 portfolio construction and position sizing (PARTIAL, not complete)
+
+- New module: `agents/portfolio_construction.py`; tests:
+  `test_portfolio_construction.py` — **44 tests, OK** (358 total
+  with Steps 16–27, `python -m unittest discover`, run from the
+  project root, no regressions).  Full report:
+  `~/workspace/projects/step28-report.md`.
+- **Roadmap note:** `AGENTS.md` section 10 lists Step 28 as
+  "company comparison and competitor analysis".  This build
+  follows the Step 28 brief as given for this step — portfolio
+  construction and position sizing — and the AGENTS.md line has
+  been updated to match what was actually built.  If company
+  comparison is still wanted, it belongs to a later step number.
+- Sizing methods, all with maths shown and assumptions stated:
+  equal weight (default, water-filling against a 20%
+  per-position cap, whole shares, leftovers stay cash), Kelly
+  criterion (f* = p - (1-p)/b, half-Kelly by default, capped at
+  25% of capital, edge caller-supplied per ticker — Jarvis does
+  not estimate win probabilities; a candidate without a supplied
+  edge is skipped), fixed fraction.  `build_from_detection`
+  takes a Step 26 detection result directly; value traps are
+  excluded and counted.
+- **$1,000 small-cap basket:** sized by the amount the owner is
+  willing to lose — a position's cost IS its maximum loss, every
+  position records `amount_at_risk`, and the accept-the-loss
+  discipline is stated on the output.  Currency is an input,
+  never assumed (SGD vs USD not confirmed); a basket without a
+  currency carries a warning.
+- Diversification checks (single name > 25%, sector > 40%,
+  country > 60% — judgement thresholds, stated on the output)
+  and a rebalancing view (caller-supplied holdings, target
+  weights, prices; whole shares, sells fund buys; proposal
+  only).  Proposals can be saved/loaded as JSON at a
+  caller-chosen path.  No existing portfolio storage module
+  exists (no `agents/portfolio.py`, no portfolio table), so this
+  module is new.  No price fetching, no network, no production
+  DB writes, no trade ever placed — every output is a proposal
+  with the disclaimer that a trade needs the owner's approval
+  for that specific exact order.
+- **Fixture example (verified by probe + tests):** two
+  strongest-alert fixtures (FIXA/FIXB, MID_SPEC at $5.00),
+  $10,000 capital, equal weight, 20% cap → 400 shares each,
+  $2,000 each, invested $4,000, cash $6,000 (only 40% invested
+  because the cap binds with two candidates — the proposal says
+  so, with concentration warnings).  $1,000 basket at $200 max
+  loss each → 40 shares each, $200 at risk each, $400 invested,
+  $600 cash.  Kelly example: 60% win probability, 2:1 payoff →
+  half-Kelly 20% of capital.
+- **Real-data run (temp copy of the production DB):** detection
+  with snapshot prices finds 0 candidates and 0 traps, so the
+  builder proposes nothing — 0 positions, $0.00 invested,
+  $10,000.00 cash left over, reason stated.  MSFT is overvalued
+  with excellent quality, so no allocation is proposed for it.
+- **Bug found and fixed during testing:** Kelly fractions were
+  left as raw floats, so `0.4 * 0.5` came out as
+  `0.19999999999999998` and a $2,000 target bought 199 shares
+  instead of 200.  Fractions (and the edge) are now rounded to 6
+  decimals; the two tests that caught it pass after the fix.
+- **Step 28 is PARTIAL, not complete.** It has never sized a
+  real candidate (same data gap as Steps 25–26: 15F NOT
+  authorised beyond the pilot, 11D PAUSED, no HKEX statement
+  collector, no price feed).  Kelly edges are owner judgement by
+  design and cannot be validated here.  Concentration thresholds
+  and the 20% cap are uncalibrated judgement defaults, and
+  sector is NULL for every US/HK row, so sector concentration
+  cannot be assessed on real data.  Not wired into `main.py`
+  (Step 50); no sending or scheduling; no live prices (Step 38
+  concern).  Sufficient to start Step 29 (automated company
+  research reports).
 
 ### 2026-11-08 — Full codebase audit (verification + repair)
 
