@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 33 — Earnings calendar and event tracking (PARTIAL — built and tested 2026-11-09; 12 week-ahead events seeded, MSFT/NVDA re-checks verified — see Step 33 section below)
-- Current subtask: Step 34 company news and event monitoring (macroeconomic and sector analysis, the roadmap's Step 33, is still owed — see Step 33 section)
+- Current step: 33b — Macroeconomic and sector analysis (PARTIAL — built and tested 2026-11-09; macro store seeded with 6 caller-supplied points for 5–6 Nov 2026, MSFT-only sector aggregates — see Step 33b section below)
+- Current subtask: Step 34 company news and event monitoring
 - Overall status: In progress
 
 ## Completed work
@@ -1595,14 +1595,94 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   summaries, macro/sector analysis, company news/event
   monitoring). This step was built as earnings calendar and
   event tracking per the Step 33 brief as given.
-  Macroeconomic and sector analysis is still owed and, like
-  the Step 28 / 28b precedent, belongs to a later step
-  number (e.g. Step 33b) so the later numbering is
-  unchanged. No renumbering was done here.
+  Macroeconomic and sector analysis was built as Step 33b
+  (see the Step 33b section below), like the Step 28 / 28b
+  precedent, so the later numbering is unchanged. No
+  renumbering was done here.
 - **Step 33 is PARTIAL, not complete.** No live event feed
   exists — every event is caller-supplied (a live feed is a
   Step 38 concern). No outcome has ever been recorded on
   real data and no real post-earnings re-check has ever
   run. The Step 32 summary does not yet consume the store.
   Not wired into `main.py` (Step 50). Sufficient to start
+  Step 34 (company news and event monitoring).
+
+### 2026-11-09 — Step 33b macroeconomic and sector analysis (PARTIAL, not complete)
+
+- Built `agents/macro_sector.py`: a macro record store (one
+  JSON file per data point under a caller-chosen directory,
+  default `data/macro/`) plus sector analysis and a
+  sector-vs-market comparison, composing the Step 25 scanner
+  and Step 28b profiles — nothing is re-derived, nothing is
+  fetched, nothing is sent or scheduled, no buy/sell call.
+- Macro store: `add_macro_point` (validated, raises on bad
+  input), `list_macro_points` (newest first, corrupt files
+  skipped, indicator/date filters), `macro_snapshot` (latest
+  point per indicator on or before a date — a later point
+  never leaks into an earlier date), `what_changed`
+  (changes with direction and size, plus added / dropped /
+  unchanged), `relevant_macro_points` (per caller-supplied
+  sector-to-indicator associations — the module invents no
+  mapping of its own; with no associations the result is
+  empty and says so).
+- Sector analysis: `analyse_sector` (sector name and/or
+  explicit tickers; median/min/max/contributing count for
+  every Step 28b metric, quality / tier / health
+  distributions, one row per ticker, macro context). Every
+  aggregate states its contributing count; an aggregate over
+  1 ticker is labelled a single-company figure, not a sector
+  figure; a metric with no contributors is missing with a
+  reason, never zero. `compare_sector_to_market` puts a
+  sector and a market set side by side with difference and
+  difference % — differences are descriptive only, no
+  judgement about which set is better.
+- Seeded 6 macro points in `data/macro/` (untracked
+  generated data, not committed), source "owner research,
+  2026-11-08": S&P 500 daily change −4.36% and Nasdaq −5.52%
+  and SOX −12.25% and VIX 28.18 on 2026-11-05 (driver note:
+  AI/data-centre regulation fears after the Democrats'
+  midterm sweep, Qualcomm weak guide, AI capex questions;
+  Fri 6 Nov partial chip bounce), S&P 500 weekly change
+  −2.7% and Nasdaq weekly change −3.4% on 2026-11-06. US Oct
+  CPI and PPI are future events, not data points — no value
+  is invented for them.
+- MSFT-only sector aggregate on a temp DB copy (sector
+  "technology", explicit tickers [MSFT], snapshot price
+  $507.12 as of 2026-11-03): coverage selected 1, with
+  statements 1, scannable 1; quality {excellent: 1}, tier
+  {overvalued: 1}; every aggregate single-company (revenue
+  $331,839,000,000, net margin 0.403, ROIC 0.306, P/E 28.25,
+  DCF base $163.30). Macro context with caller-supplied
+  associations found all three requested points (−4.36%,
+  −5.52%, VIX 28.18). Selection by stored sector returns 0
+  tickers — sector is NULL for every US/HK row — with the
+  warning recorded. Sector (MSFT) vs whole-universe market
+  (10,613 selected, 2 with statements, 1 scannable): both
+  sides are MSFT-only figures, so every difference is 0.0.
+- Fixture proof: three-company sector (MID/BIG/WEAK) —
+  revenue median 1220, net margin median 0.127, ROIC median
+  0.152, P/E median 4.474, DCF base median 23.04; quality
+  {good: 2, weak: 1}; tier {strongest_alert: 2,
+  reasonable_price: 1}. Sector [MID, BIG] vs market
+  [MID, BIG, WEAK]: net margin 0.155 vs 0.127 (+0.028,
+  +22.1%), revenue 1830 vs 1220 (+610, +50.0%).
+- One bug found and fixed during the build: the first
+  `compare_sector_to_market` called `analyse_sector` with
+  neither a sector nor tickers for the whole-universe market
+  side (which raises); it now passes the universe tickers
+  explicitly, and `compare_sector_to_market` also accepts
+  explicit `sector_tickers` so the sector side works when
+  stored sector data is absent.
+- **Step 33b is PARTIAL, not complete.** Sector aggregates
+  are single-company figures only on real data; no
+  multi-company sector aggregate has ever been computed on
+  real data (needs statements for more tickers — 15F NOT
+  authorised beyond the pilot, 11D PAUSED, no HKEX
+  statement collector — and sector data in
+  `market_universe`, currently NULL for every US/HK row).
+  The macro store holds 6 points, all from the owner's
+  research for 5–6 Nov 2026; no live macro feed exists
+  (Step 38 concern), no CPI/PPI/rates series is stored.
+  Relevance associations are caller-supplied only. Not
+  wired into `main.py` (Step 50). Sufficient to start
   Step 34 (company news and event monitoring).
