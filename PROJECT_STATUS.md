@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 33b — Macroeconomic and sector analysis (PARTIAL — built and tested 2026-11-09; macro store seeded with 6 caller-supplied points for 5–6 Nov 2026, MSFT-only sector aggregates — see Step 33b section below)
-- Current subtask: Step 34 company news and event monitoring
+- Current step: 34 — Company news and event monitoring (PARTIAL — built and tested 2026-11-09; watchlist monitor over stored Step 31 news and Step 33 events, what-changed via Step 30 snapshots, alert records — MSFT only on real data, 10 new articles, 0 alerts — see Step 34 section below)
+- Current subtask: Step 35 portfolio management
 - Overall status: In progress
 
 ## Completed work
@@ -1686,3 +1686,82 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   Relevance associations are caller-supplied only. Not
   wired into `main.py` (Step 50). Sufficient to start
   Step 34 (company news and event monitoring).
+
+### 2026-11-09 — Step 34 company news and event monitoring (PARTIAL, not complete)
+
+- `agents/news_monitoring.py` built and tested (32 new tests,
+  523 total, `python -m unittest discover` from the project
+  root with `~/workspace/projects/jarvis-venv/bin/python`).
+  Production DB hash unchanged (`36862922…089187`); checks
+  ran on temp DB copies in tests and a read-only connection
+  in the real run. Report: `~/workspace/projects/
+  step34-report.md`.
+- The monitor answers "what is new since I last looked?" for
+  a caller-supplied watchlist, reading only what other steps
+  already stored: Step 31 news run files under `data/news/`
+  and Step 33 event files under `data/events/`. Newness is
+  the seen-set in the state file; on a first run with no
+  seen-set, the last-checked timestamp filters by age
+  (fetched at/after the check, or published on/after that
+  date; an article with neither date is reported rather than
+  silently dropped). Upcoming events in the next N days
+  (default 7) and past events (most recent first, with an
+  `outcome_recorded` flag) come from the Step 33 store.
+  Market-wide events are reported once at watchlist level,
+  not repeated per ticker.
+- What changed: the current Step 30 evidence snapshot is
+  compared field-by-field with the snapshot at the last
+  check (price, tier, quality, deterioration, health,
+  strongest-alert price, fair-value range, latest key
+  figures), plus the price-vs-alert-price position. A
+  snapshot that cannot be built is recorded as a failure,
+  never raised — one ticker's missing data does not stop
+  the whole watchlist check.
+- Alerts are records only, never sent: a strongest_alert
+  candidate in a caller-supplied Step 26 detection result,
+  or a Step 30 review suggesting `invalidated` (or
+  `confirmed`). An alert is raised once per key — re-running
+  does not re-raise it. Watch-band candidates and
+  still-active theses are not alerts.
+- State is one JSON file (default
+  `data/monitoring/monitoring_state.json`): per ticker the
+  last-checked timestamp, seen article keys and event ids,
+  the last evidence snapshot, and the alert keys already
+  raised. `run_monitor` checks the watchlist, raises new
+  alerts, marks everything seen, and saves the state.
+  Briefing lines give one line per ticker plus one per
+  alert; a ticker with nothing new gets a line saying so.
+- First real run, watchlist `["MSFT"]`, as of 2026-11-09:
+  10 new articles of 10 stored (5 real dated articles
+  2026-04-22 to 2026-11-05 + 5 aggregator hub pages); 0
+  upcoming and 0 past MSFT events; 3 market-wide events in
+  the next 7 days (US Oct CPI 10 Nov, bond market closed
+  11 Nov, US PPI 13 Nov; 13F due 16 Nov is outside the
+  window); snapshot complete, 0 changes (first run);
+  strongest-alert price $78.82, price not below it; 0
+  alerts. A second run on the same state reports 0 new
+  articles and 0 changes (verified in tests against the
+  real stored files).
+- Two test bugs found and fixed during the run (both in the
+  tests, not the module): the real-data alert-price
+  assertion compared the exact value 78.8165… to the rounded
+  78.82, and a state assertion ran after its
+  TemporaryDirectory had been deleted.
+- **Step 34 is PARTIAL, not complete.** MSFT only on real
+  data (plus synthetic fixtures). No alert has ever fired
+  on real data: no strongest_alert candidate has ever been
+  detected and no thesis has ever been invalidated or
+  confirmed on real data — the alert paths are
+  fixture-proven only. The monitor reads stored
+  news/events; it does not collect them (Step 31) and does
+  not fetch a live feed (Step 38 concern). Not wired into
+  `main.py` (Step 50); no sending or scheduling (Step 46).
+  The state file `data/monitoring/monitoring_state.json`
+  is untracked generated data, like `data/news/` and
+  `data/events/`. Housekeeping: the full suite leaves stale
+  temp DB copies in /tmp (72 `tmp*.db` files, /tmp at 30%
+  after the Step 34 run) — Step 34's own tests use
+  TemporaryDirectory and leave nothing behind; the residue
+  is from older steps' `_temp_db_copy` helpers (first
+  noted Step 27, again Step 33b). Sufficient to start
+  Step 35 (portfolio management).
