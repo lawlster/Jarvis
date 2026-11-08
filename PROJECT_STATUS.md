@@ -2,7 +2,7 @@
 
 ## Current development position
 - Current step: 15G — US security classification
-- Current subtask: v3 read-only results audit complete; prioritized remediation remains
+- Current subtask: Step 15G Phase 3 implemented and tested from existing cached evidence; issuer-structure gap remains
 - Overall status: In progress
 
 ## Completed work
@@ -22,12 +22,13 @@
 
 Step 15F completed an isolated 20-CIK pilot on 2026-11-08: all 20 SEC fetches succeeded, coverage was 20 matched with no failures, and production database/cache hashes remained unchanged. The pilot does not authorize full-universe enrichment. Known limits: stale-cache refresh behavior was not exercised because the isolated pilot cache began empty; three issuers have no SIC information; Pembina Pipeline has additional SEC-associated tickers requiring security-level classification.
 
-Step 15G Phase 2 generated current exchange-backed evidence and refreshed candidate outputs in a new versioned directory. The v3 read-only audit confirmed 137 confirmed, 6,120 provisional, 8 conflicting, and 1,360 unknown listings. Provisional/unknown/conflicting rows remain in manual review; production import and database schema changes remain gated.
+Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corrected case-sensitive identity and parser artifacts and generated v4_2 from the same cached snapshots. Results are 137 confirmed, 6,116 provisional, 37 conflicting, and 1,335 unknown listings. All nonconfirmed listings remain in manual review; production import and database schema changes remain gated.
 
 ## Pending work
 
 - Review the Phase 2 candidates and collect additional SEC filing or issuer-document evidence for unresolved classes and issuer structures; do not treat name/ticker hints or secondary sources as confirmation.
 - Keep Step 15H validation/normalization and Step 15I production import separately gated; no production import or schema change has occurred.
+- Assess the remaining issuer-structure gap before deciding whether to collect targeted official SEC evidence. Phase 3 did not collect data or run SEC requests.
 
 ## Important project rules
 
@@ -229,4 +230,18 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
 3. Extend parsing for explicit Nasdaq/NYSE descriptions found in the existing snapshots; output only the dimensions directly supported and leave incomplete cases provisional.
 4. Validate freshness/provenance of existing SEC issuer metadata, then use it only for issuer structure on the 6,106 provisional listings. No security form should be inferred from CIK or company name.
 5. Retain the 570 unrepresented listings and the three substantive conflicts as grouped review cohorts; do not start a universe-wide manual review or production import.
+
+### 2026-11-08 — Step 15G Phase 3 identity and existing-evidence corrections
+
+- Implemented case-preserving ticker matching in `agents/us_security_classifier.py`. Exchange names are still normalized, while ticker case is retained in database, evidence and NYSE URL keys. This keeps NYSE `TPC` (Tutor Perini) distinct from `TpC` (AT&T preferred Series C).
+- Improved explicit issue-description parsing in `agents/us_security_evidence.py`: ADR/ADS wrapper descriptions take precedence over descriptions of underlying components; common-share suffixes take precedence over issuer-name words such as “Bond”; preferred shorthand is accepted only in explicit security/series contexts; and underlying `CL ORD` is no longer recorded as a security share class. Issuer/company names and ticker patterns remain non-confirming.
+- Added `agents/us_security_classification_phase3.py`. It reads only the v3 source manifest's cached snapshots, verifies each content hash, reads the production market-universe database with SQLite URI `mode=ro`, and issues no requests. It rebuilds issue-level evidence with exact case-sensitive ticker plus exchange matching, retains one-axis evidence as provisional, and writes an XASE/ARCX/XNGS MIC reconciliation view without mapping those MICs into the database exchange field.
+- Added `test_us_security_phase3.py`, including regression coverage for all eight v3 conflicts and a temporary-database end-to-end rebuild using temporary cached snapshots. Focused command: `D:\AiAssistant\.venv\Scripts\python.exe -m unittest test_us_security_classifier test_us_security_evidence test_us_security_phase3` — **Ran 17 tests — OK**. Tests use no live SEC or exchange requests.
+- Final output: `data/market_data/us_security_classification_v4_2/`. It contains the evidence CSV, all-listings candidate and manual-review CSVs, report, source manifest, MIC reconciliation CSV, a 196-row per-listing v3-to-Phase-3 change CSV, and a comparison/conflict review report. The earlier same-task draft directories `us_security_classification_v4/` and `us_security_classification_v4_1/` are marked as superseded; use v4_2.
+- All 7,625 listing rows were retained. v3 -> v4_2 counts: confirmed **137 -> 137**; provisional **6,120 -> 6,116**; conflicting **8 -> 37**; unknown **1,360 -> 1,335**. The change CSV records each changed listing, its old/new status, structure, form, share class, evidence source and rationale.
+- All five audited artifacts now remain as provisional one-axis classifications: BSBR=ADR/ADS; RNP=common shares; TPC=common shares; VBF=common shares; WDH=ADR/ADS with underlying Class A. They are not fully confirmed because issuer structure is still unknown. IPB (ETF/preferred), MHNC (notes/preferred), and TVC (common/debt-preferred) remain conflicting and in manual review.
+- Explicit parsing exposed **34 additional** Nasdaq/NYSE security-form disagreements, which remain conflicting/manual-review rather than being reconciled by guessing. Nine previously provisional records became unknown where v3's broad text rules had accepted fund-name/abbreviation terms without an explicit listed-security descriptor. Thirty-four formerly unknown records became provisional when an explicit issue form was parsed; issuer structure remains unknown. The per-listing change CSV details these and all other material changes.
+- The MIC reconciliation view contains **4,582** source rows: XASE 327, ARCX 2,752, and XNGS 1,503. These are review candidates only and are not attached to US listings as classification evidence.
+- The v3 candidates, evidence, report and manifest remain untouched; their SHA-256 values were checked after generation. Cached snapshots matched the hashes in the v3 manifest. No database writes, schema changes, cache writes, imports, SEC/exchange requests, `main.py` changes, commits or pushes occurred.
+- Remaining limitation: security form is improved where the cached exchange issue descriptions explicitly identify the listed security, but issuer structure remains unknown for most rows. Phase 3 is a candidate-classification improvement, not production approval; review the new explicit conflicts and decide separately whether targeted issuer-level SEC evidence collection is worthwhile.
 
