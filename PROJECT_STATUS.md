@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 20 — Cash flow and owner earnings (Phase A closed out 2026-11-08 — see close-out note below)
-- Current subtask: Step 20 cash flow / owner earnings on US data
+- Current step: 21 — Intrinsic valuation (Step 20 complete as PARTIAL — see Step 20 section below)
+- Current subtask: Step 21 intrinsic valuation (DCF / owner earnings) on US data
 - Overall status: In progress
 
 ## Completed work
@@ -275,6 +275,63 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   verification). 15I remains PENDING (specials held). 14H remains
   PENDING (29 HK manual-review rows). Phase A is otherwise closed;
   next is Step 20.
+
+### 2026-11-08 — Step 20 cash flow and owner earnings (PARTIAL, not complete)
+
+- Built `agents/financial_cashflow.py`: one-period and all-periods
+  cash-flow assessment reusing Step 16 standardised values and
+  Step 16's derived free cash flow (OCF − capex), Step 19's CAGR /
+  YoY helpers and Step 17's TTM construction. Covers OCF quality
+  (OCF / net income, OCF / operating income), capex (capex /
+  revenue, capex / OCF, capex YoY, 5y/10y capex vs OCF CAGRs),
+  FCF and FCF after dividends and after dividends + buybacks,
+  SBC (SBC / OCF, SBC / FCF, SBC-adjusted FCF, labelled as an
+  adjustment), working capital (change in working capital,
+  working-capital requirement, cash conversion cycle from
+  period-end balances), and 5y/10y cash-conversion trends. No
+  price used anywhere; sign convention is Step 16's (capex /
+  dividends / buybacks stored as positive outflows).
+- Tests: `test_financial_cashflow.py` — **21 tests, OK** (109
+  total with Steps 16–19, no regressions). Covers fixture
+  arithmetic, owner-earnings unavailability, missing-input and
+  zero-denominator behaviour, CCC components, and hand-checked
+  MSFT FY2026 values on a temp DB copy. One first-run failure
+  was a test bug (warnings-list index), fixed in the test.
+  Production DB SHA-256 verified unchanged before and after
+  (`e90fa34a…3c89dfe`, the post-import hash).
+- MSFT FY2026 (verified from the DB): OCF $182,935m, capex
+  $115,948m, FCF $66,987m, dividends $26,445m, FCF after
+  dividends $40,542m, buybacks $22,271m, FCF after dividends +
+  buybacks $18,271m, SBC $12,405m, SBC-adjusted FCF $54,582m.
+  OCF / net income 1.37, FCF / net income 0.50, capex / revenue
+  34.9%, capex / OCF 63.4%, SBC / OCF 6.8%, SBC / FCF 18.5%.
+  Working capital fell $11,028m while revenue grew $50,115m
+  (requirement −0.22 — revenue growth released working
+  capital); cash conversion cycle −51.8 days (DIO 4.8, DSO 89.0,
+  DPO 145.5).
+- Answers the Step 19 question: FCF lags OCF because of a capex
+  surge, not OCF weakness — 5y capex CAGR 41.2% vs OCF 19.0%
+  vs FCF 3.6% (10y: 30.1% / 18.6% / 10.4%); FY2026 capex
+  +79.6% YoY vs OCF +34.4%; Q1 FY2027 capex +103% YoY, FCF
+  −27.4% YoY. TTM FCF to 2026-09-30 is $59,957m. Whether the
+  capex is growth investment or rising maintenance spending
+  cannot be answered from reported data (no maintenance/growth
+  split).
+- Owner earnings is UNAVAILABLE, not computed: D&A is not a
+  Step 16 concept and no such key exists anywhere in the US raw
+  data (verified across all US statement rows), capex is not
+  split into maintenance vs growth, and no other non-cash-charge
+  concept exists. No partial version is offered. FCF is the
+  closest available proxy and is labelled as such — it is NOT
+  owner earnings. Unlocking it needs D&A added to Step 16
+  (SEC tag `DepreciationDepletionAndAmortization`) plus a
+  maintenance-capex estimate.
+- Remaining incomplete: MSFT only; OCF/FCF missing FY2014–
+  FY2015 (sparse early cash-flow rows); TTM growth vs prior TTM
+  not computed; no SG/HK analysis. **Step 20 is PARTIAL, not
+  complete.** It completes Phase C's financial analysis engine
+  (Steps 17–20) for the data available; its outputs feed Steps
+  21 (valuation), 23 (margin of safety) and 24 (business quality).
 
 ## Important project rules
 

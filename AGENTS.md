@@ -325,7 +325,7 @@ Do not deduplicate by CIK.
 17. Build financial ratios and metrics engine — PARTIAL (2026-11-08: ratios engine built and tested, 21 tests OK; MSFT only, price ratios rest on a stale 2026-11-03 snapshot; EV/EBITDA and interest coverage unavailable — see PROJECT_STATUS.md Step 17 section)
 18. Build financial health and quality analysis — PARTIAL (2026-11-08: health engine built and tested, 11 tests OK, 53 total; MSFT FY2026 verdict strong; Altman Z-score unavailable — retained earnings not in Step 16 set; MSFT only — see PROJECT_STATUS.md Step 18 section)
 19. Build historical financial growth analysis — PARTIAL (2026-11-08: YoY/CAGR/consistency/cyclicality built and tested, 35 tests OK; MSFT only — see PROJECT_STATUS.md Step 19 section)
-20. Build cash flow and owner earnings analysis — NOT STARTED
+20. Build cash flow and owner earnings analysis — PARTIAL (2026-11-08: cash-flow engine built and tested, 21 tests OK; owner earnings UNAVAILABLE — no D&A in Step 16 concept set — see PROJECT_STATUS.md Step 20 section)
 21. Build intrinsic valuation engine — NOT STARTED
 22. Build sector-specific valuation models — NOT STARTED
 23. Build margin-of-safety and relative valuation analysis — NOT STARTED
