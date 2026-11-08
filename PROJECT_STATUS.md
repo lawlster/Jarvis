@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 25 — Global market scanner (PARTIAL — built and tested 2026-11-08; only 1 of 10,619 tickers scannable — see Step 25 section below)
-- Current subtask: Step 26 undervalued-company detection
+- Current step: 26 — Undervalued-company detection (PARTIAL — built and tested 2026-11-08; fixture-proven, 0 candidates on real data — see Step 26 section below)
+- Current subtask: Step 27 financial risk and deterioration detection
 - Overall status: In progress
 
 ## Completed work
@@ -653,6 +653,70 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   and rotation are uncalibrated judgement rules.  Not wired
   into `main.py` (Step 50).  Sufficient to start Step 26
   (undervalued-company detection).
+
+### 2026-11-08 — Step 26 undervalued-company detection (PARTIAL, not complete)
+
+- Built `agents/undervalued_detector.py`: a focused detector on
+  the Step 25 scanner — it re-derives nothing.  It filters scan
+  results into candidates (strongest_alert tier, plus two watch
+  bands: `watch_discount` 0–20% below conservative value and
+  `watch_below_base` below base but above conservative value,
+  both with the same quality-adequate-or-better and
+  deterioration-known-clear gates as an alert), value traps
+  (price at/below conservative value on a weak or deteriorating
+  business, reported with the evidence, never a candidate), and
+  a "why not" explanation (`explain_ticker`) for every other
+  ticker.  Detection records carry the valuation range, both
+  margin conventions labelled (Step 23 Graham vs Step 21/22),
+  quality, health, deterioration flag and signals, price with
+  as-of date and source, reasons it qualifies and reasons it
+  does NOT qualify for anything stronger.  No buy/sell call
+  anywhere.  `briefing_line` / `briefing_summary` give
+  alert-ready one-line-per-candidate output for a daily check
+  or morning briefing — records only, never sent or scheduled.
+  Run history is a JSON-lines file log
+  (`data/detection_runs.jsonl`, `append_run_log` /
+  `read_run_log`), not a production-table write.
+- Tests: `test_undervalued_detector.py` — **22 tests, OK**
+  (290 total with Steps 16–25, `python -m unittest discover`).
+  Covers strongest-alert detection (incl. the just-above-20%
+  boundary), both watch bands, watch requiring adequate
+  quality, value-trap rejection (cheap-but-weak) and a weak
+  business with no value not being a trap, "why not"
+  explanations (overvalued / fairly_valued / insufficient_data
+  / blocked_alert / reasonable-price weak quality), mixed-market
+  candidates + traps + insufficient together, briefing output,
+  rotation passing through from the scanner, run-log write/read,
+  and MSFT/D05/full-universe on a temp DB copy (production
+  SHA-256 verified unchanged before and after,
+  `36862922…089187`, and asserted in the tests'
+  `tearDownClass`).
+- Bugs found and fixed during testing: (1) the detector's
+  re-sort by margin discarded the scanner's fresh-name
+  rotation — candidates are now ranked by band, then by the
+  scanner's rank within the band; (2) the exact-20% boundary
+  is a floating-point edge — a price at exactly 80% of the
+  conservative value computes a margin of
+  0.19999999999999993, just below Step 23's `>= 20%` test, so
+  it lands in watch_discount; Step 23's threshold logic was
+  left unchanged and the edge is documented, not hidden.
+- Detector result on real data (temp copy, 2026-11-03 snapshot
+  prices, ~1.2 seconds): selected 10,619 — scannable 1 (MSFT
+  only).  **Candidates: 0** (0 strongest alerts, 0 watch).
+  **Value traps: 0.**  By category: overvalued 1 (MSFT),
+  insufficient_data 10,618.  MSFT is not a candidate and not a
+  trap (tier overvalued, quality excellent, health strong);
+  D05 is insufficient_data.
+- **Step 26 is PARTIAL, not complete.** No real candidate has
+  ever been detected — the detector is fixture-proven, but only
+  1 of 10,619 tickers is scannable (same data gap as Step 25:
+  15F NOT authorised beyond the pilot, 11D PAUSED, no HKEX
+  statement collector, no price feed).  No value trap has ever
+  been found on real data either, for the same reason.  The
+  exact-20% floating-point boundary is a known edge.  The
+  project run log has no entries yet.  Not wired into `main.py`
+  (Step 50); no sending or scheduling.  Sufficient to start
+  Step 27 (financial risk and deterioration detection).
 
 ### 2026-11-08 — Full codebase audit (verification + repair)
 
