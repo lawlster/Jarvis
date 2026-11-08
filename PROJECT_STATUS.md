@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 17 — Financial ratios and metrics engine (PARTIAL — built and tested 2026-11-08; MSFT only, price ratios rest on a stale 2026-11-03 snapshot — see Step 17 section below)
-- Current subtask: Step 18 financial health on US data; Phase A close-out (15H/15I/15J + 14H/14I decisions pending owner) remains gated on owner decisions
+- Current step: 18 — Financial health and quality analysis (PARTIAL — built and tested 2026-11-08; MSFT only — see Step 18 section below)
+- Current subtask: Step 19 growth analysis on US data; Phase A close-out (15H/15I/15J + 14H/14I decisions pending owner) remains gated on owner decisions
 - Overall status: In progress
 
 ## Completed work
@@ -150,6 +150,54 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   interest coverage need D&A and interest expense added to the
   Step 16 concept set (SEC XBRL tags exist for both). Sufficient
   to start Step 18 (financial health) on US data.
+
+### 2026-11-08 — Step 18 financial health and quality analysis (PARTIAL, not complete)
+
+- Built `agents/financial_health.py`: structured health assessment
+  per ticker/period reusing Step 16 standardised values and Step 17
+  ratios (nothing re-derived by a different definition). Sections:
+  (a) balance-sheet strength, (b) liquidity, (c) solvency / debt
+  sustainability, (d) profitability consistency over 5y and 10y
+  windows (mean/min/max/CV, share of profitable years), (e) distress
+  screen (Altman components only where inputs exist, plus hard
+  distress flags). Overall verdict `strong` / `adequate` / `weak` /
+  `insufficient data`, always with reasons listed; thresholds are
+  documented judgement rules in the module.
+- Tests: `test_financial_health.py` — **11 tests, OK** (53 total with
+  Steps 16–17, `python -m unittest test_financial_health
+  test_financial_ratios test_financial_standard`). Covers MSFT FY2026
+  and FY2025 against hand-checked values, sparse-FY2008 graceful
+  degradation, fixture-driven `weak` verdict, missing-input
+  behaviour, and consistency metrics. Two test bugs fixed before
+  delivery ($m vs $ units; fixture used `total_equity` where the
+  real raw key is `shareholders_equity`).
+- Run against a temp copy of the real DB (production SHA-256
+  unchanged, 812ECB53…89D4CD). MSFT FY2026 verdict: **STRONG** —
+  equity ratio 58.33%, debt-to-equity 0.09, net debt $19,359m, cash
+  cover 0.52, current 1.23, quick 1.22, working capital $38,885m,
+  debt / operating cash flow 0.22x, debt / FCF 0.60x, FCF after
+  dividends $40,542m, debt down 31% over 5 years, 5y net-margin
+  mean 36.6% (CV 0.062), 5y mean ROE 38.1%, 5y mean ROIC 33.9%,
+  5/5 profitable years. Watch item: working capital down 51% over
+  3 years and 59% over 5 years (current liabilities growing faster
+  than current assets) while the current ratio stayed above 1.
+  Verdicts over 19 annual periods: FY2008 insufficient data, FY2009–
+  FY2011 adequate, FY2012–FY2013 strong, FY2014–FY2022 adequate
+  (5y windows include the FY2018 tax-charge year: net margin 15.0%,
+  10y CV 0.223), FY2023–FY2026 strong. No year was `weak`.
+- Unavailable, not guessed: **Altman Z-score** (retained earnings
+  is not a Step 16 concept and no such key exists in the US raw
+  data — 4 of 5 components exist, including market value of equity
+  / liabilities 11.92 on the stale 2026-11-03 price); **net debt /
+  EBITDA** and **interest coverage** (same Step 16 gaps as Step 17).
+  Adding retained earnings (SEC tag
+  `RetainedEarningsAccumulatedDeficit`) plus D&A and interest
+  expense to the Step 16 concept set would unlock all three.
+  **Step 18 is PARTIAL, not complete.** MSFT only; verdict
+  thresholds are uncalibrated judgement rules (no distressed issuer
+  in the DB to test against — `weak` is exercised only by fixture
+  rows); working-capital decline is reported, not scored; no TTM
+  health assessment yet. Sufficient to start Steps 19–20 on US data.
 
 ## Important project rules
 

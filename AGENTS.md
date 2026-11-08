@@ -323,7 +323,7 @@ Do not deduplicate by CIK.
 
 16. Build unified financial-data standard — PARTIAL (2026-11-08: US/SEC standardiser built and tested, 21 tests OK; SG/HK mappings are candidate tables only — see PROJECT_STATUS.md Step 16 section)
 17. Build financial ratios and metrics engine — PARTIAL (2026-11-08: ratios engine built and tested, 21 tests OK; MSFT only, price ratios rest on a stale 2026-11-03 snapshot; EV/EBITDA and interest coverage unavailable — see PROJECT_STATUS.md Step 17 section)
-18. Build financial health and quality analysis — NOT STARTED
+18. Build financial health and quality analysis — PARTIAL (2026-11-08: health engine built and tested, 11 tests OK, 53 total; MSFT FY2026 verdict strong; Altman Z-score unavailable — retained earnings not in Step 16 set; MSFT only — see PROJECT_STATUS.md Step 18 section)
 19. Build historical financial growth analysis — NOT STARTED
 20. Build cash flow and owner earnings analysis — NOT STARTED
 21. Build intrinsic valuation engine — NOT STARTED
