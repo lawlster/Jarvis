@@ -78,6 +78,16 @@ inputs are missing the flag is UNKNOWN (``deteriorated=None``)
 and a strongest alert is blocked — an unknown is never treated
 as "no deterioration".
 
+Quality gate (Step 24)
+----------------------
+A ``strongest_alert`` also requires business quality adequate or
+better (Step 24 rating).  A ``weak`` or ``insufficient data``
+quality rating blocks the alert even at a discount, exactly like
+material deterioration: a cheap price on a weak business is not
+a strongest alert.  The gate only applies when a quality rating
+is supplied to ``classify_tier``; callers that do not pass one
+keep the previous behaviour (the summary always passes one).
+
 Sensitivity
 -----------
 How the margin moves with the discount rate and the growth
@@ -103,6 +113,7 @@ writes.  It never touches the production database.
 
 import sqlite3
 
+from agents import business_quality as bq
 from agents import financial_cashflow as cf
 from agents import financial_growth as fg
 from agents import financial_health as fh
@@ -509,15 +520,21 @@ def assess_deterioration(conn, ticker, health=None, growth=None,
 # ---------------------------------------------------------------------------
 
 def classify_tier(margin_conservative, margin_base, margin_optimistic,
-                  deterioration):
+                  deterioration, quality=None):
     """Tier from the margins and the deterioration flag.
 
     ``margin_*`` are Step 23 margins (value - price) / value, or
     None when missing.  ``deterioration`` is the dict from
-    ``assess_deterioration``.  Returns {"tier", "reasons",
-    "strongest_alert_blocked", "conditions_to_change": [...]}.
-    Never returns a buy/sell call.
+    ``assess_deterioration``.  ``quality`` is the Step 24 quality
+    assessment dict (or a plain rating string); when supplied, a
+    ``weak`` or ``insufficient data`` rating blocks a strongest
+    alert — a strongest alert requires quality adequate or better.
+    When ``quality`` is None the gate does not apply (previous
+    behaviour; the summary always supplies one).  Returns {"tier",
+    "reasons", "strongest_alert_blocked", "quality_rating",
+    "conditions_to_change": [...]}.  Never returns a buy/sell call.
     """
+    quality_rating = bq.quality_rating(quality)
     reasons = []
     conditions = []
     blocked = False
@@ -530,6 +547,7 @@ def classify_tier(margin_conservative, margin_base, margin_optimistic,
             "reasons": ["conservative value or price is missing, so "
                         "no margin of safety can be computed"],
             "strongest_alert_blocked": False,
+            "quality_rating": quality_rating,
             "conditions_to_change": [
                 "a conservative intrinsic value and a price are "
                 "needed before any tier can be assigned"],
@@ -552,18 +570,38 @@ def classify_tier(margin_conservative, margin_base, margin_optimistic,
                 "alert is BLOCKED: deterioration is UNKNOWN "
                 "(no health/growth inputs)")
         else:
-            return {
-                "tier": "strongest_alert",
-                "reasons": [
+            if quality_rating in ("weak", "insufficient data"):
+                # Quality gate (Step 24): a cheap price on a weak
+                # business is not a strongest alert.  Fall through
+                # to the margin-based tiers with blocked=True, the
+                # same as a deterioration block.
+                blocked = True
+                reasons.append(
+                    f"margin vs conservative value is "
+                    f"{margin_conservative:.1%} (>= 20%) but a "
+                    "strongest alert is BLOCKED by business quality: "
+                    f"Step 24 rating is '{quality_rating}' "
+                    "(strongest alert requires quality adequate or "
+                    "better)")
+            else:
+                reasons = reasons + [
                     f"margin vs conservative value is "
                     f"{margin_conservative:.1%} (>= 20% threshold)",
-                    "no material deterioration (Step 18/19/20 rule)"],
-                "strongest_alert_blocked": False,
-                "conditions_to_change": [
-                    "a price rise above 80% of conservative value, "
-                    "or new evidence of material deterioration, "
-                    "would remove the alert"],
-            }
+                    "no material deterioration (Step 18/19/20 rule)"]
+                if quality_rating is not None:
+                    reasons.append(
+                        "business quality rating is "
+                        f"'{quality_rating}' (adequate or better)")
+                return {
+                    "tier": "strongest_alert",
+                    "reasons": reasons,
+                    "strongest_alert_blocked": False,
+                    "quality_rating": quality_rating,
+                    "conditions_to_change": [
+                        "a price rise above 80% of conservative value, "
+                        "or new evidence of material deterioration, "
+                        "would remove the alert"],
+                }
 
     if margin_base is not None and margin_base >= 0:
         # Price at or below base value: reasonable, not an alert.
@@ -586,6 +624,7 @@ def classify_tier(margin_conservative, margin_base, margin_optimistic,
             "'fairly_valued' or 'overvalued'")
         return {"tier": tier, "reasons": reasons,
                 "strongest_alert_blocked": blocked,
+                "quality_rating": quality_rating,
                 "conditions_to_change": conditions}
 
     if margin_optimistic is not None and margin_optimistic >= 0:
@@ -609,6 +648,7 @@ def classify_tier(margin_conservative, margin_base, margin_optimistic,
             "'overvalued'")
         return {"tier": "fairly_valued", "reasons": reasons,
                 "strongest_alert_blocked": blocked,
+                "quality_rating": quality_rating,
                 "conditions_to_change": conditions}
 
     # Price above the optimistic value.
@@ -627,6 +667,7 @@ def classify_tier(margin_conservative, margin_base, margin_optimistic,
         "deterioration) would make it a strongest alert")
     return {"tier": "overvalued", "reasons": reasons,
             "strongest_alert_blocked": blocked,
+            "quality_rating": quality_rating,
             "conditions_to_change": conditions}
 
 
@@ -782,8 +823,20 @@ def margin_of_safety_summary(conn, ticker, price_input=None,
 
     deterioration = assess_deterioration(
         conn, ticker, deterioration_override=deterioration_override)
+
+    # Business quality (Step 24) — the quality gate: a strongest
+    # alert requires quality adequate or better.  Guarded so a
+    # quality failure never breaks the margin summary; a missing
+    # quality assessment is recorded, not treated as good quality.
+    quality = None
+    quality_error = None
+    try:
+        quality = bq.assess_business_quality(conn, ticker)
+    except Exception as exc:  # noqa: BLE001 - report, never crash
+        quality_error = str(exc)
     tier = classify_tier(margin_conservative, margin_base,
-                         margin_optimistic, deterioration)
+                         margin_optimistic, deterioration,
+                         quality=quality)
 
     # Ladder inputs: DCF path (technology / general) or DDM path.
     dcf_inputs = None
@@ -865,6 +918,8 @@ def margin_of_safety_summary(conn, ticker, price_input=None,
         "strongest_alert_margin": STRONGEST_ALERT_MARGIN,
         "tier": tier,
         "deterioration": deterioration,
+        "business_quality": quality,
+        "business_quality_error": quality_error,
         "sensitivity": sensitivity,
         "relative_pe_check": relative,
         "warnings": list(sector.get("warnings", [])),

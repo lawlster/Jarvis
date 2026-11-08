@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 23 — Margin of safety (PARTIAL — built and tested 2026-11-08; MSFT only — see Step 23 section below)
-- Current subtask: Step 24 competitive advantage and business quality
+- Current step: 24 — Competitive advantage and business quality (PARTIAL — built and tested 2026-11-08; MSFT only — see Step 24 section below)
+- Current subtask: Step 25 global market scanner
 - Overall status: In progress
 
 ## Completed work
@@ -520,6 +520,71 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   snapshot; tier thresholds are the owner's standing rules,
   uncalibrated.  Sufficient to start Step 24 (competitive
   advantage and business quality).
+
+### 2026-11-08 — Step 24 competitive advantage and business quality (PARTIAL, not complete)
+
+- Built `agents/business_quality.py`: seven scored components
+  (returns on capital, margin stability, efficiency, growth
+  consistency, earnings quality, balance-sheet strength,
+  capital allocation), each 0/1/2 with its inputs shown, and
+  an overall rating — `excellent` / `good` / `adequate` /
+  `weak` / `insufficient data` — from the mean component score
+  (>= 1.6 / >= 1.0 / >= 0.5).  Reuses Step 17 ratios, the Step
+  18 health verdict, Step 19 growth and Step 20 cash flow;
+  never re-derives a value.  No price used, no network
+  requests.  No buy/sell call anywhere.
+- Moat statement is explicitly qualified: "strong financial
+  evidence of a durable advantage" is evidence, not proof.
+  Seven things statements cannot assess are listed on every
+  assessment (brand, network effects, switching costs,
+  regulatory moats, management integrity, competitive position
+  vs peers, customer concentration), each with its reason.
+- Two honest guards: incremental ROIC is computed only when
+  invested capital grew (on a shrinking base it is missing,
+  never a nonsense number — caught by the weak fixture), and
+  every window ends at the assessed period, never at the
+  latest (a real bug found during testing: the first version
+  used latest-period windows for every historical year).
+  A third real bug found in the same pass: the dividend-cut
+  count zipped a list with itself when shorter than 11 years,
+  so cuts were never counted — fixed and regression-tested.
+- Quality gate wired into Step 23: `classify_tier` takes an
+  optional `quality` argument; a `weak` or `insufficient
+  data` rating blocks a `strongest_alert` even at a discount,
+  like material deterioration.  No quality supplied keeps the
+  previous behaviour (all 36 Step 23 tests still pass);
+  `margin_of_safety_summary` always supplies one and now
+  returns `business_quality` in its output.
+- Tests: `test_business_quality.py` — **15 tests, OK**
+  (243 total with Steps 16–23, `python -m unittest discover`).
+  Covers a synthetic weak business (rating `weak`, all six
+  scored components 0), a synthetic solid mid business
+  (rating `good`, mean 10/7), insufficient data (< 3 periods,
+  no rows, DBS), the quality gate (weak / insufficient-data
+  block, good allows, none keeps old behaviour, blocked alert
+  falls back to `reasonable_price`), and hand-checked MSFT
+  values on a temp DB copy.  Production DB SHA-256 verified
+  unchanged before and after (`36862922…089187`, post-audit
+  hash).
+- MSFT FY2026: **rating `excellent`, mean score 2.0 (7/7
+  components scored 2)** — 5y mean ROIC 33.9% (every year >=
+  30.6%), 5y net margin mean 36.6% (CV 0.062), gross margin
+  mean 68.8% (CV 0.010), CCC -51.8 days, revenue steady with
+  10/10 years growing and 3.3% max drawdown, 5y mean OCF/net
+  income 1.30 and FCF/net income 0.75, 10/10 profitable years,
+  health `strong`, dividends up 18 consecutive years with 0
+  cuts, shares -2.0% over 5y, incremental ROIC 5y 23.5% /
+  10y 30.2%, payout 36%.  History: `good` FY2010–FY2022,
+  `excellent` from FY2023; dips to 1.0 in FY2015 and FY2018
+  are the two known one-offs.  One caution inside the
+  excellent rating: latest-year FCF/net income is 0.50 on the
+  capex surge (Step 20 finding).  DBS returns `insufficient
+  data`.  Full numbers in `step24-report.md`.
+- **Step 24 is PARTIAL, not complete.** MSFT only (plus two
+  synthetic fixtures); the moat conclusion is financial
+  evidence only; scoring thresholds are judgement rules,
+  uncalibrated against a peer set (none exists).  Sufficient
+  to start Step 25 (global market scanner).
 
 ### 2026-11-08 — Full codebase audit (verification + repair)
 

@@ -329,7 +329,7 @@ Do not deduplicate by CIK.
 21. Build intrinsic valuation engine — PARTIAL (2026-11-08: 10y DCF engine built and tested, 26 tests OK; MSFT only, owner earnings / EV/EBITDA / historical P/E unavailable — see PROJECT_STATUS.md Step 21 section)
 22. Build sector-specific valuation models — PARTIAL (2026-11-08: sector router + bank/insurer/REIT/tech models built and tested, 37 tests OK; only the MSFT technology path is validated on real data — bank/insurer/REIT models are fixture-only, no statements exist for them — see PROJECT_STATUS.md Step 22 section)
 23. Build margin-of-safety and relative valuation analysis — PARTIAL (2026-11-08: margin engine, entry-price ladder, tier logic with the owner's 20%-below-conservative strongest-alert rule, deterioration flag wired to Steps 18/19/20, WACC/growth sensitivity and relative P/E cross-check built and tested, 36 tests OK; MSFT only, tier overvalued at $507.12, alert threshold $78.82 — see PROJECT_STATUS.md Step 23 section)
-24. Build competitive advantage and business-quality analysis — NOT STARTED
+24. Build competitive advantage and business-quality analysis — PARTIAL (2026-11-08: seven-component quality engine built and tested, 15 tests OK; MSFT FY2026 rating excellent, mean score 2.0; quality gate wired into Step 23 tier logic — a weak/insufficient-data rating blocks a strongest alert; moat conclusion qualified as financial evidence only; MSFT only — see PROJECT_STATUS.md Step 24 section)
 
 ### Part 5 — Market scanner and research
 
