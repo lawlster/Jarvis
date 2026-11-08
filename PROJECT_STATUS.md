@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 28b — Company comparison and competitor analysis (PARTIAL — built and tested 2026-11-08; no real peer comparison has ever run — only MSFT has statements — see Step 28b section below)
-- Current subtask: Step 29 automated company research reports
+- Current step: 29 — Automated company research reports (PARTIAL — built and tested 2026-11-08; MSFT report generated, DBS degrades to insufficient-data — see Step 29 section below)
+- Current subtask: Step 30 investment thesis tracking
 - Overall status: In progress
 
 ## Completed work
@@ -956,6 +956,86 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   wired into `main.py` (Step 50).  Sufficient to start Step 29
   (automated company research reports), which can consume
   these comparisons.
+
+### 2026-11-08 — Step 29 automated company research reports (PARTIAL, not complete)
+
+- New module: `agents/research_report.py`; tests:
+  `test_research_report.py` — **13 tests, OK** (384 total
+  with Steps 16–28b, `python -m unittest discover`, run from
+  the project root, no regressions).  Full report:
+  `~/workspace/projects/step29-report.md`; generated MSFT
+  report: `~/workspace/projects/step29-msft-report.md`.
+- The generator composes Steps 16–28b and re-derives
+  nothing: header (ticker, company, sector, country, report
+  date, price with as-of date), business summary, financials
+  (Step 16–20 key figures, ratios, growth, cash flow in
+  tables with periods), health and quality (Step 18 verdict,
+  Step 24 rating with all seven components, Step 27
+  deterioration verdict and risk flags, plus the seven things
+  statements cannot assess), valuation (Step 21/22 range,
+  Step 23 margins in both conventions, tier, entry-price
+  ladder, strongest-alert threshold price, relative P/E),
+  peer comparison (Step 28b), risks and what would change
+  the view, and a one-paragraph conclusion.  Every section
+  carries its source and period; a section that cannot be
+  produced is present with its status and reason, never
+  silently omitted.  No recommendation anywhere; generated
+  report text contains no "buy" or "sell" as standalone
+  words (word-boundary regex checked on every report
+  variant, dict and Markdown).
+- **Business description: none exists.** No description
+  column exists anywhere in the database, so the business
+  summary says so and sticks to stored sector/industry/
+  listing labels.  No description is invented or fetched.
+- Report status is driven by the three core data sections
+  (financials, health/quality, valuation): all three
+  insufficient → `insufficient_data`.  Reports are written
+  as Markdown files (default `reports/` under the project
+  root); generation opens the database read-only (`mode=ro`),
+  so it can never write to it.
+- **MSFT report (peers NVDA/AVGO/GOOGL):** status partial
+  (no description; no peer has statements).  Tier
+  **overvalued**, quality **excellent**, health **strong**,
+  deterioration **warning** (not material); price $507.12
+  as of 2026-11-03; range $98.52 / $163.30 / $234.64;
+  strongest-alert price $78.82.  Every number verified
+  against Steps 17–24/27 in the tests (revenue $331,839m,
+  net income $133,749m, P/E 28.25, P/B 8.54, EV/EBIT 24.38).
+  Risks: FCF softening, working capital falling, capex
+  surge compressing FCF.
+- **DBS report:** `insufficient_data` — 79 statement rows
+  are announcement metadata only (0 concepts), so
+  financials (15/15 key figures missing), health/quality
+  (all three assessments insufficient) and valuation (no
+  conservative value) each say so with their specific
+  reason.  Unknown ticker (ZZZZ) behaves the same way.
+- **Bugs found and fixed during testing:** (1) real module
+  bug — `business_quality as bq` was never imported, so the
+  quality section silently came back empty (MSFT quality
+  "unknown"); (2) real module bug — valuation defaulted to
+  the TTM FCF basis, so a ticker with annual rows only got
+  no DCF range; it now falls back to the labelled annual
+  basis (same fallback as the Step 25 scanner) and records
+  the basis used; (3) real module bug — the health/quality
+  section counted as "complete" when the three assessments
+  returned dicts even when all three said insufficient data;
+  the status now checks the verdicts; (4) real module bug —
+  report status treated every section equally, so the
+  always-partial business summary made `insufficient_data`
+  unreachable; status is now driven by the core sections;
+  (5) test bugs (peer summary wording, no-price
+  `missing_inputs` substring check, `$98m` vs `$98.52`
+  money format).
+- **Housekeeping:** `/tmp` tmpfs filled to 84% with stale
+  temp DB copies from the test runs; cleaned to 0% during
+  Step 29 (the suite leaves ~20MB of temp DB copies behind
+  per full run — a housekeeping gap, same as Step 27).
+- **Step 29 is PARTIAL, not complete.** MSFT only on real
+  data (plus a synthetic SOLID fixture); no business
+  description exists in the database; the report rests on
+  one stale price snapshot; not wired into `main.py`
+  (Step 50); no sending or scheduling.  Sufficient to start
+  Step 30 (investment thesis tracking).
 
 ### 2026-11-08 — Full codebase audit (verification + repair)
 
