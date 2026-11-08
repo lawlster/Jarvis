@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 32 — Daily market summaries (PARTIAL — built and tested 2026-11-08; real 2026-11-08 summary generated — 10,619 tickers scanned, 1 scannable, 0 candidates — see Step 32 section below)
-- Current subtask: Step 33 macroeconomic and sector analysis
+- Current step: 33 — Earnings calendar and event tracking (PARTIAL — built and tested 2026-11-09; 12 week-ahead events seeded, MSFT/NVDA re-checks verified — see Step 33 section below)
+- Current subtask: Step 34 company news and event monitoring (macroeconomic and sector analysis, the roadmap's Step 33, is still owed — see Step 33 section)
 - Overall status: In progress
 
 ## Completed work
@@ -1523,5 +1523,86 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   price is available. No same-day news article has ever
   appeared in a summary. No sending, no scheduling
   (Steps 46/50); not wired into `main.py` (Step 50).
-  Sufficient to start Step 33 (macroeconomic and sector
-  analysis).
+  Sufficient to start Step 33 (earnings calendar and event
+  tracking, per the Step 33 brief as given).
+
+### 2026-11-09 — Step 33 earnings calendar and event tracking (PARTIAL, not complete)
+
+- New module: `agents/event_tracking.py`; tests:
+  `test_event_tracking.py` — **22 tests, OK** (471 total
+  with Steps 16–32, `python -m unittest discover`, run from
+  the project root with
+  `~/workspace/projects/jarvis-venv/bin/python`, no
+  regressions). Full report:
+  `~/workspace/projects/step33-report.md`. Production DB
+  SHA-256 verified unchanged before and after
+  (`36862922…089187`, post-audit hash); the module never
+  opens the production database at all — events live in
+  JSON files under `data/events/`.
+- Event store: one JSON file per event (event_id
+  `YYYY-MM-DD_TICKER_01`), fields ticker (null for
+  market-wide events), event_type (earnings, dividend,
+  economic, filing, other), title, date, time (optional),
+  timezone (IANA, default Asia/Singapore), source, notes,
+  outcome. Queries: by date, range, ticker, upcoming from a
+  date, reminders (records only, never sends). Timezone
+  conversion via zoneinfo; date-only events have no
+  datetime and none is invented. `week_ahead` groups 7
+  days (empty days listed, not gapped) and returns the
+  Step 32 "what to watch" `{"item", "date"}` list.
+- Outcomes: caller-supplied actuals only, with a surprise
+  percentage computed where reported and expected both
+  exist (EPS, revenue, net income). Post-event re-check
+  re-runs the Step 23 margin-of-safety summary now and
+  compares tier, quality, health, deterioration and
+  valuation range with a caller-supplied before summary —
+  using the scanner's price normalisation and its
+  TTM/annual starting-FCF rule, and the Step 18 health
+  verdict (guarded). No network, no sending, no
+  scheduling, no buy/sell call.
+- **Seeded week ahead** (caller-supplied, owner's
+  research; 12 events, `data/events/`, untracked): KSPI
+  earnings Mon 9 Nov; ALC earnings + US Oct CPI 21:30 SGT
+  Tue 10 Nov; US bond market closed (Veterans Day), SIA
+  and SATS results Wed 11 Nov; CSCO + AMAT after close Thu
+  12 Nov; Singtel results + US PPI Fri 13 Nov; Pabrai /
+  Ackman Q3 13F filings due Mon 16 Nov (window ~14–16 Nov,
+  dated to the last day); NVDA earnings after close Tue 17
+  Nov. Week 9–15 Nov holds 10 events; re-seeding adds 0.
+- Re-checks verified: MSFT on a temp DB copy — before and
+  after both overvalued / excellent / strong, no changes;
+  fixture FIXA at $5.00 (strongest alert) re-checked at
+  $25.00 — tier changes to fairly_valued, valuation range
+  unchanged (it does not depend on price); NVDA —
+  insufficient_data, no crash; market-wide event — no
+  re-check, reason recorded.
+- Bugs found and fixed during testing: (1) a real module
+  bug — Step 23's tier is a dict `{"tier", "reasons"}`, not
+  a string; the first version stored the whole dict as the
+  comparable fact, so no tier change could be detected;
+  (2) a real module gap — annual-only histories got no DCF
+  range under the default TTM basis; the re-check now picks
+  the basis the Step 25 scanner picks; (3) a real module
+  gap — a bare price number raised AttributeError inside
+  the Step 22 sector valuation; the re-check now normalises
+  it the way the scanner does; (4) three test bugs — a
+  same-day sort expectation, a week count of 11 instead of
+  10, and a change list wrongly including the valuation
+  range.
+- **Roadmap discrepancy:** the AGENTS.md roadmap lists
+  Step 33 as "macroeconomic and sector analysis" (the
+  implementation plan groups 31–34 as news, daily
+  summaries, macro/sector analysis, company news/event
+  monitoring). This step was built as earnings calendar and
+  event tracking per the Step 33 brief as given.
+  Macroeconomic and sector analysis is still owed and, like
+  the Step 28 / 28b precedent, belongs to a later step
+  number (e.g. Step 33b) so the later numbering is
+  unchanged. No renumbering was done here.
+- **Step 33 is PARTIAL, not complete.** No live event feed
+  exists — every event is caller-supplied (a live feed is a
+  Step 38 concern). No outcome has ever been recorded on
+  real data and no real post-earnings re-check has ever
+  run. The Step 32 summary does not yet consume the store.
+  Not wired into `main.py` (Step 50). Sufficient to start
+  Step 34 (company news and event monitoring).
