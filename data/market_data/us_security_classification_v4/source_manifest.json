@@ -1,0 +1,21 @@
+{
+  "generated_at_utc": "2026-11-08T12:43:54.247944+00:00",
+  "database_access": "SQLite URI mode=ro",
+  "network_requests": 0,
+  "source_manifest": "D:\\AiAssistant\\data\\market_data\\us_security_classification_v3\\source_manifest.json",
+  "source_snapshot_hashes_verified": true,
+  "listing_rows": 7625,
+  "evidence_rows_matched_by_case_sensitive_ticker_and_exchange": 9006,
+  "unmatched_source_records": {
+    "nasdaq": 1845,
+    "nyse": 962
+  },
+  "mic_reconciliation_rows": 4582,
+  "outputs": {
+    "evidence_csv": "D:\\AiAssistant\\data\\market_data\\us_security_classification_v4\\official_issue_level_evidence.csv",
+    "candidate_csv": "D:\\AiAssistant\\data\\market_data\\us_security_classification_v4\\us_security_classification_candidates.csv",
+    "manual_review_csv": "D:\\AiAssistant\\data\\market_data\\us_security_classification_v4\\us_security_classification_manual_review.csv",
+    "report": "D:\\AiAssistant\\data\\market_data\\us_security_classification_v4\\us_security_classification_report.txt",
+    "mic_reconciliation_csv": "D:\\AiAssistant\\data\\market_data\\us_security_classification_v4\\mic_reconciliation_xase_arcx_xngs.csv"
+  }
+}

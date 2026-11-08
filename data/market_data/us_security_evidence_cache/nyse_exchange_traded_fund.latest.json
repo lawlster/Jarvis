@@ -1,0 +1,8 @@
+{
+  "source_id": "nyse_exchange_traded_fund",
+  "source_url": "https://www.nyse.com/api/quotes/filter",
+  "fetched_at_utc": "2026-11-08T09:49:57.322114+00:00",
+  "sha256": "496dc313bd86baa50135c3a835f97e7727044dbe55f97528713103b9139521f7",
+  "snapshot_file": "nyse_exchange_traded_fund_20261108T094957Z_496dc313bd86.json",
+  "media_type": "json"
+}

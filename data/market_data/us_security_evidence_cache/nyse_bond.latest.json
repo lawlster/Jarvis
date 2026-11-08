@@ -1,0 +1,8 @@
+{
+  "source_id": "nyse_bond",
+  "source_url": "https://www.nyse.com/api/quotes/filter",
+  "fetched_at_utc": "2026-11-08T09:50:01.930705+00:00",
+  "sha256": "5984eac0c5c6d947241e29dd5671b81a1546cedf77e08d38438ac47029969afa",
+  "snapshot_file": "nyse_bond_20261108T095001Z_5984eac0c5c6.json",
+  "media_type": "json"
+}

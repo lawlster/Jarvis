@@ -1,0 +1,93 @@
+{
+  "cache_directory": "D:\\AiAssistant\\data\\market_data\\us_security_evidence_cache",
+  "database_access": "SQLite URI mode=ro",
+  "evidence_rows_matched_by_ticker_and_exchange": 11719,
+  "generated_at_utc": "2026-11-08T09:50:45.097053+00:00",
+  "listing_rows": 7625,
+  "nasdaq_source_records": 8484,
+  "nyse_source_records": 13791,
+  "outputs": {
+    "candidate_csv": "D:\\AiAssistant\\data\\market_data\\us_security_classification_v2\\us_security_classification_candidates.csv",
+    "evidence_csv": "D:\\AiAssistant\\data\\market_data\\us_security_classification_v2\\official_issue_level_evidence.csv",
+    "manual_review_csv": "D:\\AiAssistant\\data\\market_data\\us_security_classification_v2\\us_security_classification_manual_review.csv",
+    "report": "D:\\AiAssistant\\data\\market_data\\us_security_classification_v2\\us_security_classification_report.txt"
+  },
+  "sources": [
+    {
+      "fetched_at_utc": "2026-11-08T09:49:43.001703+00:00",
+      "media_type": "text",
+      "sha256": "caf2610f53c7830ed10bf65eede3dc445b51509e73a4ba95d0bb62cf984e2d0a",
+      "snapshot_file": "nasdaqtraded_20261108T094943Z_caf2610f53c7.txt",
+      "source_id": "nasdaqtraded",
+      "source_url": "https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqtraded.txt"
+    },
+    {
+      "fetched_at_utc": "2026-11-08T09:49:50.538500+00:00",
+      "media_type": "json",
+      "sha256": "0ba54cd2f181f16382950a4568865ca4935ea5ec296f1e068a8836067007a736",
+      "snapshot_file": "nyse_equity_20261108T094950Z_0ba54cd2f181.json",
+      "source_id": "nyse_equity",
+      "source_url": "https://www.nyse.com/api/quotes/filter"
+    },
+    {
+      "fetched_at_utc": "2026-11-08T09:49:57.322114+00:00",
+      "media_type": "json",
+      "sha256": "496dc313bd86baa50135c3a835f97e7727044dbe55f97528713103b9139521f7",
+      "snapshot_file": "nyse_exchange_traded_fund_20261108T094957Z_496dc313bd86.json",
+      "source_id": "nyse_exchange_traded_fund",
+      "source_url": "https://www.nyse.com/api/quotes/filter"
+    },
+    {
+      "fetched_at_utc": "2026-11-08T09:49:58.669256+00:00",
+      "media_type": "json",
+      "sha256": "11e48260fd1f22cdfea1c2d3fd7963d699f43bc1298f48c6876f0078acc58c29",
+      "snapshot_file": "nyse_preferred_stock_20261108T094958Z_11e48260fd1f.json",
+      "source_id": "nyse_preferred_stock",
+      "source_url": "https://www.nyse.com/api/quotes/filter"
+    },
+    {
+      "fetched_at_utc": "2026-11-08T09:49:59.362895+00:00",
+      "media_type": "json",
+      "sha256": "7deaecfd337e8cccfdb33892bbc8fba5866962a7c66c494c0dea96e011616828",
+      "snapshot_file": "nyse_warrant_20261108T094959Z_7deaecfd337e.json",
+      "source_id": "nyse_warrant",
+      "source_url": "https://www.nyse.com/api/quotes/filter"
+    },
+    {
+      "fetched_at_utc": "2026-11-08T09:49:59.927266+00:00",
+      "media_type": "json",
+      "sha256": "ffdfcbc41f64e89ad1fba18d5808d4894c42f8847bc46e1c74efd86e2c61ed7d",
+      "snapshot_file": "nyse_right_20261108T094959Z_ffdfcbc41f64.json",
+      "source_id": "nyse_right",
+      "source_url": "https://www.nyse.com/api/quotes/filter"
+    },
+    {
+      "fetched_at_utc": "2026-11-08T09:50:00.931397+00:00",
+      "media_type": "json",
+      "sha256": "e8ce1853fefdd8a24e724e8e6fbb449d96ae2f033ca8a14e2928d6f8eacfda8c",
+      "snapshot_file": "nyse_trust_20261108T095000Z_e8ce1853fefd.json",
+      "source_id": "nyse_trust",
+      "source_url": "https://www.nyse.com/api/quotes/filter"
+    },
+    {
+      "fetched_at_utc": "2026-11-08T09:50:01.930705+00:00",
+      "media_type": "json",
+      "sha256": "5984eac0c5c6d947241e29dd5671b81a1546cedf77e08d38438ac47029969afa",
+      "snapshot_file": "nyse_bond_20261108T095001Z_5984eac0c5c6.json",
+      "source_id": "nyse_bond",
+      "source_url": "https://www.nyse.com/api/quotes/filter"
+    },
+    {
+      "fetched_at_utc": "2026-11-08T09:50:02.985278+00:00",
+      "media_type": "json",
+      "sha256": "5e5f9cb8b2f223e89eb3ba013c7381fcb339eb4b822342f2310583e2f5b234c0",
+      "snapshot_file": "nyse_reit_20261108T095002Z_5e5f9cb8b2f2.json",
+      "source_id": "nyse_reit",
+      "source_url": "https://www.nyse.com/api/quotes/filter"
+    }
+  ],
+  "unmatched_source_records": {
+    "nasdaq": 1845,
+    "nyse": 2242
+  }
+}

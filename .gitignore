@@ -26,3 +26,9 @@ venv/
 
 # Large generated SEC cache files
 data/market_data/us/sec_issuer_enrichment_cache*
+
+# Generated US SEC issuer enrichment outputs and resumable checkpoints
+data/market_data/us/sec_issuer_enrichment.csv
+data/market_data/us/sec_issuer_enrichment_report.txt
+data/market_data/us/sec_issuer_enrichment_coverage.json
+data/market_data/us/sec_issuer_enrichment_journal/

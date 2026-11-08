@@ -1,0 +1,80 @@
+AiAssistant - US Issuer Enrichment Report
+==================================================
+Generated at UTC: 2026-11-08T06:44:04.848310+00:00
+Refresh policy (days): 30
+Database ticker records: 20
+Database unique CIKs: 20
+Cache issuer records: 20
+Cached CIKs absent from database: 0
+Matched CIKs: 20
+Missing CIKs: 0
+Invalid CIK records: 0
+Stale CIKs: 0
+Invalid cache keys (including non-current CIKs): 0
+Failed SEC requests this run: 0
+Invalid journal files: 0
+
+SIC INDUSTRY DESCRIPTIONS (CURRENT VALID CACHE RECORDS)
+--------------------------------------------------
+Pharmaceutical Preparations: 3
+Unknown: 3
+Semiconductors & Related Devices: 2
+Aircraft & Parts: 1
+Cutlery, Handtools & General Hardware: 1
+Radio & Tv Broadcasting & Communications Equipment: 1
+Lessors of  Real Property, NEC: 1
+Electric Services: 1
+Air Transportation, Scheduled: 1
+Mining & Quarrying of  Nonmetallic Minerals (No Fuels): 1
+Savings Institution, Federally Chartered: 1
+Real Estate Investment Trusts: 1
+Services-Business Services, NEC: 1
+Gold and Silver Ores: 1
+Oil & Gas Field Exploration Services: 1
+
+MATCHED CIKS
+--------------------------------------------------
+0000001750
+0000001800
+0000002098
+0000002186
+0000002230
+0000002488
+0000003545
+0000004127
+0000004904
+0000006201
+0001540171
+0001540684
+0001541119
+0001541157
+0001541401
+0001543151
+0001543418
+0001544206
+0001546066
+0001546429
+
+MISSING CIKS
+--------------------------------------------------
+None
+
+INVALID CIKS
+--------------------------------------------------
+None
+
+STALE CIKS
+--------------------------------------------------
+None
+
+CACHE CIKs ABSENT FROM DATABASE
+--------------------------------------------------
+None
+
+FAILED REQUESTS
+--------------------------------------------------
+None
+
+INVALID JOURNAL FILES
+--------------------------------------------------
+None

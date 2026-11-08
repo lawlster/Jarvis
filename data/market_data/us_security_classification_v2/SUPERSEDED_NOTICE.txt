@@ -1,0 +1,6 @@
+﻿SUPERSEDED INITIAL PHASE 2 DRAFT
+
+This directory is retained for run provenance only. It is not the final Phase 2 result.
+The initial source join included records returned by NYSE for non-NYSE MICs. The final
+collector now matches NYSE source evidence only when the quote URL identifies MIC XNYS.
+Use data/market_data/us_security_classification_v3 for review.

@@ -1,0 +1,46 @@
+US SECURITY CLASSIFICATION CANDIDATE REPORT
+================================================
+Generated at UTC: 2026-11-08T09:50:44.974765+00:00
+US listing rows evaluated: 7625
+Distinct ticker/exchange listing keys: 7625
+Primary SEC/exchange evidence rows loaded: 11719
+Listings with exact-key primary evidence: 6643
+Evidence file: D:\AiAssistant\data\market_data\us_security_classification_v2\official_issue_level_evidence.csv
+Database access: read-only; no market-universe records imported or changed.
+Special instruments are retained as candidates; candidate hints are not classifications.
+
+CLASSIFICATION STATUS
+------------------------------------------------
+confirmed: 146
+provisional: 6104
+conflicting: 25
+unknown: 1350
+
+ISSUER STRUCTURE
+------------------------------------------------
+etf: 30
+reit: 135
+unknown: 7460
+
+SECURITY FORM
+------------------------------------------------
+adr_ads: 273
+common_share: 4906
+debt_note: 160
+exchange_traded_product: 29
+preferred_share: 133
+rights: 103
+unit: 269
+unknown: 1393
+warrant: 359
+
+CANDIDATE HINTS (NOT CONFIRMATION)
+------------------------------------------------
+possible_bdc_issuer: 9
+possible_depositary_share: 2
+possible_etf: 48
+possible_fund_issuer: 2
+possible_preferred_share: 15
+possible_reit_issuer: 21
+possible_unit_ticker_suffix: 50
+possible_warrant_ticker_suffix: 59

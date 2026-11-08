@@ -1,0 +1,8 @@
+{
+  "source_id": "nyse_warrant",
+  "source_url": "https://www.nyse.com/api/quotes/filter",
+  "fetched_at_utc": "2026-11-08T09:49:59.362895+00:00",
+  "sha256": "7deaecfd337e8cccfdb33892bbc8fba5866962a7c66c494c0dea96e011616828",
+  "snapshot_file": "nyse_warrant_20261108T094959Z_7deaecfd337e.json",
+  "media_type": "json"
+}

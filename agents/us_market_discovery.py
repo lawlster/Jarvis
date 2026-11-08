@@ -136,7 +136,9 @@ def import_us_company_listings():
             exchange=company["exchange"],
             country=company["country"],
             currency=company["currency"],
-            security_type="equity",
+            # Default new SEC listings to equity; the universe upsert keeps
+            # any existing reviewed non-equity classification.
+            security_type=company.get("security_type", "equity"),
             data_source="SEC EDGAR company_tickers_exchange.json",
             sec_cik=company["sec_cik"]
         )

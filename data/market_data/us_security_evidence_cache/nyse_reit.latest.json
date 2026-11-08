@@ -1,0 +1,8 @@
+{
+  "source_id": "nyse_reit",
+  "source_url": "https://www.nyse.com/api/quotes/filter",
+  "fetched_at_utc": "2026-11-08T09:50:02.985278+00:00",
+  "sha256": "5e5f9cb8b2f223e89eb3ba013c7381fcb339eb4b822342f2310583e2f5b234c0",
+  "snapshot_file": "nyse_reit_20261108T095002Z_5e5f9cb8b2f2.json",
+  "media_type": "json"
+}

@@ -1,0 +1,122 @@
+[ {
+  "total" : 11,
+  "url" : "https://www.nyse.com/quote/XNYS:CRT",
+  "normalizedTicker" : "CRT",
+  "instrumentName" : "CROSS TIMBERS ROYALTY TRUST",
+  "symbolExchangeTicker" : "CRT",
+  "exchangeId" : null,
+  "instrumentType" : null,
+  "symbolTicker" : null,
+  "symbolEsignalTicker" : null,
+  "micCode" : null
+}, {
+  "total" : 11,
+  "url" : "https://www.nyse.com/quote/XASE:IHT",
+  "normalizedTicker" : "IHT",
+  "instrumentName" : "INNSUITES HOSPITALITY TRUST",
+  "symbolExchangeTicker" : "IHT",
+  "exchangeId" : null,
+  "instrumentType" : null,
+  "symbolTicker" : null,
+  "symbolEsignalTicker" : null,
+  "micCode" : null
+}, {
+  "total" : 11,
+  "url" : "https://www.nyse.com/quote/XNYS:MSB",
+  "normalizedTicker" : "MSB",
+  "instrumentName" : "MESABI TRUST",
+  "symbolExchangeTicker" : "MSB",
+  "exchangeId" : null,
+  "instrumentType" : null,
+  "symbolTicker" : null,
+  "symbolEsignalTicker" : null,
+  "micCode" : null
+}, {
+  "total" : 11,
+  "url" : "https://www.nyse.com/quote/XNYS:MTR",
+  "normalizedTicker" : "MTR",
+  "instrumentName" : "MESA ROYALTY TRUST",
+  "symbolExchangeTicker" : "MTR",
+  "exchangeId" : null,
+  "instrumentType" : null,
+  "symbolTicker" : null,
+  "symbolEsignalTicker" : null,
+  "micCode" : null
+}, {
+  "total" : 11,
+  "url" : "https://www.nyse.com/quote/XNYS:NRT",
+  "normalizedTicker" : "NRT",
+  "instrumentName" : "NORTH EUROPEAN OIL ROYALTY TRUST",
+  "symbolExchangeTicker" : "NRT",
+  "exchangeId" : null,
+  "instrumentType" : null,
+  "symbolTicker" : null,
+  "symbolEsignalTicker" : null,
+  "micCode" : null
+}, {
+  "total" : 11,
+  "url" : "https://www.nyse.com/quote/XNYS:PBT",
+  "normalizedTicker" : "PBT",
+  "instrumentName" : "PERMIAN BASIN ROYALTY TRUST",
+  "symbolExchangeTicker" : "PBT",
+  "exchangeId" : null,
+  "instrumentType" : null,
+  "symbolTicker" : null,
+  "symbolEsignalTicker" : null,
+  "micCode" : null
+}, {
+  "total" : 11,
+  "url" : "https://www.nyse.com/quote/XNYS:PRT",
+  "normalizedTicker" : "PRT",
+  "instrumentName" : "PERMROCK ROYALTY TRUST",
+  "symbolExchangeTicker" : "PRT",
+  "exchangeId" : null,
+  "instrumentType" : null,
+  "symbolTicker" : null,
+  "symbolEsignalTicker" : null,
+  "micCode" : null
+}, {
+  "total" : 11,
+  "url" : "https://www.nyse.com/quote/XNYS:PVL",
+  "normalizedTicker" : "PVL",
+  "instrumentName" : "PERMIANVILLE ROYALTY TRUST",
+  "symbolExchangeTicker" : "PVL",
+  "exchangeId" : null,
+  "instrumentType" : null,
+  "symbolTicker" : null,
+  "symbolEsignalTicker" : null,
+  "micCode" : null
+}, {
+  "total" : 11,
+  "url" : "https://www.nyse.com/quote/XNYS:SBR",
+  "normalizedTicker" : "SBR",
+  "instrumentName" : "SABINE ROYALTY TRUST",
+  "symbolExchangeTicker" : "SBR",
+  "exchangeId" : null,
+  "instrumentType" : null,
+  "symbolTicker" : null,
+  "symbolEsignalTicker" : null,
+  "micCode" : null
+}, {
+  "total" : 11,
+  "url" : "https://www.nyse.com/quote/ARCX:SCOP",
+  "normalizedTicker" : "SCOP",
+  "instrumentName" : "SPROTT PHYSICAL COPPER TRUST",
+  "symbolExchangeTicker" : "SCOP",
+  "exchangeId" : null,
+  "instrumentType" : null,
+  "symbolTicker" : null,
+  "symbolEsignalTicker" : null,
+  "micCode" : null
+}, {
+  "total" : 11,
+  "url" : "https://www.nyse.com/quote/XNYS:SJT",
+  "normalizedTicker" : "SJT",
+  "instrumentName" : "SAN JUAN BASIN ROYALITY TRUST",
+  "symbolExchangeTicker" : "SJT",
+  "exchangeId" : null,
+  "instrumentType" : null,
+  "symbolTicker" : null,
+  "symbolEsignalTicker" : null,
+  "micCode" : null
+} ]

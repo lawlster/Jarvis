@@ -1,0 +1,8 @@
+{
+  "source_id": "nasdaqtraded",
+  "source_url": "https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqtraded.txt",
+  "fetched_at_utc": "2026-11-08T09:49:43.001703+00:00",
+  "sha256": "caf2610f53c7830ed10bf65eede3dc445b51509e73a4ba95d0bb62cf984e2d0a",
+  "snapshot_file": "nasdaqtraded_20261108T094943Z_caf2610f53c7.txt",
+  "media_type": "text"
+}

@@ -179,7 +179,14 @@ def add_company(
                     excluded.industry,
                     market_universe.industry
                 ),
-                security_type = excluded.security_type,
+                -- Generic rediscovery defaults to equity; retain a reviewed
+                -- non-equity classification on an existing listing.
+                security_type = CASE
+                    WHEN market_universe.security_type IS NOT NULL
+                     AND market_universe.security_type != 'equity'
+                    THEN market_universe.security_type
+                    ELSE excluded.security_type
+                END,
                 market_cap = COALESCE(
                     excluded.market_cap,
                     market_universe.market_cap

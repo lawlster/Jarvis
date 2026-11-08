@@ -1,0 +1,8 @@
+{
+  "source_id": "nyse_right",
+  "source_url": "https://www.nyse.com/api/quotes/filter",
+  "fetched_at_utc": "2026-11-08T09:49:59.927266+00:00",
+  "sha256": "ffdfcbc41f64e89ad1fba18d5808d4894c42f8847bc46e1c74efd86e2c61ed7d",
+  "snapshot_file": "nyse_right_20261108T094959Z_ffdfcbc41f64.json",
+  "media_type": "json"
+}

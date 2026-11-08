@@ -1,0 +1,8 @@
+{
+  "source_id": "nyse_preferred_stock",
+  "source_url": "https://www.nyse.com/api/quotes/filter",
+  "fetched_at_utc": "2026-11-08T09:49:58.669256+00:00",
+  "sha256": "11e48260fd1f22cdfea1c2d3fd7963d699f43bc1298f48c6876f0078acc58c29",
+  "snapshot_file": "nyse_preferred_stock_20261108T094958Z_11e48260fd1f.json",
+  "media_type": "json"
+}

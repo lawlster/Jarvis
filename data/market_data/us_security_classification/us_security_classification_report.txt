@@ -1,0 +1,34 @@
+US SECURITY CLASSIFICATION CANDIDATE REPORT
+================================================
+Generated at UTC: 2026-11-08T07:50:45.300277+00:00
+US listing rows evaluated: 7625
+Distinct ticker/exchange/CIK listing keys: 7625
+Primary SEC/exchange evidence rows loaded: 0
+Listings with exact-key primary evidence: 0
+Evidence file: D:\AiAssistant\data\market_data\us\security_classification_evidence.csv
+Database access: read-only; no market-universe records imported or changed.
+Special instruments are retained as candidates; candidate hints are not classifications.
+
+CLASSIFICATION STATUS
+------------------------------------------------
+confirmed: 0
+manual_review: 7625
+
+ISSUER STRUCTURE
+------------------------------------------------
+unknown: 7625
+
+SECURITY FORM
+------------------------------------------------
+unknown: 7625
+
+CANDIDATE HINTS (NOT CONFIRMATION)
+------------------------------------------------
+possible_bdc_issuer: 9
+possible_depositary_share: 2
+possible_etf: 48
+possible_fund_issuer: 2
+possible_preferred_share: 15
+possible_reit_issuer: 21
+possible_unit_ticker_suffix: 50
+possible_warrant_ticker_suffix: 59
