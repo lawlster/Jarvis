@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 21 — Intrinsic valuation (Step 20 complete as PARTIAL — see Step 20 section below)
-- Current subtask: Step 21 intrinsic valuation (DCF / owner earnings) on US data
+- Current step: 21 — Intrinsic valuation (PARTIAL — built and tested 2026-11-08; MSFT only — see Step 21 section below)
+- Current subtask: Step 22 sector-specific valuation; Step 23 margin of safety interprets the Step 21 range
 - Overall status: In progress
 
 ## Completed work
@@ -332,6 +332,56 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   complete.** It completes Phase C's financial analysis engine
   (Steps 17–20) for the data available; its outputs feed Steps
   21 (valuation), 23 (margin of safety) and 24 (business quality).
+
+### 2026-11-08 — Step 21 intrinsic valuation engine (PARTIAL, not complete)
+
+- Built `agents/intrinsic_valuation.py`: a 10-year DCF engine
+  wrapping the canonical `tools/valuation.py::calculate_dcf` (no
+  second DCF built), with bear/base/optimistic scenarios, a WACC
+  sensitivity table and an implied-growth inversion. Assumptions
+  stated on every output: WACC 11%, terminal growth 2.5%,
+  10-year forecast; scenario growth bear +3% (near 5y FCF CAGR
+  3.6%), base +10% (near 10y FCF CAGR 10.4%), optimistic +15%
+  (between 10y revenue CAGR 13.8% and 10y OCF CAGR 18.6%).
+  A saved `valuation_profiles` row overrides the base assumptions
+  when one exists (table currently empty; override exercised by a
+  fixture test).
+- Starting FCF is TTM free cash flow ($59,957m for MSFT), with the
+  annual FY2026 variant ($66,987m) computed alongside and labelled.
+  Net debt $15,200m and shares 7,446m from the latest balance
+  sheet (2026-09-30). Price $507.12 as of 2026-11-03 (snapshot —
+  stale, labelled).
+- Tests: `test_intrinsic_valuation.py` — **26 tests, OK**
+  (155 total with Steps 16–20, `python -m unittest discover`).
+  Covers DCF arithmetic against an independent hand computation
+  (base $163.30), scenario ordering, WACC monotonicity,
+  implied-growth round-trip, unavailable-method behaviour and
+  hand-checked MSFT values on a temp DB copy. Production DB
+  SHA-256 verified unchanged before and after
+  (`36862922…089187`, post-audit hash).
+- MSFT (TTM basis): bear $98.52, base **$163.30**, optimistic
+  $234.64; annual-FCF variant base $182.68. WACC sensitivity at
+  base growth: 10% → $188.53, 11% → $163.30, 12% → $143.54.
+  At $507.12 the price implies **~25.8% FCF growth a year for 10
+  years** (TTM basis; ~24.2% annual basis; ~26.4% at the live
+  $530.61 seen on the owner's PC on 2026-11-08, Yahoo price as of
+  2026-11-06) — materially faster than the same method gave for
+  NVDA (~17%) and AVGO (~18%). Margin of safety vs base is
+  −67.8% at $507.12 — a number only; Step 23 interprets it, and
+  no buy/sell call is made here. Full numbers in
+  `step21-report.md`.
+- Unavailable, not faked: owner earnings (no D&A concept, no
+  maintenance/growth capex split), EV/EBITDA (no EBITDA/D&A),
+  historical P/E (no historical price series stored — only a
+  single 2026-11-03 snapshot row; the method is implemented for a
+  caller-supplied price history and tested with fixture data).
+  Unlocking owner earnings / EV/EBITDA needs D&A added to the SEC
+  collector plus re-collection — a mapping change alone would give
+  0% coverage on the data already stored, so it was not done here.
+- **Step 21 is PARTIAL, not complete.** MSFT only; three methods
+  unavailable as above; the valuation rests on one stale price
+  snapshot. Sufficient to start Step 22 (sector-specific
+  valuation) and Step 23 (margin of safety).
 
 ### 2026-11-08 — Full codebase audit (verification + repair)
 

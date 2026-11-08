@@ -326,7 +326,7 @@ Do not deduplicate by CIK.
 18. Build financial health and quality analysis — PARTIAL (2026-11-08: health engine built and tested, 11 tests OK, 53 total; MSFT FY2026 verdict strong; Altman Z-score unavailable — retained earnings not in Step 16 set; MSFT only — see PROJECT_STATUS.md Step 18 section)
 19. Build historical financial growth analysis — PARTIAL (2026-11-08: YoY/CAGR/consistency/cyclicality built and tested, 35 tests OK; MSFT only — see PROJECT_STATUS.md Step 19 section)
 20. Build cash flow and owner earnings analysis — PARTIAL (2026-11-08: cash-flow engine built and tested, 21 tests OK; owner earnings UNAVAILABLE — no D&A in Step 16 concept set — see PROJECT_STATUS.md Step 20 section)
-21. Build intrinsic valuation engine — NOT STARTED
+21. Build intrinsic valuation engine — PARTIAL (2026-11-08: 10y DCF engine built and tested, 26 tests OK; MSFT only, owner earnings / EV/EBITDA / historical P/E unavailable — see PROJECT_STATUS.md Step 21 section)
 22. Build sector-specific valuation models — NOT STARTED
 23. Build margin-of-safety and relative valuation analysis — NOT STARTED
 24. Build competitive advantage and business-quality analysis — NOT STARTED
