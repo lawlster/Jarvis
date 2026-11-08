@@ -333,7 +333,7 @@ Do not deduplicate by CIK.
 
 ### Part 5 — Market scanner and research
 
-25. Build global market scanner — NOT STARTED
+25. Build global market scanner — PARTIAL (2026-11-08: scanner built and tested, 25 tests OK; runs the full 10,619-row universe in ~1.1s but only 1 ticker is scannable (MSFT, overvalued, quality excellent) — 10,617 have no statements, D05 has no price; ranking with strongest-alert first and fresh-name rotation, fixture-proven alert and weak-business block; dual-listing cache bug found and fixed — see PROJECT_STATUS.md Step 25 section)
 26. Build undervalued-company detection — NOT STARTED
 27. Build financial risk and deterioration detection — NOT STARTED
 28. Build company comparison and competitor analysis — NOT STARTED

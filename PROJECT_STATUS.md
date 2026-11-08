@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 24 — Competitive advantage and business quality (PARTIAL — built and tested 2026-11-08; MSFT only — see Step 24 section below)
-- Current subtask: Step 25 global market scanner
+- Current step: 25 — Global market scanner (PARTIAL — built and tested 2026-11-08; only 1 of 10,619 tickers scannable — see Step 25 section below)
+- Current subtask: Step 26 undervalued-company detection
 - Overall status: In progress
 
 ## Completed work
@@ -585,6 +585,74 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   evidence only; scoring thresholds are judgement rules,
   uncalibrated against a peer set (none exists).  Sufficient
   to start Step 25 (global market scanner).
+
+### 2026-11-08 — Step 25 global market scanner (PARTIAL, not complete)
+
+- Built `agents/market_scanner.py`: orchestrates the Step 16-24
+  pipeline over a ticker selection and returns a ranked
+  candidate list.  It re-derives nothing — per ticker it calls
+  the Step 23 margin-of-safety summary (Step 21/22 valuation,
+  Step 18/19/20 deterioration flag, Step 24 quality gate) plus
+  the Step 18 health verdict.  Prices are caller-supplied or
+  fall back to the latest `financial_snapshots` row, labelled
+  with its as-of date; no live price feed, no network request,
+  no database writes.  Starting FCF basis is TTM when the data
+  supports it, otherwise the labelled annual basis.
+- Ranking: `strongest_alert` first, then `reasonable_price`,
+  `fairly_valued`, `overvalued`, `insufficient_data` last.
+  Within a tier, tickers not surfaced recently go first
+  (fresh-name rotation), then the largest margin of safety vs
+  the conservative value, then the best quality rating.
+  Rotation never promotes across tiers.  No buy/sell call
+  anywhere.
+- Performance: tickers with no statement rows skip the
+  pipeline entirely (one `GROUP BY` up front); only tickers
+  with statements run it, with a per-run cache.  Full
+  10,619-row universe scans in **~1.1 seconds**.
+- Tests: `test_market_scanner.py` — **25 tests, OK**
+  (268 total with Steps 16-24, `python -m unittest discover`).
+  Covers price normalisation, ranking order, rotation
+  (including never promoting across tiers), a synthetic
+  cheap-and-good business reaching `strongest_alert`
+  (conservative $13.39, margin 62.6%, quality good), a
+  synthetic cheap-but-weak business NOT reaching it
+  (conservative $0.50, margin 39.7%, quality weak, tier
+  `reasonable_price`, blocked), a weak business with no value
+  (`insufficient_data`), no-statements / no-price handling,
+  snapshot-price loading, and MSFT/D05/full-universe on a
+  temp DB copy (production SHA-256 verified unchanged before
+  and after, `36862922…089187`, and asserted in the tests'
+  `tearDownClass`).
+- Full-universe scan (temp copy, snapshot prices): selected
+  10,619 — **scannable 1** (MSFT only).  USA 7,625 (overvalued
+  1, insufficient_data 7,624), Singapore 201 (all
+  insufficient_data), Hong Kong 2,793 (all insufficient_data).
+  10,617 tickers have no financial statement rows; D05 has
+  rows but no price and no conservative value.  Rank 1: MSFT
+  (overvalued, quality excellent, health strong, TTM basis,
+  range $98.52 / $163.30 / $234.64, price $507.12 as of
+  2026-11-03).  No strongest alert, no reasonable-price name
+  on real data.
+- Bug found and fixed during testing: the per-run cache was
+  keyed by ticker only, so six dual-listed tickers (AWX, BHK,
+  BMA, BSL, HMN, OGS — USA and Singapore) collapsed into one
+  candidate and the coverage showed USA 7,619 / Singapore
+  207.  The cache key now includes the exchange, with a
+  regression test; coverage now matches the database exactly
+  (USA 7,625 / Singapore 201).
+- **Step 25 is PARTIAL, not complete.** Only 1 of 10,619
+  tickers is scannable — the scanner reports that honestly,
+  but it cannot surface fresh names until statements and
+  prices exist for more tickers (US statements beyond MSFT
+  need full-universe SEC enrichment, 15F, NOT authorised
+  beyond the pilot; SG needs line-item extraction, 11D
+  PAUSED; HKEX needs a statement collector; prices need a
+  feed or caller-supplied prices, Step 38 concern).  Sector
+  is NULL for every US/HK row, so the Step 22 router still
+  depends on caller-supplied overrides.  Ranking thresholds
+  and rotation are uncalibrated judgement rules.  Not wired
+  into `main.py` (Step 50).  Sufficient to start Step 26
+  (undervalued-company detection).
 
 ### 2026-11-08 — Full codebase audit (verification + repair)
 
