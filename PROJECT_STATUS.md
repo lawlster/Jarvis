@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 18 — Financial health and quality analysis (PARTIAL — built and tested 2026-11-08; MSFT only — see Step 18 section below)
-- Current subtask: Step 19 growth analysis on US data; Phase A close-out (15H/15I/15J + 14H/14I decisions pending owner) remains gated on owner decisions
+- Current step: 19 — Growth analysis (PARTIAL — built and tested 2026-11-08; MSFT only — see Step 19 section below)
+- Current subtask: Step 20 cash flow / owner earnings on US data; Phase A close-out (15H/15I/15J + 14H/14I decisions pending owner) remains gated on owner decisions
 - Overall status: In progress
 
 ## Completed work
@@ -198,6 +198,50 @@ Step 15G Phase 2 generated exchange-backed evidence in v3. Phase 3 has now corre
   in the DB to test against — `weak` is exercised only by fixture
   rows); working-capital decline is reported, not scored; no TTM
   health assessment yet. Sufficient to start Steps 19–20 on US data.
+
+### 2026-11-08 — Step 19 growth analysis (PARTIAL, not complete)
+
+- Built `agents/financial_growth.py`: YoY growth, 3y/5y/10y CAGRs,
+  growth consistency and a cyclicality assessment for revenue,
+  operating income, net income, diluted EPS, operating cash flow
+  and free cash flow, reusing Step 16 standardised values and Step
+  16's derived free cash flow; no price used anywhere. YoY is
+  missing (not nonsense) when the prior value is zero or negative;
+  CAGR is undefined when the start value is ≤ 0 or the end value
+  is < 0 (end value of exactly 0 is −100%); missing endpoints are
+  never interpolated. Quarterly YoY compares a quarter with the
+  same quarter a year ago. Cyclicality verdicts (steady / moderate
+  / volatile) come from YoY volatility, declines in the last 10y
+  and the largest peak-to-trough level drawdown; thresholds are
+  documented judgement rules, uncalibrated (no peer set in the DB).
+- Tests: `test_financial_growth.py` — **35 tests, OK** (88 total
+  with Steps 16–18, no regressions). Covers YoY edge cases
+  (zero/negative prior, missing values), CAGR edge cases (negative
+  start/end, zero end, insufficient history, missing endpoint),
+  consistency, drawdowns, cyclicality verdicts, quarterly YoY,
+  and hand-checked MSFT values on a temp DB copy.
+- MSFT FY2026 YoY: revenue +17.8%, operating income +20.8%, net
+  income +31.3%, diluted EPS +31.6%, operating cash flow +34.4%,
+  free cash flow −6.5% (capex rose faster than OCF). 10y CAGRs:
+  revenue +13.8%, operating income +19.5%, net income +20.6%, EPS
+  +21.5%, OCF +18.6%, FCF +10.4%. 5y CAGRs: revenue +14.6%, net
+  income +16.9%, EPS +17.4%, FCF only +3.6%. Revenue grew in 16
+  of 18 years and is "steady"; earnings are "volatile" — driven by
+  two identified one-offs (FY2015 Nokia write-down, FY2018 tax
+  charge), not a repeating cycle. Largest net-income drawdown
+  47.3% (2011 peak → 2015 trough). Latest quarter YoY
+  (2026-09-30): revenue +18.8%, net income +32.0%, FCF −27.4%.
+- OCF/FCF YoY are missing for FY2014–FY2016 (sparse early
+  cash-flow rows, Step 16 finding) — excluded from consistency
+  counts, not treated as zero. TTM growth vs the prior TTM is not
+  computed (no prior-year TTM construction available); quarterly
+  YoY is the like-for-like alternative. No SG/HK growth (Step 16
+  standardised 0 concepts for DBS, none for HKEX).
+- **Step 19 is PARTIAL, not complete.** MSFT only; thresholds
+  uncalibrated against peers or a genuinely cyclical company.
+  Sufficient to start Step 20 (cash flow / owner earnings) on US
+  data; growth figures feed Steps 21 (valuation) and 24 (business
+  quality).
 
 ## Important project rules
 
