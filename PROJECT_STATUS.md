@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 46 — Build reminders and scheduled automation (PARTIAL — built and tested 2026-11-09; job store + due-check + runner + stub delivery, 42 new tests, fixture example on a fake clock — see Step 46 section below)
-- Current subtask: Step 46 reminders and scheduled automation
+- Current step: 47 — Build computer and application interaction (PARTIAL — built and tested 2026-11-09; capability registry + local executor + remote gate + audit log, 53 new tests, fixture example in a temp workspace — see Step 47 section below)
+- Current subtask: Step 47 computer and application interaction
 - Overall status: In progress
 
 ## Completed work
@@ -2865,6 +2865,95 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   and leave nothing behind; the full-suite runs left a few
   stale `tmp*.db` files in /tmp, removed with the targeted
   `rm /tmp/tmp*.db` used before — /tmp now 5%.
+  `database/assistant.db` shows as modified in `git status`,
+  but its hash is unchanged (`36862922…089187`) — the known
+  pre-existing state (header rewrites from earlier
+  imports/audit; logical content identical).
+
+### 2026-11-09 — Step 47 build computer and application interaction (PARTIAL, not complete)
+
+- `agent/computer.py` built and tested (53 new tests, 945 total,
+  `python -m unittest discover` from the project root with
+  `~/workspace/projects/jarvis-venv/bin/python`; 1 skipped: the
+  live smoke test, behind `JARVIS_LIVE_WEB_RESEARCH=1`).
+  Production DB hash unchanged (`36862922…089187`); this step
+  does not touch the database at all. Report:
+  `~/workspace/projects/step47-report.md`.
+- Audit first: no computer-interaction module existed
+  (`agent/computer.py`, `tools/system.py`, and `agent/apps.py`
+  all absent), and no `subprocess` / `os.system` / `Popen` use
+  existed anywhere in `agent/`, `tools/`, or `main.py`. Reused,
+  not duplicated: Step 44's forbidden-name token set and
+  registration-time refusal, Step 46's one-JSON-file-per-record
+  and JSON-lines log patterns.
+- What it does: a capability registry (six defaults — `read_file`,
+  `write_file`, `list_directory`, `run_command`,
+  `launch_application`, `system_info` — each with an explicit
+  scope and approval flag; forbidden trade/send/schedule names
+  refused at registration); a local executor (file read/write
+  and directory listing inside a caller-chosen workspace root —
+  `..`, absolute paths outside the root, and escaping symlinks
+  all refused; commands only from a fixed module-level allowlist
+  with `shell=False`, a timeout, and no shell metacharacters;
+  writes/commands/launches need explicit per-call approval;
+  application launch by name from a fixed allowlist and only
+  through a caller-supplied launcher — none configured by
+  default); a remote gate (target DISABLED by default, enabled
+  only through `configure_remote_target` with the owner's
+  explicit approval recorded; with no enabled target every
+  remote action returns `"remote not configured"` and never
+  attempts a connection); an audit log (every attempt, allowed
+  or refused, as a JSON line under a caller-chosen directory,
+  default `data/computer_actions/` — attempt logged before
+  execution, outcome after). One entry point `perform_action`
+  returns refusal records instead of raising; a thin `Computer`
+  class wraps root, log dir, registry, launcher, transport, and
+  remote target.
+- **No direct control of the owner's Windows machine, his VS
+  Code window, or his screen exists** — computer pairing is
+  Mac-only and only his iPhone is paired. Nothing in this module
+  connects to, launches anything on, or runs a shell command on
+  his Windows PC. `windows_control_available()` always returns
+  `False` with that reason. The workable routes stay what they
+  have always been: build here and hand over files for him to
+  open in VS Code, or remote file access only with his explicit
+  setup approval (which is exactly what `configure_remote_target`
+  records). The module runs on the machine Jarvis itself runs on
+  (Linux here) and never assumes Windows.
+- Fixture example (files
+  `~/workspace/projects/step47-example-computer.json` / `.md`,
+  temp workspace, no launcher, no remote target): list the
+  workspace → `["notes.txt", "step29-msft-report.md"]`; read the
+  Step 29 MSFT report → 10,061 characters, first line "# Research
+  report: MICROSOFT CORP (MSFT)"; attempt `rm -rf /` → refused
+  ("command 'rm' is not in the allowlist … destructive and shell
+  commands are refused by construction"); attempt a remote action
+  with no target → `remote_not_configured`, nothing attempted;
+  read-only system info → Linux, Python 3.12.3; audit log → 8
+  records, 0 corrupt lines.
+- One test bug found and fixed: the first timeout test ran
+  `python3 -c "import time; time.sleep(5)"`, but the argument
+  contains `;`, a shell metacharacter, so the executor correctly
+  refused it before ever running — and the test passed anyway
+  because it only asserted a `ComputerError`. Fixed by adding
+  `sleep` (harmless, side-effect-free) to the allowlist and
+  testing the timeout with `sleep 5` at 0.2s, asserting it raises
+  in under 2s.
+- **Step 47 is PARTIAL, not complete. No real application was
+  ever launched or controlled through this module** (the only
+  launches use a stub launcher; the default is no launcher at
+  all). **No remote machine was ever connected** — no enabled
+  remote target exists, no transport exists, and no connection
+  was ever attempted; remote file access still needs the owner's
+  explicit setup approval, which has not been given. Not wired
+  into `main.py` (Step 50), and the Step 39 orchestrator does not
+  yet call the computer layer. No live price feed; no holdings
+  store (open decisions carried from Steps 36–37). Sufficient to
+  start Step 48 (complete user interface).
+- Housekeeping: Step 47's own tests use `TemporaryDirectory`
+  and leave nothing behind; the full-suite runs left a few
+  stale `tmp*.db` files in /tmp, removed with the targeted
+  `rm /tmp/tmp*.db` used before — /tmp now 7%.
   `database/assistant.db` shows as modified in `git status`,
   but its hash is unchanged (`36862922…089187`) — the known
   pre-existing state (header rewrites from earlier
