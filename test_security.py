@@ -477,10 +477,15 @@ class DbWriteAuditTestCase(unittest.TestCase):
         # audit caught provider_logger (every
         # get_company_financials call logs a provider_logs row)
         # which the earlier steps had missed.
+        # Step 53: THREE — the deployment readiness check
+        # imports the backup module, so it joined the runtime.
+        # Its only write-capable connect is the backup
+        # destination file, never the production database.
         self.assertEqual(
             {s["file"] for s in audit["runtime_write_capable_sites"]},
             {"agent/memory.py",
-             "data/providers/provider_logger.py"})
+             "data/providers/provider_logger.py",
+             "agents/backup_recovery.py"})
 
     def test_legacy_write_paths_listed_not_hidden(self):
         audit = sec.audit_db_write_paths(PROJECT_ROOT)

@@ -17,11 +17,17 @@ Three checks, all read-only:
    write-capable, and works out which modules the integrated
    assistant actually loads (the ``main.py`` import graph).
    The documented set, from ``main.py``'s perspective, is
-   exactly one write-capable path: ``agent/memory.py`` (the
-   last-20-messages table — the one place the integrated
-   assistant writes to the database).  The audit returns
-   whether the code still matches that set, so a future write
-   path cannot sneak in unnoticed.  Legacy modules outside
+   exactly three write-capable paths (see
+   ``DOCUMENTED_RUNTIME_WRITE_PATHS`` below): ``agent/memory.py``
+   (the last-20-messages table), ``data/providers/
+   provider_logger.py`` (the provider_logs table), and
+   ``agents/backup_recovery.py`` — which writes only to a
+   caller-chosen backup target file created by the SQLite
+   backup API, never to the production database (its source
+   is opened read-only, and restore refuses the production
+   path).  The audit returns whether the code still matches
+   that set, so a future write path cannot sneak in
+   unnoticed.  Legacy modules outside
    the runtime (imports, collectors, the old alert manager
    and watchlist) open the database read-write by design and
    are listed separately, not hidden.
@@ -88,6 +94,13 @@ SECRET_PATTERNS = (
 DOCUMENTED_RUNTIME_WRITE_PATHS = (
     "agent/memory.py",
     "data/providers/provider_logger.py",
+    # Step 53: the deployment readiness check imports the
+    # backup module, so it joined the runtime.  Its only
+    # write-capable connect is the backup *destination* file
+    # (sqlite3.connect(target) in backup_database) — a new
+    # file created by the SQLite backup API from a read-only
+    # source.  It never writes to the production database.
+    "agents/backup_recovery.py",
 )
 
 

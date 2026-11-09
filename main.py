@@ -231,6 +231,13 @@ class JarvisApp:
         self.conversation_history = load_recent_messages(20)
         for line in self.banner_lines():
             print(line)
+        # Step 53: cheap startup self-check (database integrity
+        # + hash, backup directory, Ollama reachability) — one
+        # line each, never blocking startup on a failure, never
+        # printing a secret, never starting a background process.
+        from agent.deployment import startup_check_lines
+        for line in startup_check_lines(db_path=self.db_path):
+            print(line)
         print()
 
     # -- one turn ---------------------------------------------------

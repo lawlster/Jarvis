@@ -312,11 +312,19 @@ def list_backups(backup_dir=None):
     if backup_dir.exists():
         for path in sorted(backup_dir.glob("*.bak")):
             if path.name not in known:
+                # Step 53: a pre-manifest backup has no recorded
+                # created_at, so use the file's modification time
+                # — otherwise the newest-first sort falls back
+                # to the file name, which is not the backup's
+                # age (the real 2026-11-08 backups sorted the
+                # oldest one first).
+                mtime = datetime.fromtimestamp(
+                    path.stat().st_mtime, tz=timezone.utc).isoformat()
                 records.append({
                     "backup_file": path.name,
                     "sha256": sha256_file(path),
                     "size_bytes": path.stat().st_size,
-                    "created_at": None,
+                    "created_at": mtime,
                     "source": None,
                     "label": None,
                     "integrity": "not in manifest",
