@@ -21,11 +21,11 @@ summary before these tests were written):
   excellent -> not a candidate, not a trap.
 """
 
-import hashlib
 import json
 import os
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -36,6 +36,9 @@ from agents import market_scanner as ms
 from agents import undervalued_detector as ud
 
 BASE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE_DIR))
+
+from db_fingerprint import content_fingerprint  # noqa: E402
 DB_PATH = BASE_DIR / "database" / "assistant.db"
 
 
@@ -57,14 +60,6 @@ def _temp_db_copy():
     tmp.close()
     shutil.copy(DB_PATH, tmp.name)
     return tmp.name
-
-
-def _sha256(path):
-    digest = hashlib.sha256()
-    with open(path, "rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def _hand_candidate(ticker="HAND", tier="reasonable_price",
@@ -400,11 +395,11 @@ class TestRealData(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls._prod_hash = _sha256(DB_PATH)
+        cls._prod_hash = content_fingerprint(DB_PATH)
 
     @classmethod
     def tearDownClass(cls):
-        assert _sha256(DB_PATH) == cls._prod_hash, (
+        assert content_fingerprint(DB_PATH) == cls._prod_hash, (
             "production database changed during Step 26 tests")
 
     def test_msft_is_not_a_candidate(self):

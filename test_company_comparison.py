@@ -26,9 +26,9 @@ Step 17-24/27 pipeline before these tests were written):
   ranking is meaningful; MSFT profile values match Step 17-24.
 """
 
-import hashlib
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -38,11 +38,10 @@ import test_market_scanner as tms
 from agents import company_comparison as cc
 
 BASE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE_DIR))
+
+from db_fingerprint import content_fingerprint  # noqa: E402
 DB_PATH = BASE_DIR / "database" / "assistant.db"
-
-
-def _db_hash():
-    return hashlib.sha256(DB_PATH.read_bytes()).hexdigest()
 
 
 # Larger, more profitable peer: bigger revenue, wider margins,
@@ -283,14 +282,14 @@ class TestFixtureComparison(unittest.TestCase):
 class TestRealDataComparison(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.hash_before = _db_hash()
+        cls.hash_before = content_fingerprint(DB_PATH)
         cls.db_path = _temp_db_copy()
 
     @classmethod
     def tearDownClass(cls):
         Path(cls.db_path).unlink(missing_ok=True)
-        assert _db_hash() == cls.hash_before, (
-            "production DB hash changed during tests")
+        assert content_fingerprint(DB_PATH) == cls.hash_before, (
+            "production DB changed during tests")
 
     def test_msft_vs_real_peers(self):
         conn = sqlite3.connect(f"file:{self.db_path}?mode=ro",

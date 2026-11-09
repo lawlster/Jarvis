@@ -3,15 +3,15 @@
 Stubbed model client only; no network, no production writes.
 The production DB is copied once per test class into the temp
 directory and the copy is removed in tearDownClass; the
-production hash is asserted unchanged. Every test cleans up
+production content fingerprint is asserted unchanged. Every test cleans up
 after itself via TemporaryDirectory (the /tmp housekeeping gap
 noted in Steps 27/33b: older _temp_db_copy helpers never delete
 their copies).
 """
 
-import hashlib
 import json
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -29,34 +29,33 @@ from agent.orchestrator import (
 from agents import watchlist_foundation as wf
 
 PROJECT_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
 PROD_DB = PROJECT_ROOT / "database" / "assistant.db"
-PROD_HASH = "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187"
 NEWS_DIR = PROJECT_ROOT / "data" / "news"
-
-
-def _db_hash(path):
-    digest = hashlib.sha256()
-    with open(path, "rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 class OrchestratorTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.tmp = tempfile.TemporaryDirectory()
+        cls.tmp = temp_dir_with_db_cleanup()
         cls.db_path = Path(cls.tmp.name) / "assistant.db"
         shutil.copy(PROD_DB, cls.db_path)
+        cls._prod_fp_before = content_fingerprint(PROD_DB)
         cls.log_dir = Path(cls.tmp.name) / "orchestration"
         cls.store_dir = Path(cls.tmp.name) / "watchlist"
         cls.stub = StubModelClient(reply="Stub chat reply.")
 
     @classmethod
     def tearDownClass(cls):
-        assert _db_hash(PROD_DB) == PROD_HASH, \
-            "production DB hash changed"
-        cls.tmp.cleanup()
+        cleanup_temp_dir(cls.tmp)
+        assert content_fingerprint(PROD_DB) == cls._prod_fp_before, \
+            "production DB changed"
 
     def _handle(self, text, **kwargs):
         kwargs.setdefault("model_client", self.stub)

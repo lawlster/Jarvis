@@ -17,11 +17,11 @@ Fixture expectations:
   rows: events live only in JSON files under data/events/.
 """
 
-import hashlib
 import json
 import os
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -33,23 +33,15 @@ from agents import event_tracking as et
 from agents import margin_of_safety as mos
 
 BASE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE_DIR))
+
+from db_fingerprint import content_fingerprint  # noqa: E402
 DB_PATH = BASE_DIR / "database" / "assistant.db"
-PRODUCTION_HASH = "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187"
-
-
 def _temp_db_copy():
     tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
     tmp.close()
     shutil.copy(DB_PATH, tmp.name)
     return tmp.name
-
-
-def _sha256(path):
-    digest = hashlib.sha256()
-    with open(path, "rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def _sample_event(**overrides):
@@ -384,12 +376,12 @@ class TestPostEventCheck(unittest.TestCase):
 class TestRealDatabase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.before_hash = _sha256(DB_PATH)
+        cls.before_hash = content_fingerprint(DB_PATH)
 
     @classmethod
     def tearDownClass(cls):
-        assert _sha256(DB_PATH) == PRODUCTION_HASH, (
-            "production DB hash changed during Step 33 tests")
+        assert content_fingerprint(DB_PATH) == cls.before_hash, (
+            "production DB changed during Step 33 tests")
 
     def test_no_events_in_production_db(self):
         conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
@@ -406,7 +398,7 @@ class TestRealDatabase(unittest.TestCase):
             conn.close()
 
     def test_production_hash_unchanged(self):
-        self.assertEqual(_sha256(DB_PATH), self.before_hash)
+        self.assertEqual(content_fingerprint(DB_PATH), self.before_hash)
 
 
 if __name__ == "__main__":

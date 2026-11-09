@@ -6,11 +6,10 @@ Covers the three Step 51 hardening fixes (valuation-profiles
 permissions check and the database-write audit.  Fixture
 secrets are obviously fake (``sk-test-...`` and the like) and
 the owner's real address never appears in any file here.
-The production database is read, never written: its hash is
+The production database is read, never written: its content fingerprint is
 asserted unchanged around the whole class.
 """
 
-import hashlib
 import importlib
 import json
 import os
@@ -25,6 +24,12 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
+
 from agent import memory as memory_mod  # noqa: E402
 from agents import security as sec  # noqa: E402
 from agents import valuation_profiles as vp  # noqa: E402
@@ -32,18 +37,11 @@ from agents.margin_of_safety import classify_tier  # noqa: E402
 from agents.valuation_monitor import (  # noqa: E402
     monitor_company_valuation)
 
-EXPECTED_DB_HASH = (
-    "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187")
-
 # Obviously fake fixture secrets.  Nothing here is real, and
 # the owner's personal address never appears in this file.
 FAKE_OPENAI_KEY = "sk-test-0123456789abcdef"
 FAKE_EMAIL = "fixture-person@example.invalid"
 FAKE_PASSWORD_LINE = 'password = "fixture-password-not-real"'
-
-
-def _db_hash(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 def _deterioration(deteriorated, unknown=False, signals=None):
@@ -54,25 +52,25 @@ def _deterioration(deteriorated, unknown=False, signals=None):
 class Step51FixesTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.production_hash_before = _db_hash(
+        cls._prod_fp_before = content_fingerprint(
             PROJECT_ROOT / "database" / "assistant.db")
 
     @classmethod
     def tearDownClass(cls):
-        after = _db_hash(PROJECT_ROOT / "database" / "assistant.db")
-        assert after == cls.production_hash_before, (
+        assert content_fingerprint(
+            PROJECT_ROOT / "database" / "assistant.db"
+        ) == cls._prod_fp_before, (
             "production DB changed during the security tests")
-        assert after == EXPECTED_DB_HASH
 
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
+        self.tmp = temp_dir_with_db_cleanup()
         self.root = Path(self.tmp.name)
         self.db_path = self.root / "assistant.db"
         shutil.copy(PROJECT_ROOT / "database" / "assistant.db",
                     self.db_path)
 
     def tearDown(self):
-        self.tmp.cleanup()
+        cleanup_temp_dir(self.tmp)
 
     # -- finding 1: valuation profiles take a db_path -----------
 
@@ -165,7 +163,9 @@ class Step51FixesTestCase(unittest.TestCase):
                 ["env override check", "stored in env db"])
             # Nothing landed in the temp copy or production.
             self.assertEqual(
-                _db_hash(self.db_path), EXPECTED_DB_HASH)
+                content_fingerprint(self.db_path),
+                content_fingerprint(
+                    PROJECT_ROOT / "database" / "assistant.db"))
         finally:
             if old is None:
                 os.environ.pop("JARVIS_DB_PATH", None)
@@ -225,12 +225,17 @@ class MainDbPathWiringTestCase(unittest.TestCase):
     """JarvisApp points conversation memory at its own db_path,
     with no monkeypatching — the Step 52 wiring fix."""
 
+    @classmethod
+    def setUpClass(cls):
+        cls._prod_fp_before = content_fingerprint(
+            PROJECT_ROOT / "database" / "assistant.db")
+
     def test_app_memory_goes_to_app_db(self):
         import main as main_mod
         from agent.orchestrator import StubModelClient
         from data.providers import provider_logger as pl
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
+        tmp = temp_dir_with_db_cleanup()
+        self.addCleanup(cleanup_temp_dir, tmp)
         root = Path(tmp.name)
         db_path = root / "assistant.db"
         shutil.copy(PROJECT_ROOT / "database" / "assistant.db",
@@ -273,8 +278,9 @@ class MainDbPathWiringTestCase(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        after = _db_hash(PROJECT_ROOT / "database" / "assistant.db")
-        assert after == EXPECTED_DB_HASH, (
+        assert content_fingerprint(
+            PROJECT_ROOT / "database" / "assistant.db"
+        ) == cls._prod_fp_before, (
             "production DB changed during the wiring test")
 
 
@@ -438,6 +444,14 @@ class PermissionsTestCase(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
+    # Step 57: Unix permission modes do not exist on Windows —
+    # os.chmod only toggles read-only there and os.stat reports
+    # 0o666 for ordinary files, so a 0o660 file still reads as
+    # world-writable.  These two tests assert Unix semantics and
+    # are skipped on Windows; the missing-path test below is
+    # platform-neutral and still runs everywhere.
+    @unittest.skipIf(os.name == "nt",
+                     "Unix permission modes do not exist on Windows")
     def test_world_writable_flagged(self):
         loose = self.root / "loose.txt"
         loose.write_text("x", encoding="utf-8")
@@ -457,6 +471,8 @@ class PermissionsTestCase(unittest.TestCase):
         self.assertFalse(results[0]["exists"])
         self.assertFalse(results[0]["ok"])
 
+    @unittest.skipIf(os.name == "nt",
+                     "Unix permission modes do not exist on Windows")
     def test_real_project_paths_not_world_writable(self):
         paths = [PROJECT_ROOT / "database" / "assistant.db",
                  PROJECT_ROOT / "data" / "watchlist",

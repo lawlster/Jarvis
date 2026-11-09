@@ -1,0 +1,12 @@
+{
+  "indicator": "Philadelphia Semiconductor Index daily change",
+  "indicator_key": "philadelphia semiconductor index daily change",
+  "value": -12.25,
+  "date": "2026-11-05",
+  "unit": "%",
+  "source": "owner research, 2026-11-08",
+  "notes": null,
+  "macro_id": "2026-11-05_philadelphia_semiconductor_index_daily_change_01",
+  "added_at": "2026-11-08T17:15:23.547697Z",
+  "file_path": "data/macro/2026-11-05_philadelphia_semiconductor_index_daily_change_01.json"
+}

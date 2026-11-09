@@ -1,0 +1,12 @@
+{
+  "indicator": "S&P 500 weekly change",
+  "indicator_key": "s&p 500 weekly change",
+  "value": -2.7,
+  "date": "2026-11-06",
+  "unit": "%",
+  "source": "owner research, 2026-11-08",
+  "notes": "Week to Fri 6 Nov 2026, after the partial chip bounce.",
+  "macro_id": "2026-11-06_s_p_500_weekly_change_01",
+  "added_at": "2026-11-08T17:15:23.548360Z",
+  "file_path": "data/macro/2026-11-06_s_p_500_weekly_change_01.json"
+}

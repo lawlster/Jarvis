@@ -15,10 +15,10 @@ production writes, no audio is ever sent anywhere (the served
 JavaScript contains no network call).
 """
 
-import hashlib
 import re
 import shutil
 import sqlite3
+import sys
 import tempfile
 import threading
 import unittest
@@ -31,8 +31,14 @@ from agent import ui
 from agents import watchlist_foundation as wf
 
 BASE = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE))
+
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
 PROD_DB = BASE / "database" / "assistant.db"
-PROD_HASH = "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187"
 
 # A control whose name, action, or label suggests trading must
 # never appear in the served HTML.
@@ -41,10 +47,6 @@ _FORBIDDEN_CONTROL_RE = re.compile(
     r"place_order|checkout)",
     re.IGNORECASE,
 )
-
-
-def _hash(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 def _domcontentloaded_blocks(js):
@@ -98,10 +100,11 @@ class _ServerCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.tmp = tempfile.TemporaryDirectory()
+        cls.tmp = temp_dir_with_db_cleanup()
         root = Path(cls.tmp.name)
         cls.db_path = str(root / "test.db")
         shutil.copy(PROD_DB, cls.db_path)
+        cls._prod_fp_before = content_fingerprint(PROD_DB)
 
         cls.store_dir = str(root / "watchlist")
         wf.add_ticker("MSFT", "owner_core",
@@ -141,9 +144,9 @@ class _ServerCase(unittest.TestCase):
         cls.server.shutdown()
         cls.server.server_close()
         cls.thread.join(timeout=5)
-        cls.tmp.cleanup()
-        assert _hash(PROD_DB) == PROD_HASH, (
-            "production DB hash changed during browser voice tests")
+        cleanup_temp_dir(cls.tmp)
+        assert content_fingerprint(PROD_DB) == cls._prod_fp_before, (
+            "production DB changed during browser voice tests")
 
     # -- HTTP helpers -------------------------------------------------
 

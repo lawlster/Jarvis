@@ -1,0 +1,17 @@
+{
+  "id": "0ab447a357e3434e8e169208620850d9",
+  "type": "preference",
+  "text": "The owner prefers text replies and declined ongoing voice replies on 2026-11-03. Voice replies only when he explicitly asks for one for that turn.",
+  "stated_by": "owner",
+  "stated_at": "2026-11-03T00:00:00+00:00",
+  "source": "owner preference stated 2026-11-03",
+  "source_kind": "owner",
+  "tags": [
+    "voice",
+    "preference"
+  ],
+  "status": "active",
+  "superseded_by": null,
+  "voice_mode": "text",
+  "file_path": "/home/hatch/workspace/projects/jarvis/data/memory/0ab447a357e3434e8e169208620850d9.json"
+}

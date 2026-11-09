@@ -5,10 +5,9 @@ with a stubbed model client, a temporary database copy and
 temporary data directories. No network, no production writes:
 ``agent.memory.DB_PATH`` is monkeypatched to the temp copy, so
 the last-20-messages persistence never touches the production
-database. The production hash is asserted unchanged.
+database. The production content fingerprint is asserted unchanged.
 """
 
-import hashlib
 import io
 import json
 import shutil
@@ -25,17 +24,15 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
+
 from agent import memory as memory_mod  # noqa: E402
 from agent.orchestrator import StubModelClient  # noqa: E402
 import main as main_mod  # noqa: E402
-
-EXPECTED_DB_HASH = (
-    "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187")
-
-
-def _db_hash(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
 
 def _free_port():
     sock = socket.socket()
@@ -48,23 +45,22 @@ def _free_port():
 class MainIntegrationTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.production_hash_before = _db_hash(
+        cls._prod_fp_before = content_fingerprint(
             PROJECT_ROOT / "database" / "assistant.db")
 
     @classmethod
     def tearDownClass(cls):
-        after = _db_hash(PROJECT_ROOT / "database" / "assistant.db")
-        assert after == cls.production_hash_before, (
+        assert content_fingerprint(
+            PROJECT_ROOT / "database" / "assistant.db"
+        ) == cls._prod_fp_before, (
             "production DB changed during the integration tests")
-        assert after == EXPECTED_DB_HASH
 
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
+        self.tmp = temp_dir_with_db_cleanup()
         self.root = Path(self.tmp.name)
         self.db_path = self.root / "assistant.db"
         shutil.copy(PROJECT_ROOT / "database" / "assistant.db",
                     self.db_path)
-        self.db_hash_before = _db_hash(self.db_path)
         # Memory persistence goes to the temp copy, never the
         # production database.
         self._old_db_path = memory_mod.DB_PATH
@@ -97,7 +93,7 @@ class MainIntegrationTestCase(unittest.TestCase):
         # session database; restore that too.
         from data.providers import provider_logger as _pl
         _pl.DB_PATH = self._old_pl_db_path
-        self.tmp.cleanup()
+        cleanup_temp_dir(self.tmp)
 
     # -- the loop delegates to the orchestrator ----------------------
 

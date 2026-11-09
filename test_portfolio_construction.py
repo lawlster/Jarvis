@@ -20,6 +20,7 @@ import json
 import os
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -31,6 +32,12 @@ from agents import portfolio_construction as pc
 from agents import undervalued_detector as ud
 
 BASE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE_DIR))
+
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    temp_dir_with_db_cleanup,
+)
 DB_PATH = BASE_DIR / "database" / "assistant.db"
 
 
@@ -253,8 +260,8 @@ class TestBuildPortfolio(unittest.TestCase):
 
 class TestFromDetection(unittest.TestCase):
     def setUp(self):
-        self._tmpdir = tempfile.TemporaryDirectory()
-        self.addCleanup(self._tmpdir.cleanup)
+        self._tmpdir = temp_dir_with_db_cleanup()
+        self.addCleanup(cleanup_temp_dir, self._tmpdir)
         self.conn = tud._market_conn()
 
     def tearDown(self):

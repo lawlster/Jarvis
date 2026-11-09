@@ -21,11 +21,11 @@ against the real Step 23 summary before these tests were
 written.
 """
 
-import hashlib
 import json
 import re
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -33,6 +33,9 @@ from pathlib import Path
 from agents import thesis_tracking as tt
 
 BASE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE_DIR))
+
+from db_fingerprint import content_fingerprint  # noqa: E402
 DB_PATH = BASE_DIR / "database" / "assistant.db"
 
 PRICE_HIGH = {"price": 100.0, "as_of_date": "2026-11-08",
@@ -116,10 +119,6 @@ def _temp_db_copy():
     tmp.close()
     shutil.copy(DB_PATH, tmp.name)
     return tmp.name
-
-
-def _db_hash():
-    return hashlib.sha256(DB_PATH.read_bytes()).hexdigest()
 
 
 def _entry(value):
@@ -565,11 +564,11 @@ class TestThesisRealData(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls._hash_before = _db_hash()
+        cls._hash_before = content_fingerprint(DB_PATH)
 
     @classmethod
     def tearDownClass(cls):
-        assert _db_hash() == cls._hash_before, \
+        assert content_fingerprint(DB_PATH) == cls._hash_before, \
             "production DB changed during tests"
 
     def _conn(self):

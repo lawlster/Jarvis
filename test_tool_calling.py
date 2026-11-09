@@ -3,14 +3,14 @@
 Stubbed model clients and stubbed fetchers only; no live
 network, no production writes. The production DB is copied
 once per test class into the temp directory and the copy is
-removed in tearDownClass; the production hash is asserted
+removed in tearDownClass; the production content fingerprint is asserted
 unchanged. Every test cleans up after itself via
 TemporaryDirectory.
 """
 
-import hashlib
 import json
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -33,18 +33,16 @@ from agent.tool_calling import (
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
 PROD_DB = PROJECT_ROOT / "database" / "assistant.db"
-PROD_HASH = "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187"
 NEWS_DIR = PROJECT_ROOT / "data" / "news"
 EVENTS_DIR = PROJECT_ROOT / "data" / "events"
-
-
-def _db_hash(path):
-    digest = hashlib.sha256()
-    with open(path, "rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def _stub_search(query, max_results=5):
@@ -70,9 +68,10 @@ def _stub_financials(ticker, provider_name="yahoo"):
 class ToolCallingTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.tmp = tempfile.TemporaryDirectory()
+        cls.tmp = temp_dir_with_db_cleanup()
         cls.db_path = Path(cls.tmp.name) / "assistant.db"
         shutil.copy(PROD_DB, cls.db_path)
+        cls._prod_fp_before = content_fingerprint(PROD_DB)
         cls.store_dir = Path(cls.tmp.name) / "watchlist"
         cls.sessions_dir = Path(cls.tmp.name) / "sessions"
         cls.registry = default_registry(
@@ -88,9 +87,9 @@ class ToolCallingTestCase(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        assert _db_hash(PROD_DB) == PROD_HASH, \
-            "production DB hash changed"
-        cls.tmp.cleanup()
+        cleanup_temp_dir(cls.tmp)
+        assert content_fingerprint(PROD_DB) == cls._prod_fp_before, \
+            "production DB changed"
 
     def _select(self, text, **kwargs):
         kwargs.setdefault("registry", self.registry)

@@ -1,0 +1,15 @@
+{
+  "event_id": "2026-11-16_MARKET_01",
+  "ticker": null,
+  "event_type": "filing",
+  "title": "Pabrai / Ackman Q3 13F filings due",
+  "date": "2026-11-16",
+  "time": null,
+  "timezone": "Asia/Singapore",
+  "source": "owner research (caller-supplied)",
+  "notes": "Q3 13F filings due ~14\u201316 Nov; this event is dated to the last day of the window.",
+  "created_at": "2026-11-08T17:06:03.039823Z",
+  "outcome": null,
+  "outcome_recorded_at": null,
+  "file_path": "/home/hatch/workspace/projects/jarvis/data/events/2026-11-16_MARKET_01.json"
+}

@@ -1,0 +1,12 @@
+{
+  "indicator": "Nasdaq weekly change",
+  "indicator_key": "nasdaq weekly change",
+  "value": -3.4,
+  "date": "2026-11-06",
+  "unit": "%",
+  "source": "owner research, 2026-11-08",
+  "notes": null,
+  "macro_id": "2026-11-06_nasdaq_weekly_change_01",
+  "added_at": "2026-11-08T17:15:23.548842Z",
+  "file_path": "data/macro/2026-11-06_nasdaq_weekly_change_01.json"
+}

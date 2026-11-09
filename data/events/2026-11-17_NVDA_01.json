@@ -1,0 +1,15 @@
+{
+  "event_id": "2026-11-17_NVDA_01",
+  "ticker": "NVDA",
+  "event_type": "earnings",
+  "title": "NVDA earnings",
+  "date": "2026-11-17",
+  "time": null,
+  "timezone": "Asia/Singapore",
+  "source": "owner research (caller-supplied)",
+  "notes": "After close.",
+  "created_at": "2026-11-08T17:06:03.039550Z",
+  "outcome": null,
+  "outcome_recorded_at": null,
+  "file_path": "/home/hatch/workspace/projects/jarvis/data/events/2026-11-17_NVDA_01.json"
+}

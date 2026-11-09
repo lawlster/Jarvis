@@ -1,0 +1,16 @@
+{
+  "record_count": 1,
+  "skipped_files": [],
+  "records": [
+    {
+      "id": "0ab447a357e3434e8e169208620850d9",
+      "type": "preference",
+      "stated_at": "2026-11-03T00:00:00+00:00",
+      "tags": [
+        "voice",
+        "preference"
+      ],
+      "status": "active"
+    }
+  ]
+}

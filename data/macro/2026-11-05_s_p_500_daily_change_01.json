@@ -1,0 +1,12 @@
+{
+  "indicator": "S&P 500 daily change",
+  "indicator_key": "s&p 500 daily change",
+  "value": -4.36,
+  "date": "2026-11-05",
+  "unit": "%",
+  "source": "owner research, 2026-11-08",
+  "notes": "Thu 5 Nov 2026 selloff: AI/data-centre regulation fears after Democrats' midterm sweep (both houses flipped; Trump remains president), Qualcomm weak guide, AI capex questions; Fri 6 Nov partial chip bounce.",
+  "macro_id": "2026-11-05_s_p_500_daily_change_01",
+  "added_at": "2026-11-08T17:15:23.546526Z",
+  "file_path": "data/macro/2026-11-05_s_p_500_daily_change_01.json"
+}

@@ -8,6 +8,7 @@ live-scan data is a small fixture JSON; the readiness verdict is
 a fixture dict. No production writes, no live scan is ever run.
 """
 
+import gc
 import hashlib
 import json
 import re
@@ -30,8 +31,14 @@ from agent import ui
 from agents import watchlist_foundation as wf
 
 BASE = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE))
+
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
 PROD_DB = BASE / "database" / "assistant.db"
-PROD_HASH = "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187"
 
 # A control whose name, action, or label suggests trading must
 # never appear in the served HTML.
@@ -131,10 +138,11 @@ class _ServerCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.tmp = tempfile.TemporaryDirectory()
+        cls.tmp = temp_dir_with_db_cleanup()
         root = Path(cls.tmp.name)
         cls.db_path = str(root / "test.db")
         shutil.copy(PROD_DB, cls.db_path)
+        cls._prod_fp_before = content_fingerprint(PROD_DB)
 
         cls.store_dir = str(root / "watchlist")
         wf.add_ticker("MSFT", "owner_core",
@@ -176,9 +184,9 @@ class _ServerCase(unittest.TestCase):
         cls.server.shutdown()
         cls.server.server_close()
         cls.thread.join(timeout=5)
-        cls.tmp.cleanup()
-        assert _hash(PROD_DB) == PROD_HASH, (
-            "production DB hash changed during UI redesign tests")
+        cleanup_temp_dir(cls.tmp)
+        assert content_fingerprint(PROD_DB) == cls._prod_fp_before, (
+            "production DB changed during UI redesign tests")
 
     # -- HTTP helpers -------------------------------------------------
 
@@ -447,7 +455,8 @@ class TestMainStartsUI(unittest.TestCase):
     """`python main.py --ui` serves the redesigned UI, then quits."""
 
     def test_main_ui_serves_home_then_quits(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        before = content_fingerprint(PROD_DB)
+        with temp_dir_with_db_cleanup() as tmp:
             db_path = str(Path(tmp) / "test.db")
             shutil.copy(PROD_DB, db_path)
             sock = socket.socket()
@@ -498,8 +507,9 @@ class TestMainStartsUI(unittest.TestCase):
                     proc.kill()
                     proc.wait(timeout=5)
             self.assertEqual(proc.returncode, 0)
-            assert _hash(PROD_DB) == PROD_HASH, (
-                "production DB hash changed during main.py UI test")
+            assert content_fingerprint(PROD_DB) == before, (
+                "production DB changed during main.py UI test")
+            gc.collect()
 
 
 if __name__ == "__main__":

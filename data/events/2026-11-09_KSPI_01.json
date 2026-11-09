@@ -1,0 +1,15 @@
+{
+  "event_id": "2026-11-09_KSPI_01",
+  "ticker": "KSPI",
+  "event_type": "earnings",
+  "title": "KSPI earnings",
+  "date": "2026-11-09",
+  "time": null,
+  "timezone": "Asia/Singapore",
+  "source": "owner research (caller-supplied)",
+  "notes": "",
+  "created_at": "2026-11-08T17:06:03.033907Z",
+  "outcome": null,
+  "outcome_recorded_at": null,
+  "file_path": "/home/hatch/workspace/projects/jarvis/data/events/2026-11-09_KSPI_01.json"
+}

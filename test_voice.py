@@ -5,11 +5,11 @@ libraries, no production writes. The production database is
 opened only through read-only copies in TemporaryDirectory.
 """
 
-import hashlib
 import json
 import os
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -30,16 +30,14 @@ from agent.voice import (
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-PRODUCTION_DB = PROJECT_ROOT / "database" / "assistant.db"
-PRODUCTION_HASH = (
-    "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187"
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
 )
-
-
-def _db_hash(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
-
+PRODUCTION_DB = PROJECT_ROOT / "database" / "assistant.db"
 def _temp_db_copy(directory):
     """A throwaway copy of the production DB in ``directory``."""
     target = Path(directory) / "assistant.db"
@@ -51,8 +49,8 @@ class VoiceStep45TestCase(unittest.TestCase):
     """Shared temp-dir + temp-DB setup for the Step 45 tests."""
 
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
+        self.tmp = temp_dir_with_db_cleanup()
+        self.addCleanup(cleanup_temp_dir, self.tmp)
         self.dir = Path(self.tmp.name)
         self.db_path = _temp_db_copy(self.dir)
         self.log_dir = self.dir / "orchestration"
@@ -68,8 +66,13 @@ class VoiceStep45TestCase(unittest.TestCase):
         return voice_turn(transcript, **kwargs)
 
     @classmethod
+    def setUpClass(cls):
+        cls._prod_fp_before = content_fingerprint(PRODUCTION_DB)
+
+    @classmethod
     def tearDownClass(cls):
-        assert _db_hash(PRODUCTION_DB) == PRODUCTION_HASH, (
+        assert content_fingerprint(
+            PRODUCTION_DB) == cls._prod_fp_before, (
             "Step 45 tests changed the production database"
         )
 

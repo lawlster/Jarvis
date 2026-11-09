@@ -19,11 +19,11 @@ summary before these tests were written):
   excellent, snapshot price $507.12 as of 2026-11-03.
 """
 
-import hashlib
 import json
 import os
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -32,6 +32,9 @@ import test_business_quality as tbq
 from agents import market_scanner as ms
 
 BASE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE_DIR))
+
+from db_fingerprint import content_fingerprint  # noqa: E402
 DB_PATH = BASE_DIR / "database" / "assistant.db"
 
 # Cheap but weak: declining revenue, thin volatile margins, a loss
@@ -104,14 +107,6 @@ def _temp_db_copy():
     tmp.close()
     shutil.copy(DB_PATH, tmp.name)
     return tmp.name
-
-
-def _sha256(path):
-    digest = hashlib.sha256()
-    with open(path, "rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def _candidate(ticker, tier, margin=None, quality=None):
@@ -383,11 +378,11 @@ class TestRealData(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls._prod_hash = _sha256(DB_PATH)
+        cls._prod_hash = content_fingerprint(DB_PATH)
 
     @classmethod
     def tearDownClass(cls):
-        assert _sha256(DB_PATH) == cls._prod_hash, (
+        assert content_fingerprint(DB_PATH) == cls._prod_hash, (
             "production database changed during Step 25 tests")
 
     def test_msft_is_overvalued_excellent(self):

@@ -1,0 +1,15 @@
+{
+  "event_id": "2026-11-12_AMAT_01",
+  "ticker": "AMAT",
+  "event_type": "earnings",
+  "title": "AMAT earnings",
+  "date": "2026-11-12",
+  "time": null,
+  "timezone": "Asia/Singapore",
+  "source": "owner research (caller-supplied)",
+  "notes": "After close.",
+  "created_at": "2026-11-08T17:06:03.038723Z",
+  "outcome": null,
+  "outcome_recorded_at": null,
+  "file_path": "/home/hatch/workspace/projects/jarvis/data/events/2026-11-12_AMAT_01.json"
+}

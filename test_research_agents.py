@@ -1,14 +1,14 @@
 """Tests for Step 41 — integrate financial research agents.
 
 Temp DB copies only; no network, no production writes. The
-production database hash is asserted unchanged in tearDownClass.
+production database content fingerprint is asserted unchanged in tearDownClass.
 """
 
-import hashlib
 import json
 import os
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -16,20 +16,19 @@ from pathlib import Path
 from agent import research_agents as ra
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-PROD_DB = PROJECT_ROOT / "database" / "assistant.db"
-EXPECTED_HASH = (
-    "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187"
-)
+sys.path.insert(0, str(PROJECT_ROOT))
 
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
+PROD_DB = PROJECT_ROOT / "database" / "assistant.db"
 RAN_SOURCES = {
     ra.SOURCE_SCAN, ra.SOURCE_VALUATION, ra.SOURCE_REPORT,
     ra.SOURCE_COMPARISON, ra.SOURCE_NEWS, ra.SOURCE_EVENTS,
     ra.SOURCE_CHANGED,
 }
-
-
-def _hash(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 def _copy_db(directory):
@@ -41,15 +40,17 @@ def _copy_db(directory):
 class ResearchAgentsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls._tmp = tempfile.TemporaryDirectory()
+        cls._tmp = temp_dir_with_db_cleanup()
         cls.db_path = _copy_db(cls._tmp.name)
+        cls._prod_fp_before = content_fingerprint(PROD_DB)
         cls.news_dir = str(PROJECT_ROOT / "data" / "news")
         cls.events_dir = str(PROJECT_ROOT / "data" / "events")
 
     @classmethod
     def tearDownClass(cls):
-        cls._tmp.cleanup()
-        assert _hash(PROD_DB) == EXPECTED_HASH, "production DB changed!"
+        cleanup_temp_dir(cls._tmp)
+        assert content_fingerprint(PROD_DB) == cls._prod_fp_before, \
+            "production DB changed!"
 
     # -- planning ---------------------------------------------------
 

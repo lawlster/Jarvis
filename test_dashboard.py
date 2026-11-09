@@ -10,6 +10,7 @@ import hashlib
 import json
 import re
 import shutil
+import sys
 import tempfile
 import threading
 import unittest
@@ -21,8 +22,14 @@ from agent import orchestrator as orch
 from agent import ui
 
 BASE = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE))
+
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
 PROD_DB = BASE / "database" / "assistant.db"
-PROD_HASH = "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187"
 
 # A control whose name, action, or label suggests trading must
 # never appear in the served HTML.
@@ -173,12 +180,13 @@ class TestDashboard(unittest.TestCase):
         cls.data_dir = _fixture_data(cls.tmp.name)
         cls.snapshot = dash.collect_status(
             data_dir=str(cls.data_dir), now=NOW)
+        cls._prod_fp_before = content_fingerprint(PROD_DB)
 
     @classmethod
     def tearDownClass(cls):
         cls.tmp.cleanup()
-        assert _hash(PROD_DB) == PROD_HASH, (
-            "production DB hash changed during dashboard tests")
+        assert content_fingerprint(PROD_DB) == cls._prod_fp_before, (
+            "production DB changed during dashboard tests")
 
     # -- Snapshot ------------------------------------------------------
 
@@ -346,11 +354,12 @@ class TestDashboard(unittest.TestCase):
 class TestDashboardPage(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.tmp = tempfile.TemporaryDirectory()
+        cls.tmp = temp_dir_with_db_cleanup()
         root = Path(cls.tmp.name)
         cls.data_dir = _fixture_data(cls.tmp.name)
         cls.db_path = str(root / "test.db")
         shutil.copy(PROD_DB, cls.db_path)
+        cls._prod_fp_before = content_fingerprint(PROD_DB)
         cls.app = ui.JarvisUI(
             db_path=cls.db_path,
             data_dir=str(cls.data_dir),
@@ -369,9 +378,9 @@ class TestDashboardPage(unittest.TestCase):
         cls.server.shutdown()
         cls.server.server_close()
         cls.thread.join(timeout=5)
-        cls.tmp.cleanup()
-        assert _hash(PROD_DB) == PROD_HASH, (
-            "production DB hash changed during dashboard UI tests")
+        cleanup_temp_dir(cls.tmp)
+        assert content_fingerprint(PROD_DB) == cls._prod_fp_before, (
+            "production DB changed during dashboard UI tests")
 
     def get(self, path):
         with urllib.request.urlopen(self.base + path) as resp:

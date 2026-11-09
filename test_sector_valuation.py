@@ -297,6 +297,7 @@ class TestRealDatabase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.conn.close()
+        shutil.rmtree(cls.tmpdir, ignore_errors=True)
 
     def test_msft_sector_is_unknown_in_stored_data(self):
         info = sv.resolve_sector(self.conn, "MSFT")

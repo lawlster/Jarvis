@@ -20,10 +20,10 @@ Step 28b profiles before these tests were written):
   empty (sector NULL for every US/HK row).
 """
 
-import hashlib
 import json
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -34,11 +34,10 @@ import test_market_scanner as tms
 from agents import macro_sector as mcs
 
 BASE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE_DIR))
+
+from db_fingerprint import content_fingerprint  # noqa: E402
 DB_PATH = BASE_DIR / "database" / "assistant.db"
-
-
-def _db_hash():
-    return hashlib.sha256(DB_PATH.read_bytes()).hexdigest()
 
 
 def _fixture_conn():
@@ -323,12 +322,12 @@ class TestSectorAnalysis(unittest.TestCase):
 class TestRealDataMSFT(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.before_hash = _db_hash()
+        cls.before_hash = content_fingerprint(DB_PATH)
         cls.db_path = _temp_db_copy()
 
     @classmethod
     def tearDownClass(cls):
-        assert _db_hash() == cls.before_hash, \
+        assert content_fingerprint(DB_PATH) == cls.before_hash, \
             "production database changed during Step 33b tests"
 
     def test_msft_sector_is_single_company_figures(self):

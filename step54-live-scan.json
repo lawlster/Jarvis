@@ -1,0 +1,1589 @@
+{
+  "results": [
+    {
+      "ticker": "ALC",
+      "yahoo_symbol": "ALC",
+      "status": "provider_unavailable",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": null,
+      "sector": null,
+      "currency": null,
+      "price_as_of": null,
+      "retrieved_at": null,
+      "reason": "Failed to perform, curl: (28) Operation timed out after 30001 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+    },
+    {
+      "ticker": "ALG",
+      "yahoo_symbol": "ALG",
+      "status": "provider_unavailable",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": null,
+      "sector": null,
+      "currency": null,
+      "price_as_of": null,
+      "retrieved_at": null,
+      "reason": "Failed to perform, curl: (28) Operation timed out after 30002 milliseconds with 0 bytes received. See https://curl.se/libcurl/c/libcurl-errors.html first for more details."
+    },
+    {
+      "ticker": "AMD",
+      "yahoo_symbol": "AMD",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Advanced Micro Devices, Inc.",
+      "sector": "Technology",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:01+00:00",
+      "retrieved_at": "2026-11-09T04:35:01.782773+00:00",
+      "price": 449.04,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 60.07701848098898,
+        "base": 85.35060635215572,
+        "optimistic": 121.73656764296265
+      },
+      "latest_fcf": 6735000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": -1692000000.0,
+      "shares_outstanding": 1640087251.0,
+      "margins": {
+        "conservative": -6.4744055439784525,
+        "base": -4.2611225530989865,
+        "optimistic": -2.6886205081531074
+      },
+      "margin_of_safety_vs_conservative": -6.4744055439784525,
+      "margin_of_safety_vs_base": -4.2611225530989865,
+      "margin_of_safety_vs_optimistic": -2.6886205081531074,
+      "strongest_alert_price": 48.06161478479119,
+      "tier": "overvalued",
+      "tier_reasons": [
+        "price is above optimistic value (margin vs optimistic -268.9%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to optimistic value would make it 'fairly_valued'; a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert"
+      ]
+    },
+    {
+      "ticker": "AMR",
+      "yahoo_symbol": "AMR",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Alpha Metallurgical Resources, Inc.",
+      "sector": "Basic Materials",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:02+00:00",
+      "retrieved_at": "2026-11-09T04:35:05.710778+00:00",
+      "price": 147.93,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 48.02604699309496,
+        "base": 56.66484075260624,
+        "optimistic": 69.10196748487542
+      },
+      "latest_fcf": 17773000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": -352558000.0,
+      "shares_outstanding": 12662046.0,
+      "margins": {
+        "conservative": -2.0802035408258552,
+        "base": -1.6106135309873986,
+        "optimistic": -1.1407494661042459
+      },
+      "margin_of_safety_vs_conservative": -2.0802035408258552,
+      "margin_of_safety_vs_base": -1.6106135309873986,
+      "margin_of_safety_vs_optimistic": -1.1407494661042459,
+      "strongest_alert_price": 38.42083759447597,
+      "tier": "overvalued",
+      "tier_reasons": [
+        "price is above optimistic value (margin vs optimistic -114.1%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to optimistic value would make it 'fairly_valued'; a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert"
+      ]
+    },
+    {
+      "ticker": "AMZN",
+      "yahoo_symbol": "AMZN",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Amazon.com, Inc.",
+      "sector": "Consumer Cyclical",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:01+00:00",
+      "retrieved_at": "2026-11-09T04:35:09.729711+00:00",
+      "price": 259.3,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 4.112216210793019,
+        "base": 8.492004501875984,
+        "optimistic": 14.797512371737326
+      },
+      "latest_fcf": 7695000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 66177000000.0,
+      "shares_outstanding": 10813138306.0,
+      "margins": {
+        "conservative": -62.05602300760237,
+        "base": -29.534604632241727,
+        "optimistic": -16.523215624759533
+      },
+      "margin_of_safety_vs_conservative": -62.05602300760237,
+      "margin_of_safety_vs_base": -29.534604632241727,
+      "margin_of_safety_vs_optimistic": -16.523215624759533,
+      "strongest_alert_price": 3.289772968634415,
+      "tier": "overvalued",
+      "tier_reasons": [
+        "price is above optimistic value (margin vs optimistic -1652.3%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to optimistic value would make it 'fairly_valued'; a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert"
+      ]
+    },
+    {
+      "ticker": "AVGO",
+      "yahoo_symbol": "AVGO",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Broadcom Inc.",
+      "sector": "Technology",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:01+00:00",
+      "retrieved_at": "2026-11-09T04:35:14.028625+00:00",
+      "price": 293.69,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 70.81118049486234,
+        "base": 105.51088353465802,
+        "optimistic": 155.46746500795612
+      },
+      "latest_fcf": 26914000000.0,
+      "latest_fcf_period": "2025-10-31",
+      "net_debt": 48958000000.0,
+      "shares_outstanding": 4773629865.0,
+      "margins": {
+        "conservative": -3.1475088813313663,
+        "base": -1.7835043188082984,
+        "optimistic": -0.8890769202737709
+      },
+      "margin_of_safety_vs_conservative": -3.1475088813313663,
+      "margin_of_safety_vs_base": -1.7835043188082984,
+      "margin_of_safety_vs_optimistic": -0.8890769202737709,
+      "strongest_alert_price": 56.64894439588988,
+      "tier": "overvalued",
+      "tier_reasons": [
+        "price is above optimistic value (margin vs optimistic -88.9%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to optimistic value would make it 'fairly_valued'; a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert"
+      ]
+    },
+    {
+      "ticker": "BE",
+      "yahoo_symbol": "BE",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Bloom Energy Corporation",
+      "sector": "Industrials",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:03+00:00",
+      "retrieved_at": "2026-11-09T04:35:18.095962+00:00",
+      "price": 173.24,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 0.9625367284187889,
+        "base": 2.1535159074679844,
+        "optimistic": 3.8681486904326636
+      },
+      "latest_fcf": 57190000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 537844000.0,
+      "shares_outstanding": 295537217.0,
+      "margins": {
+        "conservative": -178.98274235684565,
+        "base": -79.44519169755681,
+        "optimistic": -43.786282499554744
+      },
+      "margin_of_safety_vs_conservative": -178.98274235684565,
+      "margin_of_safety_vs_base": -79.44519169755681,
+      "margin_of_safety_vs_optimistic": -43.786282499554744,
+      "strongest_alert_price": 0.7700293827350312,
+      "tier": "overvalued",
+      "tier_reasons": [
+        "price is above optimistic value (margin vs optimistic -4378.6%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to optimistic value would make it 'fairly_valued'; a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert"
+      ]
+    },
+    {
+      "ticker": "BKE",
+      "yahoo_symbol": "BKE",
+      "status": "ok",
+      "detection_band": "strongest_alert",
+      "provisional": true,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "The Buckle, Inc.",
+      "sector": "Consumer Cyclical",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:03+00:00",
+      "retrieved_at": "2026-11-09T04:35:22.586680+00:00",
+      "price": 41.96,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 54.83047424025266,
+        "base": 79.4163245578672,
+        "optimistic": 114.81216160793133
+      },
+      "latest_fcf": 205779000.0,
+      "latest_fcf_period": "2026-01-31",
+      "net_debt": 134353000.0,
+      "shares_outstanding": 51512434.0,
+      "margins": {
+        "conservative": 0.23473213424814898,
+        "base": 0.4716451531394457,
+        "optimistic": 0.6345334900732208
+      },
+      "margin_of_safety_vs_conservative": 0.23473213424814898,
+      "margin_of_safety_vs_base": 0.4716451531394457,
+      "margin_of_safety_vs_optimistic": 0.6345334900732208,
+      "strongest_alert_price": 43.86437939220213,
+      "tier": "reasonable_price",
+      "tier_reasons": [
+        "margin vs conservative value is 23.5% (>= 20%) but a strongest alert is BLOCKED: deterioration is UNKNOWN (no health/growth inputs)",
+        "price is at or below base value, so the tier is 'reasonable_price' with the strongest alert blocked"
+      ],
+      "strongest_alert_blocked": true,
+      "conditions_to_change": [
+        "a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above base value would move it to 'fairly_valued' or 'overvalued'"
+      ],
+      "band_note": "margin band 'strongest_alert' from the live-derived values only \u2014 business quality and deterioration are unknown from a live pull, so this is NOT a confirmed Step 26 candidate"
+    },
+    {
+      "ticker": "BN",
+      "yahoo_symbol": "BN",
+      "status": "insufficient_data",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Brookfield Corporation",
+      "sector": "Financial Services",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:03+00:00",
+      "retrieved_at": "2026-11-09T04:35:26.748622+00:00",
+      "price": 41.38,
+      "dcf_notes": [
+        "latest annual free cash flow is not positive (-3,794,000,000 for 2025-12-31)"
+      ],
+      "reason": "latest annual free cash flow is not positive (-3,794,000,000 for 2025-12-31)"
+    },
+    {
+      "ticker": "BRK.B",
+      "yahoo_symbol": "BRK-B",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Berkshire Hathaway Inc.",
+      "sector": "Financial Services",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:03:23+00:00",
+      "retrieved_at": "2026-11-09T04:35:31.223067+00:00",
+      "price": 570.89,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 200.89250841362954,
+        "base": 310.35158073994637,
+        "optimistic": 467.93797444452713
+      },
+      "latest_fcf": 25042000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 77204000000.0,
+      "shares_outstanding": 1408035161.0,
+      "margins": {
+        "conservative": -1.8417684885718115,
+        "base": -0.839494416747847,
+        "optimistic": -0.22001211950725655
+      },
+      "margin_of_safety_vs_conservative": -1.8417684885718115,
+      "margin_of_safety_vs_base": -0.839494416747847,
+      "margin_of_safety_vs_optimistic": -0.22001211950725655,
+      "strongest_alert_price": 160.71400673090363,
+      "tier": "overvalued",
+      "tier_reasons": [
+        "price is above optimistic value (margin vs optimistic -22.0%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to optimistic value would make it 'fairly_valued'; a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert"
+      ]
+    },
+    {
+      "ticker": "DBS",
+      "yahoo_symbol": "D05.SI",
+      "status": "ok",
+      "detection_band": "watch_discount",
+      "provisional": true,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "DBS Group Holdings Ltd",
+      "sector": "Financial Services",
+      "currency": "SGD",
+      "price_as_of": "2026-11-06T09:15:03+00:00",
+      "retrieved_at": "2026-11-09T04:35:35.314785+00:00",
+      "price": 69.72,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 79.57397143576924,
+        "base": 102.29429440716908,
+        "optimistic": 135.0043629722707
+      },
+      "latest_fcf": 10499000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": -75348000000.0,
+      "shares_outstanding": 2844000622.0,
+      "margins": {
+        "conservative": 0.123834103764988,
+        "base": 0.3184370604044772,
+        "optimistic": 0.4835722456294233
+      },
+      "margin_of_safety_vs_conservative": 0.123834103764988,
+      "margin_of_safety_vs_base": 0.3184370604044772,
+      "margin_of_safety_vs_optimistic": 0.4835722456294233,
+      "strongest_alert_price": 63.65917714861539,
+      "tier": "reasonable_price",
+      "tier_reasons": [
+        "price is at or below base value (margin vs base 31.8%) but the margin vs conservative value is 12.4% (< 20%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above base value would move it to 'fairly_valued' or 'overvalued'"
+      ],
+      "band_note": "margin band 'watch_discount' from the live-derived values only \u2014 business quality and deterioration are unknown from a live pull, so this is NOT a confirmed Step 26 candidate"
+    },
+    {
+      "ticker": "DECK",
+      "yahoo_symbol": "DECK",
+      "status": "ok",
+      "detection_band": "strongest_alert",
+      "provisional": true,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Deckers Outdoor Corporation",
+      "sector": "Consumer Cyclical",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:03+00:00",
+      "retrieved_at": "2026-11-09T04:35:39.244354+00:00",
+      "price": 86.71,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 129.68311822704396,
+        "base": 180.2793461596181,
+        "optimistic": 253.12188835821794
+      },
+      "latest_fcf": 1097332000.0,
+      "latest_fcf_period": "2026-03-31",
+      "net_debt": -1532055000.0,
+      "shares_outstanding": 133479987.0,
+      "margins": {
+        "conservative": 0.33137017997830964,
+        "base": 0.519024215213053,
+        "optimistic": 0.657437764223345
+      },
+      "margin_of_safety_vs_conservative": 0.33137017997830964,
+      "margin_of_safety_vs_base": 0.519024215213053,
+      "margin_of_safety_vs_optimistic": 0.657437764223345,
+      "strongest_alert_price": 103.74649458163518,
+      "tier": "reasonable_price",
+      "tier_reasons": [
+        "margin vs conservative value is 33.1% (>= 20%) but a strongest alert is BLOCKED: deterioration is UNKNOWN (no health/growth inputs)",
+        "price is at or below base value, so the tier is 'reasonable_price' with the strongest alert blocked"
+      ],
+      "strongest_alert_blocked": true,
+      "conditions_to_change": [
+        "a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above base value would move it to 'fairly_valued' or 'overvalued'"
+      ],
+      "band_note": "margin band 'strongest_alert' from the live-derived values only \u2014 business quality and deterioration are unknown from a live pull, so this is NOT a confirmed Step 26 candidate"
+    },
+    {
+      "ticker": "DHI",
+      "yahoo_symbol": "DHI",
+      "status": "ok",
+      "detection_band": "watch_discount",
+      "provisional": true,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "D.R. Horton, Inc.",
+      "sector": "Consumer Cyclical",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:02+00:00",
+      "retrieved_at": "2026-11-09T04:35:43.161697+00:00",
+      "price": 152.28,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 162.71364550101885,
+        "base": 237.16394511192377,
+        "optimistic": 344.3487949061173
+      },
+      "latest_fcf": 3283500000.0,
+      "latest_fcf_period": "2025-09-30",
+      "net_debt": 3045700000.0,
+      "shares_outstanding": 271435610.0,
+      "margins": {
+        "conservative": 0.06412274440101284,
+        "base": 0.35791251942560176,
+        "optimistic": 0.5577739714712305
+      },
+      "margin_of_safety_vs_conservative": 0.06412274440101284,
+      "margin_of_safety_vs_base": 0.35791251942560176,
+      "margin_of_safety_vs_optimistic": 0.5577739714712305,
+      "strongest_alert_price": 130.1709164008151,
+      "tier": "reasonable_price",
+      "tier_reasons": [
+        "price is at or below base value (margin vs base 35.8%) but the margin vs conservative value is 6.4% (< 20%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above base value would move it to 'fairly_valued' or 'overvalued'"
+      ],
+      "band_note": "margin band 'watch_discount' from the live-derived values only \u2014 business quality and deterioration are unknown from a live pull, so this is NOT a confirmed Step 26 candidate"
+    },
+    {
+      "ticker": "DPZ",
+      "yahoo_symbol": "DPZ",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Domino's Pizza, Inc.",
+      "sector": "Consumer Cyclical",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:01+00:00",
+      "retrieved_at": "2026-11-09T04:35:47.422384+00:00",
+      "price": 334.28,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 143.86668778133784,
+        "base": 269.4989047599736,
+        "optimistic": 450.36950402609443
+      },
+      "latest_fcf": 671504000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 4922609000.0,
+      "shares_outstanding": 32896056.0,
+      "margins": {
+        "conservative": -1.3235399740909461,
+        "base": -0.24037609836567983,
+        "optimistic": 0.25776501958571385
+      },
+      "margin_of_safety_vs_conservative": -1.3235399740909461,
+      "margin_of_safety_vs_base": -0.24037609836567983,
+      "margin_of_safety_vs_optimistic": 0.25776501958571385,
+      "strongest_alert_price": 115.09335022507028,
+      "tier": "fairly_valued",
+      "tier_reasons": [
+        "price is above base value (margin vs base -24.0%) but inside the fair-value range (margin vs optimistic 25.8%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above optimistic value would make it 'overvalued'"
+      ]
+    },
+    {
+      "ticker": "GOOGL",
+      "yahoo_symbol": "GOOGL",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Alphabet Inc.",
+      "sector": "Communication Services",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:01+00:00",
+      "retrieved_at": "2026-11-09T04:35:51.790760+00:00",
+      "price": 284.78,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 174.06182716663017,
+        "base": 250.64457274361462,
+        "optimistic": 360.89946929064877
+      },
+      "latest_fcf": 73266000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 28583000000.0,
+      "shares_outstanding": 5888000000.0,
+      "margins": {
+        "conservative": -0.6360853188527017,
+        "base": -0.13619057010782606,
+        "optimistic": 0.21091599120459312
+      },
+      "margin_of_safety_vs_conservative": -0.6360853188527017,
+      "margin_of_safety_vs_base": -0.13619057010782606,
+      "margin_of_safety_vs_optimistic": 0.21091599120459312,
+      "strongest_alert_price": 139.24946173330414,
+      "tier": "fairly_valued",
+      "tier_reasons": [
+        "price is above base value (margin vs base -13.6%) but inside the fair-value range (margin vs optimistic 21.1%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above optimistic value would make it 'overvalued'"
+      ]
+    },
+    {
+      "ticker": "HCC",
+      "yahoo_symbol": "HCC",
+      "status": "insufficient_data",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Warrior Met Coal, Inc.",
+      "sector": "Basic Materials",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:03+00:00",
+      "retrieved_at": "2026-11-09T04:35:56.078974+00:00",
+      "price": 84.15,
+      "dcf_notes": [
+        "latest annual free cash flow is not positive (-100,378,000 for 2025-12-31)"
+      ],
+      "reason": "latest annual free cash flow is not positive (-100,378,000 for 2025-12-31)"
+    },
+    {
+      "ticker": "HHH",
+      "yahoo_symbol": "HHH",
+      "status": "ok",
+      "detection_band": "watch_below_base",
+      "provisional": true,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Howard Hughes Holdings Inc.",
+      "sector": "Real Estate",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:03+00:00",
+      "retrieved_at": "2026-11-09T04:36:00.427588+00:00",
+      "price": 77.73,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 49.42915611296209,
+        "base": 96.7220732816718,
+        "optimistic": 164.80889428238825
+      },
+      "latest_fcf": 458871000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 3646189000.0,
+      "shares_outstanding": 59716007.0,
+      "margins": {
+        "conservative": -0.5725536527947404,
+        "base": 0.1963571771912241,
+        "optimistic": 0.528362832974201
+      },
+      "margin_of_safety_vs_conservative": -0.5725536527947404,
+      "margin_of_safety_vs_base": 0.1963571771912241,
+      "margin_of_safety_vs_optimistic": 0.528362832974201,
+      "strongest_alert_price": 39.543324890369675,
+      "tier": "reasonable_price",
+      "tier_reasons": [
+        "price is at or below base value (margin vs base 19.6%) but the margin vs conservative value is -57.3% (< 20%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above base value would move it to 'fairly_valued' or 'overvalued'"
+      ],
+      "band_note": "margin band 'watch_below_base' from the live-derived values only \u2014 business quality and deterioration are unknown from a live pull, so this is NOT a confirmed Step 26 candidate"
+    },
+    {
+      "ticker": "HIMX",
+      "yahoo_symbol": "HIMX",
+      "status": "ok",
+      "detection_band": "watch_below_base",
+      "provisional": true,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Himax Technologies, Inc.",
+      "sector": "Technology",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:01+00:00",
+      "retrieved_at": "2026-11-09T04:36:04.631530+00:00",
+      "price": 8.49,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 7.89573580379093,
+        "base": 12.112422374290897,
+        "optimistic": 18.183115427916064
+      },
+      "latest_fcf": 119505000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 341088000.0,
+      "shares_outstanding": 174425914.0,
+      "margins": {
+        "conservative": -0.07526394131928146,
+        "base": 0.2990667153400821,
+        "optimistic": 0.5330833138217049
+      },
+      "margin_of_safety_vs_conservative": -0.07526394131928146,
+      "margin_of_safety_vs_base": 0.2990667153400821,
+      "margin_of_safety_vs_optimistic": 0.5330833138217049,
+      "strongest_alert_price": 6.316588643032745,
+      "tier": "reasonable_price",
+      "tier_reasons": [
+        "price is at or below base value (margin vs base 29.9%) but the margin vs conservative value is -7.5% (< 20%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above base value would move it to 'fairly_valued' or 'overvalued'"
+      ],
+      "band_note": "margin band 'watch_below_base' from the live-derived values only \u2014 business quality and deterioration are unknown from a live pull, so this is NOT a confirmed Step 26 candidate"
+    },
+    {
+      "ticker": "ICE",
+      "yahoo_symbol": "ICE",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Intercontinental Exchange, Inc.",
+      "sector": "Financial Services",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:02+00:00",
+      "retrieved_at": "2026-11-09T04:36:08.529804+00:00",
+      "price": 172.27,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 64.80599830889497,
+        "base": 107.43622390315403,
+        "optimistic": 168.81024591372454
+      },
+      "latest_fcf": 3871000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 19442000000.0,
+      "shares_outstanding": 558858412.0,
+      "margins": {
+        "conservative": -1.6582415902133403,
+        "base": -0.6034629079600651,
+        "optimistic": -0.02049492948457451
+      },
+      "margin_of_safety_vs_conservative": -1.6582415902133403,
+      "margin_of_safety_vs_base": -0.6034629079600651,
+      "margin_of_safety_vs_optimistic": -0.02049492948457451,
+      "strongest_alert_price": 51.84479864711598,
+      "tier": "overvalued",
+      "tier_reasons": [
+        "price is above optimistic value (margin vs optimistic -2.0%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to optimistic value would make it 'fairly_valued'; a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert"
+      ]
+    },
+    {
+      "ticker": "INTC",
+      "yahoo_symbol": "INTC",
+      "status": "insufficient_data",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Intel Corporation",
+      "sector": "Technology",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:01+00:00",
+      "retrieved_at": "2026-11-09T04:36:12.731105+00:00",
+      "price": 56.28,
+      "dcf_notes": [
+        "latest annual free cash flow is not positive (-4,949,000,000 for 2025-12-31)"
+      ],
+      "reason": "latest annual free cash flow is not positive (-4,949,000,000 for 2025-12-31)"
+    },
+    {
+      "ticker": "KSPI",
+      "yahoo_symbol": "KSPI",
+      "status": "ok",
+      "detection_band": "strongest_alert",
+      "provisional": true,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Joint Stock Company Kaspi.kz",
+      "sector": "Technology",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:01+00:00",
+      "retrieved_at": "2026-11-09T04:36:17.047528+00:00",
+      "price": 91.68,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 39435.632614186405,
+        "base": 55341.1755147707,
+        "optimistic": 78240.11931491786
+      },
+      "latest_fcf": 491098000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": -432567000000.0,
+      "shares_outstanding": 190027266.0,
+      "margins": {
+        "conservative": 0.9976751989527608,
+        "base": 0.9983433673183265,
+        "optimistic": 0.99882822264584
+      },
+      "margin_of_safety_vs_conservative": 0.9976751989527608,
+      "margin_of_safety_vs_base": 0.9983433673183265,
+      "margin_of_safety_vs_optimistic": 0.99882822264584,
+      "strongest_alert_price": 31548.506091349125,
+      "tier": "reasonable_price",
+      "tier_reasons": [
+        "margin vs conservative value is 99.8% (>= 20%) but a strongest alert is BLOCKED: deterioration is UNKNOWN (no health/growth inputs)",
+        "price is at or below base value, so the tier is 'reasonable_price' with the strongest alert blocked"
+      ],
+      "strongest_alert_blocked": true,
+      "conditions_to_change": [
+        "a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above base value would move it to 'fairly_valued' or 'overvalued'"
+      ],
+      "band_note": "margin band 'strongest_alert' from the live-derived values only \u2014 business quality and deterioration are unknown from a live pull, so this is NOT a confirmed Step 26 candidate"
+    },
+    {
+      "ticker": "MA",
+      "yahoo_symbol": "MA",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Mastercard Incorporated",
+      "sector": "Financial Services",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:02+00:00",
+      "retrieved_at": "2026-11-09T04:36:20.808165+00:00",
+      "price": 652.7,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 263.5134243434739,
+        "base": 380.48199709749383,
+        "optimistic": 548.8796928328173
+      },
+      "latest_fcf": 16433000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 8434000000.0,
+      "shares_outstanding": 864657109.0,
+      "margins": {
+        "conservative": -1.4769136586728304,
+        "base": -0.7154556719611459,
+        "optimistic": -0.18914947760474937
+      },
+      "margin_of_safety_vs_conservative": -1.4769136586728304,
+      "margin_of_safety_vs_base": -0.7154556719611459,
+      "margin_of_safety_vs_optimistic": -0.18914947760474937,
+      "strongest_alert_price": 210.81073947477913,
+      "tier": "overvalued",
+      "tier_reasons": [
+        "price is above optimistic value (margin vs optimistic -18.9%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to optimistic value would make it 'fairly_valued'; a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert"
+      ]
+    },
+    {
+      "ticker": "MCRI",
+      "yahoo_symbol": "MCRI",
+      "status": "ok",
+      "detection_band": "watch_discount",
+      "provisional": true,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Monarch Casino & Resort, Inc.",
+      "sector": "Consumer Cyclical",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:01+00:00",
+      "retrieved_at": "2026-11-09T04:36:25.197670+00:00",
+      "price": 108.75,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 109.42034844693126,
+        "base": 154.2376914246474,
+        "optimistic": 218.76046971226828
+      },
+      "latest_fcf": 128425000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": -83170000.0,
+      "shares_outstanding": 17635985.0,
+      "margins": {
+        "conservative": 0.006126360009321075,
+        "base": 0.2949194260137792,
+        "optimistic": 0.5028809357420153
+      },
+      "margin_of_safety_vs_conservative": 0.006126360009321075,
+      "margin_of_safety_vs_base": 0.2949194260137792,
+      "margin_of_safety_vs_optimistic": 0.5028809357420153,
+      "strongest_alert_price": 87.536278757545,
+      "tier": "reasonable_price",
+      "tier_reasons": [
+        "price is at or below base value (margin vs base 29.5%) but the margin vs conservative value is 0.6% (< 20%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above base value would move it to 'fairly_valued' or 'overvalued'"
+      ],
+      "band_note": "margin band 'watch_discount' from the live-derived values only \u2014 business quality and deterioration are unknown from a live pull, so this is NOT a confirmed Step 26 candidate"
+    },
+    {
+      "ticker": "META",
+      "yahoo_symbol": "META",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Meta Platforms, Inc.",
+      "sector": "Communication Services",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:01+00:00",
+      "retrieved_at": "2026-11-09T04:36:29.333315+00:00",
+      "price": 610.15,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 277.70110287558873,
+        "base": 405.8500474234605,
+        "optimistic": 590.3439372322827
+      },
+      "latest_fcf": 46109000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 48024000000.0,
+      "shares_outstanding": 2214455318.0,
+      "margins": {
+        "conservative": -1.1971464775685452,
+        "base": -0.5033877755430557,
+        "optimistic": -0.03355004010132526
+      },
+      "margin_of_safety_vs_conservative": -1.1971464775685452,
+      "margin_of_safety_vs_base": -0.5033877755430557,
+      "margin_of_safety_vs_optimistic": -0.03355004010132526,
+      "strongest_alert_price": 222.160882300471,
+      "tier": "overvalued",
+      "tier_reasons": [
+        "price is above optimistic value (margin vs optimistic -3.4%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to optimistic value would make it 'fairly_valued'; a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert"
+      ]
+    },
+    {
+      "ticker": "MSFT",
+      "yahoo_symbol": "MSFT",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Microsoft Corporation",
+      "sector": "Technology",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:01+00:00",
+      "retrieved_at": "2026-11-09T04:36:32.936494+00:00",
+      "price": 530.61,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 124.86679412760805,
+        "base": 180.38308693110045,
+        "optimistic": 260.30896414545106
+      },
+      "latest_fcf": 66987000000.0,
+      "latest_fcf_period": "2026-06-30",
+      "net_debt": 35891000000.0,
+      "shares_outstanding": 7426194552.0,
+      "margins": {
+        "conservative": -3.249408369191743,
+        "base": -1.9415728992523176,
+        "optimistic": -1.0383854307203755
+      },
+      "margin_of_safety_vs_conservative": -3.249408369191743,
+      "margin_of_safety_vs_base": -1.9415728992523176,
+      "margin_of_safety_vs_optimistic": -1.0383854307203755,
+      "strongest_alert_price": 99.89343530208644,
+      "tier": "overvalued",
+      "tier_reasons": [
+        "price is above optimistic value (margin vs optimistic -103.8%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to optimistic value would make it 'fairly_valued'; a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert"
+      ]
+    },
+    {
+      "ticker": "NFLX",
+      "yahoo_symbol": "NFLX",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Netflix, Inc.",
+      "sector": "Communication Services",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:01+00:00",
+      "retrieved_at": "2026-11-09T04:36:36.672282+00:00",
+      "price": 63.41,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 31.806314636861796,
+        "base": 45.98651321320361,
+        "optimistic": 66.40150767797283
+      },
+      "latest_fcf": 9461053000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 5429155000.0,
+      "shares_outstanding": 4106325903.0,
+      "margins": {
+        "conservative": -0.9936292753172743,
+        "base": -0.3788825368432972,
+        "optimistic": 0.04505180352953338
+      },
+      "margin_of_safety_vs_conservative": -0.9936292753172743,
+      "margin_of_safety_vs_base": -0.3788825368432972,
+      "margin_of_safety_vs_optimistic": 0.04505180352953338,
+      "strongest_alert_price": 25.445051709489437,
+      "tier": "fairly_valued",
+      "tier_reasons": [
+        "price is above base value (margin vs base -37.9%) but inside the fair-value range (margin vs optimistic 4.5%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above optimistic value would make it 'overvalued'"
+      ]
+    },
+    {
+      "ticker": "NRP",
+      "yahoo_symbol": "NRP",
+      "status": "ok",
+      "detection_band": "strongest_alert",
+      "provisional": true,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Natural Resource Partners L.P.",
+      "sector": "Energy",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:02+00:00",
+      "retrieved_at": "2026-11-09T04:36:40.802642+00:00",
+      "price": 117.71,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 179.7626276047558,
+        "base": 256.8026474642452,
+        "optimistic": 367.71587413944803
+      },
+      "latest_fcf": 165863000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 2941000.0,
+      "shares_outstanding": 13250412.0,
+      "margins": {
+        "conservative": 0.34519203703002693,
+        "base": 0.5416324513695334,
+        "optimistic": 0.6798887176805397
+      },
+      "margin_of_safety_vs_conservative": 0.34519203703002693,
+      "margin_of_safety_vs_base": 0.5416324513695334,
+      "margin_of_safety_vs_optimistic": 0.6798887176805397,
+      "strongest_alert_price": 143.81010208380465,
+      "tier": "reasonable_price",
+      "tier_reasons": [
+        "margin vs conservative value is 34.5% (>= 20%) but a strongest alert is BLOCKED: deterioration is UNKNOWN (no health/growth inputs)",
+        "price is at or below base value, so the tier is 'reasonable_price' with the strongest alert blocked"
+      ],
+      "strongest_alert_blocked": true,
+      "conditions_to_change": [
+        "a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above base value would move it to 'fairly_valued' or 'overvalued'"
+      ],
+      "band_note": "margin band 'strongest_alert' from the live-derived values only \u2014 business quality and deterioration are unknown from a live pull, so this is NOT a confirmed Step 26 candidate"
+    },
+    {
+      "ticker": "NVDA",
+      "yahoo_symbol": "NVDA",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "NVIDIA Corporation",
+      "sector": "Technology",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:00+00:00",
+      "retrieved_at": "2026-11-09T04:36:44.535727+00:00",
+      "price": 186.64,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 57.5485963416729,
+        "base": 82.18922267594483,
+        "optimistic": 117.66391984005053
+      },
+      "latest_fcf": 96676000000.0,
+      "latest_fcf_period": "2026-01-31",
+      "net_debt": 435000000.0,
+      "shares_outstanding": 24147000000.0,
+      "margins": {
+        "conservative": -2.243172064387044,
+        "base": -1.2708573450789655,
+        "optimistic": -0.5862126661572542
+      },
+      "margin_of_safety_vs_conservative": -2.243172064387044,
+      "margin_of_safety_vs_base": -1.2708573450789655,
+      "margin_of_safety_vs_optimistic": -0.5862126661572542,
+      "strongest_alert_price": 46.03887707333832,
+      "tier": "overvalued",
+      "tier_reasons": [
+        "price is above optimistic value (margin vs optimistic -58.6%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to optimistic value would make it 'fairly_valued'; a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert"
+      ]
+    },
+    {
+      "ticker": "OCBC",
+      "yahoo_symbol": "O39.SI",
+      "status": "ok",
+      "detection_band": "watch_discount",
+      "provisional": true,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Oversea-Chinese Banking Corporation Limited",
+      "sector": "Financial Services",
+      "currency": "SGD",
+      "price_as_of": "2026-11-06T09:15:51+00:00",
+      "retrieved_at": "2026-11-09T04:36:48.492458+00:00",
+      "price": 27.73,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 29.372971419513693,
+        "base": 40.5194975452133,
+        "optimistic": 56.56696457696682
+      },
+      "latest_fcf": 8142000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": -14979000000.0,
+      "shares_outstanding": 4495601544.0,
+      "margins": {
+        "conservative": 0.055934804689940144,
+        "base": 0.31563810807234854,
+        "optimistic": 0.5097845499157079
+      },
+      "margin_of_safety_vs_conservative": 0.055934804689940144,
+      "margin_of_safety_vs_base": 0.31563810807234854,
+      "margin_of_safety_vs_optimistic": 0.5097845499157079,
+      "strongest_alert_price": 23.498377135610955,
+      "tier": "reasonable_price",
+      "tier_reasons": [
+        "price is at or below base value (margin vs base 31.6%) but the margin vs conservative value is 5.6% (< 20%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above base value would move it to 'fairly_valued' or 'overvalued'"
+      ],
+      "band_note": "margin band 'watch_discount' from the live-derived values only \u2014 business quality and deterioration are unknown from a live pull, so this is NOT a confirmed Step 26 candidate"
+    },
+    {
+      "ticker": "OTIS",
+      "yahoo_symbol": "OTIS",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Otis Worldwide Corporation",
+      "sector": "Industrials",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:02+00:00",
+      "retrieved_at": "2026-11-09T04:36:52.223281+00:00",
+      "price": 78.96,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 35.05978839274349,
+        "base": 58.403428312030705,
+        "optimistic": 92.01087585052332
+      },
+      "latest_fcf": 1444000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 7415000000.0,
+      "shares_outstanding": 380710513.0,
+      "margins": {
+        "conservative": -1.2521527829969092,
+        "base": -0.35197542819134087,
+        "optimistic": 0.14184057840863493
+      },
+      "margin_of_safety_vs_conservative": -1.2521527829969092,
+      "margin_of_safety_vs_base": -0.35197542819134087,
+      "margin_of_safety_vs_optimistic": 0.14184057840863493,
+      "strongest_alert_price": 28.047830714194795,
+      "tier": "fairly_valued",
+      "tier_reasons": [
+        "price is above base value (margin vs base -35.2%) but inside the fair-value range (margin vs optimistic 14.2%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above optimistic value would make it 'overvalued'"
+      ]
+    },
+    {
+      "ticker": "QSR",
+      "yahoo_symbol": "QSR",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Restaurant Brands International Inc.",
+      "sector": "Consumer Cyclical",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:02+00:00",
+      "retrieved_at": "2026-11-09T04:36:56.168606+00:00",
+      "price": 77.69,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 18.066627188780462,
+        "base": 43.66709557203907,
+        "optimistic": 80.52366126299378
+      },
+      "latest_fcf": 1449000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 14541000000.0,
+      "shares_outstanding": 348350731.0,
+      "margins": {
+        "conservative": -3.3001938982969765,
+        "base": -0.7791428301392798,
+        "optimistic": 0.03519041755613825
+      },
+      "margin_of_safety_vs_conservative": -3.3001938982969765,
+      "margin_of_safety_vs_base": -0.7791428301392798,
+      "margin_of_safety_vs_optimistic": 0.03519041755613825,
+      "strongest_alert_price": 14.45330175102437,
+      "tier": "fairly_valued",
+      "tier_reasons": [
+        "price is above base value (margin vs base -77.9%) but inside the fair-value range (margin vs optimistic 3.5%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above optimistic value would make it 'overvalued'"
+      ]
+    },
+    {
+      "ticker": "RIG",
+      "yahoo_symbol": "RIG",
+      "status": "ok",
+      "detection_band": "watch_below_base",
+      "provisional": true,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Transocean Ltd.",
+      "sector": "Energy",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:02+00:00",
+      "retrieved_at": "2026-11-09T04:36:59.988087+00:00",
+      "price": 5.24,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 3.267886220898683,
+        "base": 6.717319479733996,
+        "optimistic": 11.683410787030821
+      },
+      "latest_fcf": 626000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 5351000000.0,
+      "shares_outstanding": 1116921983.0,
+      "margins": {
+        "conservative": -0.603482999649534,
+        "base": 0.21992693427654234,
+        "optimistic": 0.5515008334880542
+      },
+      "margin_of_safety_vs_conservative": -0.603482999649534,
+      "margin_of_safety_vs_base": 0.21992693427654234,
+      "margin_of_safety_vs_optimistic": 0.5515008334880542,
+      "strongest_alert_price": 2.614308976718947,
+      "tier": "reasonable_price",
+      "tier_reasons": [
+        "price is at or below base value (margin vs base 22.0%) but the margin vs conservative value is -60.3% (< 20%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above base value would move it to 'fairly_valued' or 'overvalued'"
+      ],
+      "band_note": "margin band 'watch_below_base' from the live-derived values only \u2014 business quality and deterioration are unknown from a live pull, so this is NOT a confirmed Step 26 candidate"
+    },
+    {
+      "ticker": "SPGI",
+      "yahoo_symbol": "SPGI",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "S&P Global Inc.",
+      "sector": "Financial Services",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:02+00:00",
+      "retrieved_at": "2026-11-09T04:37:03.741883+00:00",
+      "price": 467.8,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 229.77710676480984,
+        "base": 345.6074646578289,
+        "optimistic": 512.3664915154246
+      },
+      "latest_fcf": 5456000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 11837000000.0,
+      "shares_outstanding": 289900000.0,
+      "margins": {
+        "conservative": -1.0358860227046915,
+        "base": -0.3535587272779211,
+        "optimistic": 0.0869816669384652
+      },
+      "margin_of_safety_vs_conservative": -1.0358860227046915,
+      "margin_of_safety_vs_base": -0.3535587272779211,
+      "margin_of_safety_vs_optimistic": 0.0869816669384652,
+      "strongest_alert_price": 183.82168541184788,
+      "tier": "fairly_valued",
+      "tier_reasons": [
+        "price is above base value (margin vs base -35.4%) but inside the fair-value range (margin vs optimistic 8.7%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above optimistic value would make it 'overvalued'"
+      ]
+    },
+    {
+      "ticker": "UBER",
+      "yahoo_symbol": "UBER",
+      "status": "ok",
+      "detection_band": "watch_below_base",
+      "provisional": true,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Uber Technologies, Inc.",
+      "sector": "Technology",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:03+00:00",
+      "retrieved_at": "2026-11-09T04:37:07.673962+00:00",
+      "price": 68.59,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 66.3122275780006,
+        "base": 95.73919324852818,
+        "optimistic": 138.10470301515912
+      },
+      "latest_fcf": 9763000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 4975000000.0,
+      "shares_outstanding": 2041898070.0,
+      "margins": {
+        "conservative": -0.034349206853594876,
+        "base": 0.2835744936564477,
+        "optimistic": 0.5033478331837027
+      },
+      "margin_of_safety_vs_conservative": -0.034349206853594876,
+      "margin_of_safety_vs_base": 0.2835744936564477,
+      "margin_of_safety_vs_optimistic": 0.5033478331837027,
+      "strongest_alert_price": 53.04978206240048,
+      "tier": "reasonable_price",
+      "tier_reasons": [
+        "price is at or below base value (margin vs base 28.4%) but the margin vs conservative value is -3.4% (< 20%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above base value would move it to 'fairly_valued' or 'overvalued'"
+      ],
+      "band_note": "margin band 'watch_below_base' from the live-derived values only \u2014 business quality and deterioration are unknown from a live pull, so this is NOT a confirmed Step 26 candidate"
+    },
+    {
+      "ticker": "UNH",
+      "yahoo_symbol": "UNH",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "UnitedHealth Group Incorporated",
+      "sector": "Healthcare",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:02+00:00",
+      "retrieved_at": "2026-11-09T04:37:11.742472+00:00",
+      "price": 394.15,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 197.6637996106285,
+        "base": 308.07884730285923,
+        "optimistic": 467.04154273541064
+      },
+      "latest_fcf": 16075000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": 54024000000.0,
+      "shares_outstanding": 896022611.0,
+      "margins": {
+        "conservative": -0.9940424133120139,
+        "base": -0.27938027375351693,
+        "optimistic": 0.15607079042368044
+      },
+      "margin_of_safety_vs_conservative": -0.9940424133120139,
+      "margin_of_safety_vs_base": -0.27938027375351693,
+      "margin_of_safety_vs_optimistic": 0.15607079042368044,
+      "strongest_alert_price": 158.13103968850282,
+      "tier": "fairly_valued",
+      "tier_reasons": [
+        "price is above base value (margin vs base -27.9%) but inside the fair-value range (margin vs optimistic 15.6%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above optimistic value would make it 'overvalued'"
+      ]
+    },
+    {
+      "ticker": "UOB",
+      "yahoo_symbol": "U11.SI",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "United Overseas Bank Limited",
+      "sector": "Financial Services",
+      "currency": "SGD",
+      "price_as_of": "2026-11-06T09:12:34+00:00",
+      "retrieved_at": "2026-11-09T04:37:16.343887+00:00",
+      "price": 36.88,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 10.482702537977971,
+        "base": 10.654612353693862,
+        "optimistic": 10.90210803701488
+      },
+      "latest_fcf": 46000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": -16602000000.0,
+      "shares_outstanding": 1646847591.0,
+      "margins": {
+        "conservative": -2.5181767169665252,
+        "base": -2.4614117131360507,
+        "optimistic": -2.3828320059556263
+      },
+      "margin_of_safety_vs_conservative": -2.5181767169665252,
+      "margin_of_safety_vs_base": -2.4614117131360507,
+      "margin_of_safety_vs_optimistic": -2.3828320059556263,
+      "strongest_alert_price": 8.386162030382378,
+      "tier": "overvalued",
+      "tier_reasons": [
+        "price is above optimistic value (margin vs optimistic -238.3%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to optimistic value would make it 'fairly_valued'; a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert"
+      ]
+    },
+    {
+      "ticker": "V",
+      "yahoo_symbol": "V",
+      "status": "ok",
+      "detection_band": null,
+      "provisional": false,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Visa Inc.",
+      "sector": "Financial Services",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:02+00:00",
+      "retrieved_at": "2026-11-09T04:37:20.463003+00:00",
+      "price": 422.65,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 175.26455492105345,
+        "base": 252.27167117594365,
+        "optimistic": 363.13752708252537
+      },
+      "latest_fcf": 21577000000.0,
+      "latest_fcf_period": "2025-09-30",
+      "net_debt": 8007000000.0,
+      "shares_outstanding": 1724473215.0,
+      "margins": {
+        "conservative": -1.4114972944208792,
+        "base": -0.6753763830471006,
+        "optimistic": -0.16388411684025708
+      },
+      "margin_of_safety_vs_conservative": -1.4114972944208792,
+      "margin_of_safety_vs_base": -0.6753763830471006,
+      "margin_of_safety_vs_optimistic": -0.16388411684025708,
+      "strongest_alert_price": 140.21164393684276,
+      "tier": "overvalued",
+      "tier_reasons": [
+        "price is above optimistic value (margin vs optimistic -16.4%)"
+      ],
+      "strongest_alert_blocked": false,
+      "conditions_to_change": [
+        "a fall to optimistic value would make it 'fairly_valued'; a fall to base value would make it 'reasonable_price'; a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert"
+      ]
+    },
+    {
+      "ticker": "VC",
+      "yahoo_symbol": "VC",
+      "status": "ok",
+      "detection_band": "strongest_alert",
+      "provisional": true,
+      "deterioration_unknown": true,
+      "quality_unknown": true,
+      "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+      "company_name": "Visteon Corporation",
+      "sector": "Consumer Cyclical",
+      "currency": "USD",
+      "price_as_of": "2026-11-06T21:00:00+00:00",
+      "retrieved_at": "2026-11-09T04:37:24.734785+00:00",
+      "price": 75.68,
+      "dcf_notes": [],
+      "fair_value_range": {
+        "conservative": 174.9583244703367,
+        "base": 243.9568091897441,
+        "optimistic": 343.29277236689427
+      },
+      "latest_fcf": 277000000.0,
+      "latest_fcf_period": "2025-12-31",
+      "net_debt": -340000000.0,
+      "shares_outstanding": 24707936.0,
+      "margins": {
+        "conservative": 0.5674398447223861,
+        "base": 0.6897811532649707,
+        "optimistic": 0.7795467714679498
+      },
+      "margin_of_safety_vs_conservative": 0.5674398447223861,
+      "margin_of_safety_vs_base": 0.6897811532649707,
+      "margin_of_safety_vs_optimistic": 0.7795467714679498,
+      "strongest_alert_price": 139.96665957626936,
+      "tier": "reasonable_price",
+      "tier_reasons": [
+        "margin vs conservative value is 56.7% (>= 20%) but a strongest alert is BLOCKED: deterioration is UNKNOWN (no health/growth inputs)",
+        "price is at or below base value, so the tier is 'reasonable_price' with the strongest alert blocked"
+      ],
+      "strongest_alert_blocked": true,
+      "conditions_to_change": [
+        "a fall to 80% of conservative value (with no material deterioration) would make it a strongest alert",
+        "a rise above base value would move it to 'fairly_valued' or 'overvalued'"
+      ],
+      "band_note": "margin band 'strongest_alert' from the live-derived values only \u2014 business quality and deterioration are unknown from a live pull, so this is NOT a confirmed Step 26 candidate"
+    }
+  ],
+  "summary": {
+    "selected": 38,
+    "scannable": 33,
+    "candidates": 13,
+    "by_band": {
+      "strongest_alert": 5,
+      "watch_discount": 4,
+      "watch_below_base": 4
+    },
+    "strongest_alerts": 5,
+    "watch": 8,
+    "provider_unavailable": 2,
+    "insufficient_data": 3
+  },
+  "scanned_at": "2026-11-09T04:18:15.221177+00:00",
+  "method": {
+    "dcf_basis": "10-year FCF DCF on the latest annual free cash flow, WACC 11%, terminal growth 2.5%, growth 5% / 10% / 15% for conservative / base / optimistic",
+    "wacc": 0.11,
+    "terminal_growth": 0.025,
+    "years": 10,
+    "growth_scenarios": {
+      "conservative": 0.05,
+      "base": 0.1,
+      "optimistic": 0.15
+    },
+    "starting_fcf": "latest annual free cash flow from the live pull",
+    "price": "live pull (price_data_as_of_utc)",
+    "fetcher": "Yahoo Finance via tools/finance.py (retried since Step 54)"
+  },
+  "limitations": [
+    "Live data is used in memory only \u2014 it is never written to the database and never overwrites stored statements.",
+    "Detection bands are margin bands only and provisional: business quality (Step 24) and deterioration (Step 27) are unknown from a live pull, so no band is a confirmed Step 26 candidate.",
+    "Banks, insurers and REITs need the Step 22 sector models \u2014 an FCF DCF is not valid for them, so they usually come back insufficient_data.",
+    "A single-method FCF DCF is a research figure, not a fair-value estimate and never a recommendation; the final decision is always the owner's."
+  ],
+  "run_seconds": 1149.5
+}

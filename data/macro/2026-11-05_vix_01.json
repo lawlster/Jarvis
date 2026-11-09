@@ -1,0 +1,12 @@
+{
+  "indicator": "VIX",
+  "indicator_key": "vix",
+  "value": 28.18,
+  "date": "2026-11-05",
+  "unit": "index",
+  "source": "owner research, 2026-11-08",
+  "notes": null,
+  "macro_id": "2026-11-05_vix_01",
+  "added_at": "2026-11-08T17:15:23.548043Z",
+  "file_path": "data/macro/2026-11-05_vix_01.json"
+}

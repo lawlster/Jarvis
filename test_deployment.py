@@ -5,11 +5,12 @@ itself.  Tests that need a database start from a copy of the
 production database (read-only use) or from a small synthetic
 one built in the temp directory.  No test takes a real
 backup, starts a service, or touches the production
-database; the production hash is asserted unchanged by the
-module-level setUp/tearDown.  No secret value appears
+database; the production content fingerprint is asserted unchanged by
+ProductionHashTestCase (there is no module-level setUp/tearDown).  No secret value appears
 anywhere — fixtures use obviously fake values.
 """
 
+import gc
 import json
 import os
 import shutil
@@ -23,13 +24,15 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 PRODUCTION_DB = PROJECT_ROOT / "database" / "assistant.db"
-PRODUCTION_HASH = (
-    "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187")
 
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from agent import deployment  # noqa: E402
 from agents.backup_recovery import backup_database, sha256_file  # noqa: E402
+from db_fingerprint import (  # noqa: E402
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
 
 
 def _copy_production_db(directory):
@@ -65,10 +68,23 @@ def _synthetic_db(path, tickers=("AAA", "BBB")):
 
 
 class ProductionHashTestCase(unittest.TestCase):
-    """The suite never changes the production database."""
+    """The suite never changes the production database.
 
-    def test_production_hash_unchanged(self):
-        self.assertEqual(sha256_file(PRODUCTION_DB), PRODUCTION_HASH)
+    Step 57: the old test asserted the production file's raw
+    SHA-256 against a hardcoded value from this machine.  The
+    owner's file has the same logical content but different
+    bytes (his hash is 355f80644af1...), so that assertion
+    failed on his PC for no real reason.  The guard is now the
+    content fingerprint (see db_fingerprint.py): reading the
+    database must not change its protected content.
+    """
+
+    def test_production_content_unchanged_by_reads(self):
+        before = content_fingerprint(PRODUCTION_DB)
+        check = deployment.check_database(PRODUCTION_DB)
+        self.assertEqual(check["status"], "pass")
+        self.assertEqual(content_fingerprint(PRODUCTION_DB), before)
+        self.assertEqual(check["evidence"]["universe_rows"], 10619)
 
 
 class OllamaReachableTestCase(unittest.TestCase):
@@ -88,17 +104,21 @@ class OllamaReachableTestCase(unittest.TestCase):
 
 class DatabaseCheckTestCase(unittest.TestCase):
     def test_production_copy_passes(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with temp_dir_with_db_cleanup() as tmp:
             db = _copy_production_db(tmp)
             check = deployment.check_database(db)
             self.assertEqual(check["status"], "pass")
             evidence = check["evidence"]
-            self.assertEqual(evidence["sha256"], PRODUCTION_HASH)
+            # Step 57: the module reports the file's own SHA-256;
+            # assert it reports honestly rather than matching a
+            # hardcoded hash from another machine.
+            self.assertEqual(evidence["sha256"], sha256_file(db))
             self.assertEqual(evidence["integrity"], "ok")
             self.assertEqual(evidence["universe_rows"], 10619)
             self.assertEqual(evidence["tickers_with_line_items"],
                              ["MSFT"])
             self.assertEqual(evidence["latest_snapshot"], "2026-11-03")
+            gc.collect()
 
     def test_missing_database_fails(self):
         check = deployment.check_database(
@@ -127,7 +147,7 @@ class BackupsCheckTestCase(unittest.TestCase):
             self.assertIn("no backups", check["detail"])
 
     def test_fresh_manifest_backup_passes(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with temp_dir_with_db_cleanup() as tmp:
             db = _copy_production_db(tmp)
             backup_dir = Path(tmp) / "backups"
             backup_database(db, backup_dir=backup_dir, label="test")
@@ -136,12 +156,13 @@ class BackupsCheckTestCase(unittest.TestCase):
             self.assertTrue(check["evidence"]["newest_in_manifest"])
             self.assertTrue(check["evidence"]["newest_verified"])
             self.assertEqual(check["evidence"]["count"], 1)
+            gc.collect()
 
     def test_pre_manifest_backup_is_a_warning(self):
         # A backup file dropped into the directory without a
         # manifest (the state of the real 2026-11-08 backups):
         # it verifies by integrity, but has no recorded hash.
-        with tempfile.TemporaryDirectory() as tmp:
+        with temp_dir_with_db_cleanup() as tmp:
             db = _copy_production_db(tmp)
             backup_dir = Path(tmp) / "backups"
             backup_dir.mkdir()
@@ -151,6 +172,7 @@ class BackupsCheckTestCase(unittest.TestCase):
             self.assertEqual(check["status"], "warning")
             self.assertFalse(check["evidence"]["newest_in_manifest"])
             self.assertTrue(check["evidence"]["newest_verified"])
+            gc.collect()
 
     def test_pre_manifest_backups_sort_newest_by_age(self):
         # Regression (Step 53): pre-manifest backups used to
@@ -158,7 +180,7 @@ class BackupsCheckTestCase(unittest.TestCase):
         # of the real 2026-11-08 backups first.  They must sort
         # by file age.
         import time
-        with tempfile.TemporaryDirectory() as tmp:
+        with temp_dir_with_db_cleanup() as tmp:
             db = _copy_production_db(tmp)
             backup_dir = Path(tmp) / "backups"
             backup_dir.mkdir()
@@ -172,9 +194,10 @@ class BackupsCheckTestCase(unittest.TestCase):
             check = deployment.check_backups(backup_dir)
             self.assertEqual(check["status"], "warning")
             self.assertEqual(check["evidence"]["newest"], "aaa.bak")
+            gc.collect()
 
     def test_unverifiable_backup_fails(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with temp_dir_with_db_cleanup() as tmp:
             db = _copy_production_db(tmp)
             backup_dir = Path(tmp) / "backups"
             record = backup_database(db, backup_dir=backup_dir,
@@ -183,6 +206,7 @@ class BackupsCheckTestCase(unittest.TestCase):
             path.write_bytes(b"tampered")
             check = deployment.check_backups(backup_dir)
             self.assertEqual(check["status"], "fail")
+            gc.collect()
 
 
 class TestsCheckTestCase(unittest.TestCase):
@@ -206,12 +230,20 @@ class TestsCheckTestCase(unittest.TestCase):
 
 
 class OllamaCheckTestCase(unittest.TestCase):
-    def test_not_reachable_here(self):
-        # No Ollama runs on this machine; the check must say so
-        # plainly rather than crash or pretend otherwise.
+    def test_check_matches_actual_reachability(self):
+        # Step 57: the old test asserted Ollama is NOT reachable,
+        # which is true on this machine but false on the owner's
+        # PC, where Ollama is running (his `ollama serve` failed
+        # with a bind error — already running).  The check must
+        # report reality either way.
+        reachable = deployment.ollama_reachable(timeout=0.2)
         check = deployment.check_ollama(timeout=0.2)
-        self.assertEqual(check["status"], "fail")
-        self.assertIn("not reachable", check["detail"])
+        if reachable:
+            self.assertEqual(check["status"], "pass")
+            self.assertIn("reachable", check["detail"])
+        else:
+            self.assertEqual(check["status"], "fail")
+            self.assertIn("not reachable", check["detail"])
 
     def test_reachable_when_listening(self):
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -327,7 +359,7 @@ class GuardrailsCheckTestCase(unittest.TestCase):
 
 class DataGapsCheckTestCase(unittest.TestCase):
     def test_production_data_gaps(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with temp_dir_with_db_cleanup() as tmp:
             data_dir = Path(tmp) / "data"
             data_dir.mkdir()
             check = deployment.check_data_gaps(
@@ -339,6 +371,7 @@ class DataGapsCheckTestCase(unittest.TestCase):
                           "2026-11-03)", check["detail"])
             self.assertIn("no holdings store", check["detail"])
             self.assertIn("voice off by default", check["detail"])
+            gc.collect()
 
     def test_voice_preference_is_read(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -378,7 +411,7 @@ class ReadinessReportTestCase(unittest.TestCase):
     def test_synthetic_ready_project(self):
         # A fully provisioned fake deployment: every check
         # passes and all four live checks are evidenced.
-        with tempfile.TemporaryDirectory() as tmp:
+        with temp_dir_with_db_cleanup() as tmp:
             root = Path(tmp) / "project"
             (root / "agent").mkdir(parents=True)
             (root / "agent" / "ui.py").write_text(
@@ -421,9 +454,10 @@ class ReadinessReportTestCase(unittest.TestCase):
             self.assertEqual(report["verdict"], "ready_for_always_on")
             self.assertEqual(report["blockers"], [])
             self.assertTrue(all(report["live_checks_done"].values()))
+            gc.collect()
 
     def test_one_missing_live_check_blocks_ready(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with temp_dir_with_db_cleanup() as tmp:
             root = Path(tmp) / "project"
             (root / "agent").mkdir(parents=True)
             (root / "agent" / "ui.py").write_text(
@@ -469,6 +503,7 @@ class ReadinessReportTestCase(unittest.TestCase):
                              "not_ready_for_always_on")
             self.assertTrue(any("live_restore_drill" in b
                                 for b in report["blockers"]))
+            gc.collect()
 
     def test_summary_and_markdown_shape(self):
         report = deployment.readiness_report(run_tests=False)
@@ -484,14 +519,25 @@ class ReadinessReportTestCase(unittest.TestCase):
 
 class StartupCheckTestCase(unittest.TestCase):
     def test_lines_on_production_copy(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with temp_dir_with_db_cleanup() as tmp:
             db = _copy_production_db(tmp)
             lines = deployment.startup_check_lines(db_path=db)
             self.assertEqual(len(lines), 3)
             self.assertIn("database integrity ok", lines[0])
-            self.assertIn("36862922c0ba", lines[0])
+            # Step 57: the startup line prints the file's own
+            # hash prefix — assert it matches this copy's hash,
+            # not a hardcoded hash from another machine.
+            self.assertIn(sha256_file(db)[:10], lines[0])
             self.assertIn("backup directory", lines[1])
-            self.assertIn("Ollama not reachable", lines[2])
+            # Step 57: the Ollama line reports reality — reachable
+            # on the owner's PC (Ollama running), not reachable
+            # on this machine.
+            if deployment.ollama_reachable(timeout=0.2):
+                self.assertIn("reachable", lines[2])
+                self.assertNotIn("not reachable", lines[2])
+            else:
+                self.assertIn("Ollama not reachable", lines[2])
+            gc.collect()
 
     def test_missing_database_still_returns_three_lines(self):
         lines = deployment.startup_check_lines(
@@ -506,7 +552,7 @@ class StartupCheckTestCase(unittest.TestCase):
         from contextlib import redirect_stdout
         from agent.orchestrator import StubModelClient
         from main import JarvisApp
-        with tempfile.TemporaryDirectory() as tmp:
+        with temp_dir_with_db_cleanup() as tmp:
             db = _copy_production_db(tmp)
             app = JarvisApp(db_path=db, model_client=StubModelClient(),
                             log_dir=False, data_dir=Path(tmp) / "data",
@@ -519,6 +565,7 @@ class StartupCheckTestCase(unittest.TestCase):
             self.assertIn("Self-check: database integrity ok", text)
             self.assertIn("Self-check: local Ollama not reachable",
                           text)
+            gc.collect()
 
 
 if __name__ == "__main__":

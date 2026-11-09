@@ -42,12 +42,12 @@ model-fallback selection in Step 44 picks the right tool.
 
 No network, no production writes: ``agent.memory.DB_PATH`` is
 monkeypatched to the temp copy in every scenario (the one place
-``main.py`` writes to a database), and the production hash is
+``main.py`` writes to a database), and the production content fingerprint is
 asserted unchanged. The only deliberate exception is the legacy
 valuation monitor (j): it hardcodes the production database
 path — the table already exists with 0 rows, so its
 ``CREATE TABLE IF NOT EXISTS`` is a no-op and its read is a
-plain SELECT; the test asserts the production hash before and
+plain SELECT; the test asserts the production content fingerprint before and
 after to prove it. That hardcoded path is a finding, not
 something this step fixes.
 """
@@ -70,6 +70,12 @@ from zoneinfo import ZoneInfo
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT))
+
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
 
 from agent import memory as memory_mod  # noqa: E402
 from agent import long_term_memory as ltm  # noqa: E402
@@ -96,9 +102,6 @@ from agents.valuation_monitor import (  # noqa: E402
 )
 import main as main_mod  # noqa: E402
 
-EXPECTED_DB_HASH = (
-    "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187")
-
 # Small real data subdirectories copied (read-only source) into
 # each scenario's temp data dir. Deliberately NOT the whole
 # data/ tree: data/market_data is ~1.3 GB and
@@ -112,10 +115,6 @@ FAKE_CREATED = datetime(2026, 11, 8, 9, 0,
                         tzinfo=ZoneInfo("Asia/Singapore"))
 
 
-def _db_hash(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
-
 def _free_port():
     sock = socket.socket()
     sock.bind(("127.0.0.1", 0))
@@ -125,14 +124,20 @@ def _free_port():
 
 
 def _file_hashes(root):
-    """{relative path: sha256} for every file under ``root``."""
+    """{relative path: sha256} for every file under ``root``.
+
+    Relative paths are normalised to POSIX form: on Windows
+    ``str(relative_to(...))`` uses backslashes, so the same file
+    compared as ``orchestration\\turns.jsonl`` against the
+    expected ``orchestration/turns.jsonl`` (Step 57).
+    """
     root = Path(root)
     out = {}
     if not root.exists():
         return out
     for path in sorted(root.rglob("*")):
         if path.is_file():
-            out[str(path.relative_to(root))] = hashlib.sha256(
+            out[path.relative_to(root).as_posix()] = hashlib.sha256(
                 path.read_bytes()).hexdigest()
     return out
 
@@ -164,7 +169,7 @@ class EndToEndTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.production_hash_before = _db_hash(
+        cls._prod_fp_before = content_fingerprint(
             PROJECT_ROOT / "database" / "assistant.db")
         # The older _temp_db_copy helpers (first noted Step 27)
         # never delete their copies. This harness must add none:
@@ -175,17 +180,17 @@ class EndToEndTestCase(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        after = _db_hash(PROJECT_ROOT / "database" / "assistant.db")
-        assert after == cls.production_hash_before, (
+        assert content_fingerprint(
+            PROJECT_ROOT / "database" / "assistant.db"
+        ) == cls._prod_fp_before, (
             "production DB changed during the end-to-end tests")
-        assert after == EXPECTED_DB_HASH
         tmp_db_after = {p.name for p in Path("/tmp").glob("tmp*.db")}
         assert tmp_db_after == cls.tmp_db_before, (
             "this harness left tmp*.db residue in /tmp: "
             f"{sorted(tmp_db_after - cls.tmp_db_before)}")
 
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
+        self.tmp = temp_dir_with_db_cleanup()
         self.root = Path(self.tmp.name)
         self.db_path = self.root / "assistant.db"
         shutil.copy(PROJECT_ROOT / "database" / "assistant.db",
@@ -231,7 +236,7 @@ class EndToEndTestCase(unittest.TestCase):
         # session database; restore that too.
         from data.providers import provider_logger as _pl
         _pl.DB_PATH = self._old_pl_db_path
-        self.tmp.cleanup()
+        cleanup_temp_dir(self.tmp)
         # The harness must clean up after itself: the whole
         # scenario directory is gone when the test ends.
         self.assertFalse(self.root.exists(),
@@ -595,7 +600,8 @@ class EndToEndTestCase(unittest.TestCase):
         # the production database is untouched (memory
         # initialisation is a CREATE TABLE IF NOT EXISTS no-op
         # and "exit" is handled before any message is saved).
-        before = _db_hash(PROJECT_ROOT / "database" / "assistant.db")
+        before = content_fingerprint(
+            PROJECT_ROOT / "database" / "assistant.db")
         proc = subprocess.run(
             [sys.executable, "main.py", "--db-path",
              str(self.db_path)],
@@ -605,7 +611,8 @@ class EndToEndTestCase(unittest.TestCase):
         self.assertIn("AiAssistant v0.7", proc.stdout)
         self.assertIn("Goodbye!", proc.stdout)
         self.assertEqual(
-            _db_hash(PROJECT_ROOT / "database" / "assistant.db"),
+            content_fingerprint(
+                PROJECT_ROOT / "database" / "assistant.db"),
             before)
 
     # -- (j) audit open item O5: empty valuation profiles -----------
@@ -616,13 +623,15 @@ class EndToEndTestCase(unittest.TestCase):
         # with 0 rows, so this is a read plus a no-op
         # CREATE TABLE IF NOT EXISTS — the production hash
         # must be unchanged afterwards.
-        before = _db_hash(PROJECT_ROOT / "database" / "assistant.db")
+        before = content_fingerprint(
+            PROJECT_ROOT / "database" / "assistant.db")
         result = monitor_company_valuation("MSFT")
         self.assertEqual(result, {
             "error": "No valuation profile found for MSFT. "
                      "Please create a valuation profile first."})
         self.assertEqual(
-            _db_hash(PROJECT_ROOT / "database" / "assistant.db"),
+            content_fingerprint(
+                PROJECT_ROOT / "database" / "assistant.db"),
             before)
 
     # -- (k) open decisions re-checked, not changed -----------------

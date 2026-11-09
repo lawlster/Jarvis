@@ -6,13 +6,13 @@ TemporaryDirectory (the /tmp housekeeping gap noted in Steps
 27/33b: older _temp_db_copy helpers never delete their copies).
 The production DB is copied once per test class into the temp
 directory and the copy is removed in tearDownClass; the
-production hash is asserted unchanged.
+production content fingerprint is asserted unchanged.
 """
 
-import hashlib
 import json
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -22,18 +22,14 @@ from agents import news_monitoring as nm
 from agents import thesis_tracking as tt
 
 PROJECT_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
 PROD_DB = PROJECT_ROOT / "database" / "assistant.db"
-PROD_HASH = "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187"
-
-
-def _db_hash(path):
-    digest = hashlib.sha256()
-    with open(path, "rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def _article(title, url, iso=None, fetched_at="2026-11-08T10:00:00Z",
              source="Fixture News", tickers=("MSFT",)):
     return {
@@ -67,14 +63,15 @@ class _TempDbTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.tmp = tempfile.TemporaryDirectory(prefix="step34-")
+        cls.tmp = temp_dir_with_db_cleanup()
         cls.db_path = Path(cls.tmp.name) / "assistant.db"
         shutil.copy(PROD_DB, cls.db_path)
+        cls._prod_fp_before = content_fingerprint(PROD_DB)
 
     @classmethod
     def tearDownClass(cls):
-        cls.tmp.cleanup()
-        assert _db_hash(PROD_DB) == PROD_HASH, \
+        cleanup_temp_dir(cls.tmp)
+        assert content_fingerprint(PROD_DB) == cls._prod_fp_before, \
             "production DB changed during tests"
 
     def _connect(self):

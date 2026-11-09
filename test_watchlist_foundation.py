@@ -6,13 +6,13 @@ itself via TemporaryDirectory (the /tmp housekeeping gap noted
 in Steps 27/33b: older _temp_db_copy helpers never delete their
 copies).  The production DB is copied once per test class into
 the temp directory and the copy is removed in tearDownClass;
-the production hash is asserted unchanged.
+the production content fingerprint is asserted unchanged.
 """
 
-import hashlib
 import json
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -20,16 +20,14 @@ from pathlib import Path
 from agents import watchlist_foundation as wf
 
 PROJECT_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
 PROD_DB = PROJECT_ROOT / "database" / "assistant.db"
-PROD_HASH = "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187"
-
-
-def _db_hash(path):
-    digest = hashlib.sha256()
-    with open(path, "rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 class _TempDbTestCase(unittest.TestCase):
@@ -40,16 +38,17 @@ class _TempDbTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.tmp = tempfile.TemporaryDirectory(prefix="step35-")
+        cls.tmp = temp_dir_with_db_cleanup()
         cls.db_path = Path(cls.tmp.name) / "copy.db"
         shutil.copy(PROD_DB, cls.db_path)
-        cls.hash_before = _db_hash(cls.db_path)
+        cls.hash_before = content_fingerprint(cls.db_path)
+        cls._prod_fp_before = content_fingerprint(PROD_DB)
 
     @classmethod
     def tearDownClass(cls):
-        assert _db_hash(PROD_DB) == PROD_HASH, (
-            "production DB hash changed during Step 35 tests")
-        cls.tmp.cleanup()
+        cleanup_temp_dir(cls.tmp)
+        assert content_fingerprint(PROD_DB) == cls._prod_fp_before, (
+            "production DB changed during Step 35 tests")
 
     def setUp(self):
         self.store = tempfile.TemporaryDirectory(prefix="step35-store-")
@@ -223,7 +222,8 @@ class TestRefresh(_TempDbTestCase):
         wf.seed_watchlist(store_dir=self.store_dir)
         with self._conn() as conn:
             wf.refresh_watchlist(conn, store_dir=self.store_dir)
-        self.assertEqual(_db_hash(self.db_path), self.hash_before)
+        self.assertEqual(content_fingerprint(self.db_path),
+                         self.hash_before)
 
     def test_refresh_twice_replaces_records(self):
         wf.seed_watchlist(store_dir=self.store_dir)
@@ -305,7 +305,8 @@ class TestLegacyUntouched(_TempDbTestCase):
         self.assertEqual(wf.legacy_watchlist_count(str(self.db_path)), 3)
 
     def test_production_hash_unchanged(self):
-        self.assertEqual(_db_hash(PROD_DB), PROD_HASH)
+        self.assertEqual(content_fingerprint(PROD_DB),
+                         self._prod_fp_before)
 
 
 if __name__ == "__main__":

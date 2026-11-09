@@ -1,0 +1,90 @@
+{
+  "run_id": "20261108_164957_MSFT",
+  "started_at": "2026-11-08T16:49:57.237058Z",
+  "finished_at": "2026-11-08T16:49:58.306298Z",
+  "tickers": [
+    "MSFT"
+  ],
+  "max_per_ticker": 5,
+  "delay_seconds": 0,
+  "query_template": null,
+  "fetcher": "default_fetcher",
+  "per_ticker": {
+    "MSFT": {
+      "query": "MSFT stock news",
+      "fetched": 5,
+      "kept": 5,
+      "error": null
+    }
+  },
+  "fetched_total": 5,
+  "duplicates_removed": 0,
+  "article_count": 5,
+  "articles": [
+    {
+      "title": "Here\u2019s How Much Microsoft Stock Is Expected to Move After Earnings",
+      "source": "Investopedia",
+      "published_date": "2026-10-28T16:49:58+00:00",
+      "published_date_iso": "2026-10-28",
+      "url": "https://www.investopedia.com/here-is-how-much-microsoft-stock-is-expected-to-move-after-earnings-msft-q1-fy2027-update-12184775",
+      "snippet": "Microsoft is set to report earnings Wednesday afternoon, with traders expecting a move that could send the stock to a fresh ...",
+      "tickers": [
+        "MSFT"
+      ],
+      "fetched_at": "2026-11-08T16:49:57.237058Z",
+      "query": "MSFT stock news"
+    },
+    {
+      "title": "MSFT stock alert: What to know as Microsoft offers buyouts to 60,000 employees",
+      "source": "Barchart on MSN",
+      "published_date": "2026-10-28T16:49:58+00:00",
+      "published_date_iso": "2026-10-28",
+      "url": "https://www.msn.com/en-us/news/other/msft-stock-alert-what-to-know-as-microsoft-offers-buyouts-to-60000-employees/ar-AA2gcoGR?ocid=BingNewsVerp",
+      "snippet": "Microsoft (MSFT) shares are in focus on Tuesday after the tech titan offered voluntary buyouts to about 60,000 of its ...",
+      "tickers": [
+        "MSFT"
+      ],
+      "fetched_at": "2026-11-08T16:49:57.237058Z",
+      "query": "MSFT stock news"
+    },
+    {
+      "title": "Microsoft (MSFT)Stock: Surges 6% as Polen Capital Highlights Strong AI Growth",
+      "source": "Blockonomi",
+      "published_date": "2026-11-05T16:49:58+00:00",
+      "published_date_iso": "2026-11-05",
+      "url": "https://blockonomi.com/microsoft-msft-stock-surges-6-as-polen-capital-highlights-strong-ai-growth/",
+      "snippet": "Microsoft stock surges 6.11% to $552.83 as Polen Capital highlights strong Azure revenue, rising AI demand, and Microsoft's ...",
+      "tickers": [
+        "MSFT"
+      ],
+      "fetched_at": "2026-11-08T16:49:57.237058Z",
+      "query": "MSFT stock news"
+    },
+    {
+      "title": "Microsoft Corp Q1 2027 Earnings: Live Updates of $MSFT Earnings Call, Stock Forecast",
+      "source": "TheStreet on MSN",
+      "published_date": "2026-10-29T16:49:58+00:00",
+      "published_date_iso": "2026-10-29",
+      "url": "https://www.msn.com/en-us/news/money/microsoft-corp-q1-2027-earnings-live-updates-of-msft-earnings-call-stock-forecast/ar-AA2ggKrP?ocid=BingNewsVerp",
+      "snippet": "TheStreet provides live coverage of Microsoft Corporation's Q1 2027 earnings call. See updates of $MSFT stock's latest ...",
+      "tickers": [
+        "MSFT"
+      ],
+      "fetched_at": "2026-11-08T16:49:57.237058Z",
+      "query": "MSFT stock news"
+    },
+    {
+      "title": "Should You Buy Microsoft (MSFT) Stock?",
+      "source": "U.S. News Money",
+      "published_date": "2026-04-22T00:00:00+00:00",
+      "published_date_iso": "2026-04-22",
+      "url": "https://money.usnews.com/investing/stock-market-news/articles/pros-and-cons-to-buying-microsoft-msft-stock",
+      "snippet": "Analyses of MSFT today are based less on fundamentals and more on whether it can exceed already-high expectations.",
+      "tickers": [
+        "MSFT"
+      ],
+      "fetched_at": "2026-11-08T16:49:57.237058Z",
+      "query": "MSFT stock news"
+    }
+  ]
+}

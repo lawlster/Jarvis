@@ -1,0 +1,15 @@
+{
+  "event_id": "2026-11-10_ALC_01",
+  "ticker": "ALC",
+  "event_type": "earnings",
+  "title": "ALC earnings",
+  "date": "2026-11-10",
+  "time": null,
+  "timezone": "Asia/Singapore",
+  "source": "owner research (caller-supplied)",
+  "notes": "",
+  "created_at": "2026-11-08T17:06:03.034506Z",
+  "outcome": null,
+  "outcome_recorded_at": null,
+  "file_path": "/home/hatch/workspace/projects/jarvis/data/events/2026-11-10_ALC_01.json"
+}

@@ -9,6 +9,7 @@ requests, no production database writes.  Run from the project root:
 import json
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -16,6 +17,12 @@ from pathlib import Path
 from agents import financial_standard as std
 
 BASE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE_DIR))
+
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    temp_dir_with_db_cleanup,
+)
 
 
 def us_entry(value, tag="NetIncomeLoss", unit="USD", filed="2024-08-01",
@@ -257,7 +264,7 @@ class SingaporeTests(unittest.TestCase):
 
 class PersistenceTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory()
+        self.temp = temp_dir_with_db_cleanup()
         self.db_path = Path(self.temp.name) / "copy.db"
         shutil.copy2(BASE_DIR / "database" / "assistant.db", self.db_path)
         self.before_hash = self._hash()
@@ -265,7 +272,7 @@ class PersistenceTests(unittest.TestCase):
 
     def tearDown(self):
         self.conn.close()
-        self.temp.cleanup()
+        cleanup_temp_dir(self.temp)
 
     def _hash(self):
         import hashlib

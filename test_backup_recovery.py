@@ -2,7 +2,7 @@
 
 The backup module is exercised on temporary database copies
 and temporary directories only.  The production database is
-read, never written: its hash is asserted unchanged around
+read, never written: its content fingerprint is asserted unchanged around
 the whole class.  No network, no production writes.
 """
 
@@ -18,11 +18,13 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
+
 from agents import backup_recovery as br  # noqa: E402
-
-EXPECTED_DB_HASH = (
-    "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187")
-
 
 def _db_hash(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
@@ -43,18 +45,18 @@ def _make_db(path, rows=((1, "alpha"), (2, "beta"))):
 class BackupRecoveryTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.production_hash_before = _db_hash(
+        cls._prod_fp_before = content_fingerprint(
             PROJECT_ROOT / "database" / "assistant.db")
 
     @classmethod
     def tearDownClass(cls):
-        after = _db_hash(PROJECT_ROOT / "database" / "assistant.db")
-        assert after == cls.production_hash_before, (
+        assert content_fingerprint(
+            PROJECT_ROOT / "database" / "assistant.db"
+        ) == cls._prod_fp_before, (
             "production DB changed during the backup tests")
-        assert after == EXPECTED_DB_HASH
 
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
+        self.tmp = temp_dir_with_db_cleanup()
         self.root = Path(self.tmp.name)
         self.db_path = self.root / "assistant.db"
         shutil.copy(PROJECT_ROOT / "database" / "assistant.db",
@@ -62,7 +64,7 @@ class BackupRecoveryTestCase(unittest.TestCase):
         self.backup_dir = self.root / "backups"
 
     def tearDown(self):
-        self.tmp.cleanup()
+        cleanup_temp_dir(self.tmp)
 
     # -- backup -----------------------------------------------------
 

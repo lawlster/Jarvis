@@ -1,0 +1,12 @@
+{
+  "indicator": "Nasdaq daily change",
+  "indicator_key": "nasdaq daily change",
+  "value": -5.52,
+  "date": "2026-11-05",
+  "unit": "%",
+  "source": "owner research, 2026-11-08",
+  "notes": null,
+  "macro_id": "2026-11-05_nasdaq_daily_change_01",
+  "added_at": "2026-11-08T17:15:23.547242Z",
+  "file_path": "data/macro/2026-11-05_nasdaq_daily_change_01.json"
+}

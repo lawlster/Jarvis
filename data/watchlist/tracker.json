@@ -1,0 +1,1233 @@
+{
+  "version": 1,
+  "records": {
+    "ALC": {
+      "ticker": "ALC",
+      "universe_ticker": null,
+      "company_name": "Alcon Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "ALG": {
+      "ticker": "ALG",
+      "universe_ticker": null,
+      "company_name": "Allegro MicroSystems Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "AMD": {
+      "ticker": "AMD",
+      "universe_ticker": null,
+      "company_name": "Advanced Micro Devices Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "AMR": {
+      "ticker": "AMR",
+      "universe_ticker": null,
+      "company_name": "Alpha Metallurgical Resources Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "AMZN": {
+      "ticker": "AMZN",
+      "universe_ticker": null,
+      "company_name": "Amazon.com Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "AVGO": {
+      "ticker": "AVGO",
+      "universe_ticker": null,
+      "company_name": "Broadcom Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "BE": {
+      "ticker": "BE",
+      "universe_ticker": null,
+      "company_name": "Bloom Energy Corporation",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "BKE": {
+      "ticker": "BKE",
+      "universe_ticker": null,
+      "company_name": "The Buckle Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "BN": {
+      "ticker": "BN",
+      "universe_ticker": null,
+      "company_name": "Brookfield Corporation",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "BRK.B": {
+      "ticker": "BRK.B",
+      "universe_ticker": "BRK-B",
+      "company_name": "Berkshire Hathaway Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "DBS": {
+      "ticker": "DBS",
+      "universe_ticker": "D05",
+      "company_name": "DBS Group Holdings Ltd",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "conservative value or price is missing, so no margin of safety can be computed"
+      ],
+      "quality_rating": "insufficient data",
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [
+        "core concepts missing for the period: total_assets, total_equity, current_assets, current_liabilities, revenue, net_income"
+      ],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": "insufficient data",
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no price supplied and no snapshot price in the database (a price is needed before any margin of safety can be computed)",
+        "no conservative intrinsic value could be computed from the available statements (see the valuation methods in the detail record)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "DECK": {
+      "ticker": "DECK",
+      "universe_ticker": null,
+      "company_name": "Deckers Outdoor Corporation",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "DHI": {
+      "ticker": "DHI",
+      "universe_ticker": null,
+      "company_name": "D.R. Horton Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "DPZ": {
+      "ticker": "DPZ",
+      "universe_ticker": null,
+      "company_name": "Domino's Pizza Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "GOOGL": {
+      "ticker": "GOOGL",
+      "universe_ticker": null,
+      "company_name": "Alphabet Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "HCC": {
+      "ticker": "HCC",
+      "universe_ticker": null,
+      "company_name": "Warrior Met Coal Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "HHH": {
+      "ticker": "HHH",
+      "universe_ticker": null,
+      "company_name": "Howard Hughes Holdings Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "HIMX": {
+      "ticker": "HIMX",
+      "universe_ticker": null,
+      "company_name": "Himax Technologies Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "ICE": {
+      "ticker": "ICE",
+      "universe_ticker": null,
+      "company_name": "Intercontinental Exchange Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "INTC": {
+      "ticker": "INTC",
+      "universe_ticker": null,
+      "company_name": "Intel Corporation",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "KSPI": {
+      "ticker": "KSPI",
+      "universe_ticker": null,
+      "company_name": "Kaspi.kz",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "MA": {
+      "ticker": "MA",
+      "universe_ticker": null,
+      "company_name": "Mastercard Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "MCRI": {
+      "ticker": "MCRI",
+      "universe_ticker": null,
+      "company_name": "Monarch Casino & Resort Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "META": {
+      "ticker": "META",
+      "universe_ticker": null,
+      "company_name": "Meta Platforms Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "MSFT": {
+      "ticker": "MSFT",
+      "universe_ticker": null,
+      "company_name": "Microsoft Corporation",
+      "scannable": true,
+      "tier": "overvalued",
+      "tier_reasons": [
+        "price is above optimistic value (margin vs optimistic -116.1%)"
+      ],
+      "quality_rating": "excellent",
+      "quality_mean_score": 2.0,
+      "health_verdict": "strong",
+      "health_reasons": [
+        "no hard distress flags",
+        "5-year window fully profitable (5/5 years)",
+        "5-year net-margin CV 0.062 (<= 0.20)",
+        "5-year mean ROE 38.1% (>= 15%)",
+        "free cash flow positive in the period",
+        "debt / operating cash flow 0.22 (<= 3)"
+      ],
+      "fair_value_range": {
+        "conservative": 98.52066730587686,
+        "base": 163.2961578075263,
+        "optimistic": 234.64387272245835
+      },
+      "margin_of_safety_vs_conservative": -4.147346377847258,
+      "margin_of_safety_vs_base": -2.1055231599369995,
+      "price": 507.12,
+      "price_as_of": "2026-11-03",
+      "price_source": "financial_snapshots (latest row)",
+      "strongest_alert_threshold_price": 78.8165338447015,
+      "deterioration_overall_verdict": "warning",
+      "deterioration_material": false,
+      "risk_flags": [
+        "free cash flow softening",
+        "working capital falling",
+        "capex surge compressing FCF"
+      ],
+      "missing_inputs": [],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "NFLX": {
+      "ticker": "NFLX",
+      "universe_ticker": null,
+      "company_name": "Netflix Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "NRP": {
+      "ticker": "NRP",
+      "universe_ticker": null,
+      "company_name": "Natural Resource Partners L.P.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "NVDA": {
+      "ticker": "NVDA",
+      "universe_ticker": null,
+      "company_name": "NVIDIA Corporation",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "OCBC": {
+      "ticker": "OCBC",
+      "universe_ticker": "O39",
+      "company_name": "Oversea-Chinese Banking Corporation Ltd",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "OTIS": {
+      "ticker": "OTIS",
+      "universe_ticker": null,
+      "company_name": "Otis Worldwide Corporation",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "QSR": {
+      "ticker": "QSR",
+      "universe_ticker": null,
+      "company_name": "Restaurant Brands International Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "RIG": {
+      "ticker": "RIG",
+      "universe_ticker": null,
+      "company_name": "Transocean Ltd.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "SPGI": {
+      "ticker": "SPGI",
+      "universe_ticker": null,
+      "company_name": "S&P Global Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "UBER": {
+      "ticker": "UBER",
+      "universe_ticker": null,
+      "company_name": "Uber Technologies Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "UNH": {
+      "ticker": "UNH",
+      "universe_ticker": null,
+      "company_name": "UnitedHealth Group Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "UOB": {
+      "ticker": "UOB",
+      "universe_ticker": "U11",
+      "company_name": "United Overseas Bank Ltd",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "V": {
+      "ticker": "V",
+      "universe_ticker": null,
+      "company_name": "Visa Inc.",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    },
+    "VC": {
+      "ticker": "VC",
+      "universe_ticker": null,
+      "company_name": "Visteon Corporation",
+      "scannable": false,
+      "tier": "insufficient_data",
+      "tier_reasons": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "quality_rating": null,
+      "quality_mean_score": null,
+      "health_verdict": "insufficient data",
+      "health_reasons": [],
+      "fair_value_range": {
+        "conservative": null,
+        "base": null,
+        "optimistic": null
+      },
+      "margin_of_safety_vs_conservative": null,
+      "margin_of_safety_vs_base": null,
+      "price": null,
+      "price_as_of": null,
+      "price_source": null,
+      "strongest_alert_threshold_price": null,
+      "deterioration_overall_verdict": null,
+      "deterioration_material": null,
+      "risk_flags": [],
+      "missing_inputs": [
+        "no financial statement rows for this ticker in the database (no Step 16 standardised values, so no ratios, health, growth, cash flow, valuation, margin of safety or quality can be computed)"
+      ],
+      "last_checked": "2026-11-09T01:00:00+00:00"
+    }
+  }
+}

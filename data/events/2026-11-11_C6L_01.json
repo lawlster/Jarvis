@@ -1,0 +1,15 @@
+{
+  "event_id": "2026-11-11_C6L_01",
+  "ticker": "C6L",
+  "event_type": "earnings",
+  "title": "Singapore Airlines (SIA) results",
+  "date": "2026-11-11",
+  "time": null,
+  "timezone": "Asia/Singapore",
+  "source": "owner research (caller-supplied)",
+  "notes": "",
+  "created_at": "2026-11-08T17:06:03.037806Z",
+  "outcome": null,
+  "outcome_recorded_at": null,
+  "file_path": "/home/hatch/workspace/projects/jarvis/data/events/2026-11-11_C6L_01.json"
+}

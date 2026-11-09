@@ -2,29 +2,28 @@
 
 Temp directories only. No network, no real remote connections,
 no production writes. The production database is never opened
-by this module; its hash is asserted unchanged anyway.
+by this module; its content fingerprint is asserted unchanged anyway.
 """
 
-import hashlib
 import json
+import platform
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
+PROJECT_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from db_fingerprint import content_fingerprint  # noqa: E402
 from agent import computer as cp
-
-PROD_DB_HASH = ("36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8"
-                "aa56cc089187")
-
-
-def _db_hash(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
 
 class ComputerTestBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls._prod_fp_before = content_fingerprint(
+            PROJECT_ROOT / "database" / "assistant.db")
         cls._tmp = tempfile.TemporaryDirectory()
         cls.root = Path(cls._tmp.name) / "workspace"
         cls.root.mkdir()
@@ -37,8 +36,9 @@ class ComputerTestBase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls._tmp.cleanup()
-        prod = Path(__file__).resolve().parent / "database" / "assistant.db"
-        assert _db_hash(prod) == PROD_DB_HASH, "production DB hash changed"
+        assert content_fingerprint(
+            PROJECT_ROOT / "database" / "assistant.db"
+        ) == cls._prod_fp_before, "production DB changed"
 
     def setUp(self):
         self.dir = Path(tempfile.mkdtemp(dir=self._tmp.name))
@@ -269,7 +269,10 @@ class ApplicationTests(ComputerTestBase):
 class SystemInfoTests(ComputerTestBase):
     def test_system_info(self):
         info = cp.system_info(log_dir=self.log_dir)
-        self.assertEqual(info["platform"], "Linux")
+        # Step 57: the old assertion hardcoded "Linux", but
+        # system_info() reports platform.system() — "Windows" on
+        # the owner's PC.  Assert it matches this machine.
+        self.assertEqual(info["platform"], platform.system())
         self.assertIn("python_version", info)
         self.assertIsInstance(info["cpu_count"], int)
 

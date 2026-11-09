@@ -1,0 +1,90 @@
+{
+  "run_id": "20261108_163835_MSFT",
+  "started_at": "2026-11-08T16:38:35.844694Z",
+  "finished_at": "2026-11-08T16:38:41.183552Z",
+  "tickers": [
+    "MSFT"
+  ],
+  "max_per_ticker": 5,
+  "delay_seconds": 0,
+  "query_template": null,
+  "fetcher": "default_fetcher",
+  "per_ticker": {
+    "MSFT": {
+      "query": "MSFT stock news",
+      "fetched": 5,
+      "kept": 5,
+      "error": null
+    }
+  },
+  "fetched_total": 5,
+  "duplicates_removed": 0,
+  "article_count": 5,
+  "articles": [
+    {
+      "title": "Microsoft (MSFT) Stock Price, Chart & News",
+      "source": "stockanalysis.com",
+      "published_date": "Publication date unavailable",
+      "published_date_iso": null,
+      "url": "https://stockanalysis.com/stocks/msft/",
+      "snippet": "1 day ago \u00b7 A detailed overview of Microsoft Corporation (MSFT) stock, including real-time price, chart, key statistics, news, and more.",
+      "tickers": [
+        "MSFT"
+      ],
+      "fetched_at": "2026-11-08T16:38:35.844694Z",
+      "query": "MSFT stock news"
+    },
+    {
+      "title": "Microsoft Corporation (MSFT) Latest Stock News | Seeking Alpha",
+      "source": "seekingalpha.com",
+      "published_date": "Publication date unavailable",
+      "published_date_iso": null,
+      "url": "https://seekingalpha.com/symbol/MSFT/news",
+      "snippet": "4 days ago \u00b7 Get the latest news and real-time alerts from Microsoft Corporation (MSFT) stock at Seeking Alpha.",
+      "tickers": [
+        "MSFT"
+      ],
+      "fetched_at": "2026-11-08T16:38:35.844694Z",
+      "query": "MSFT stock news"
+    },
+    {
+      "title": "MSFT Stock Price History & Chart Since 1986",
+      "source": "wallstreetnumbers.com",
+      "published_date": "Publication date unavailable",
+      "published_date_iso": null,
+      "url": "https://wallstreetnumbers.com/stocks/msft/price",
+      "snippet": "4 days ago \u00b7 MSFT price interactive chart, yearly historical data, price target, split dates, performance comparison to indexes and ETFs",
+      "tickers": [
+        "MSFT"
+      ],
+      "fetched_at": "2026-11-08T16:38:35.844694Z",
+      "query": "MSFT stock news"
+    },
+    {
+      "title": "Microsoft Corporation (MSFT) Latest Stock Analysis | Seeking ...",
+      "source": "seekingalpha.com",
+      "published_date": "Publication date unavailable",
+      "published_date_iso": null,
+      "url": "https://seekingalpha.com/symbol/MSFT/analysis",
+      "snippet": "3 days ago \u00b7 Find the latest Microsoft Corporation (MSFT) stock analysis from Seeking Alpha\u2019s top analysts: exclusive research and insights from bulls and bears.",
+      "tickers": [
+        "MSFT"
+      ],
+      "fetched_at": "2026-11-08T16:38:35.844694Z",
+      "query": "MSFT stock news"
+    },
+    {
+      "title": "Microsoft Corporation (MSFT.O) | Stock Price & Latest News ...Latest News Microsoft Stock ( MSFT )MICROSOFT CORP (MSFT) Stock News - ChartMill.com",
+      "source": "reuters.com",
+      "published_date": "Publication date unavailable",
+      "published_date_iso": null,
+      "url": "https://www.reuters.com/markets/companies/MSFT.O/",
+      "snippet": "1 day ago \u00b7 US stocks plunged on Thursday, led by a ferocious selloff in tech and AI-related stocks as investors reassessed implications for the AI data center buildout from the Democrats' sweeping wins in... 2 days ago \u00b7 Find the latest news for Microsoft Stock on our page and stay on top of the game. 1 day ago \u00b7 Latest news and press releases for MICROSOFT CORP (NASDAQ:MSFT).",
+      "tickers": [
+        "MSFT"
+      ],
+      "fetched_at": "2026-11-08T16:38:35.844694Z",
+      "query": "MSFT stock news"
+    }
+  ]
+}

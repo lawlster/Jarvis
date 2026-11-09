@@ -8,6 +8,7 @@ report run, not by these tests).
 
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -15,6 +16,12 @@ from pathlib import Path
 from agents import financial_growth as fg
 
 PROJECT_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    temp_dir_with_db_cleanup,
+)
 PRODUCTION_DB = PROJECT_ROOT / "database" / "assistant.db"
 
 
@@ -240,14 +247,14 @@ class RealDbTests(unittest.TestCase):
     """Hand-checked MSFT values from the real database (temp copy)."""
 
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
+        self.tmp = temp_dir_with_db_cleanup()
         self.db_path = Path(self.tmp.name) / "test.db"
         shutil.copy(PRODUCTION_DB, self.db_path)
         self.conn = sqlite3.connect(self.db_path)
 
     def tearDown(self):
         self.conn.close()
-        self.tmp.cleanup()
+        cleanup_temp_dir(self.tmp)
 
     def test_msft_revenue_yoy_and_cagrs(self):
         result = fg.analyse_growth(self.conn, "MSFT")

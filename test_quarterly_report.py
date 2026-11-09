@@ -8,6 +8,7 @@ against a temp copy of the production database.
 import json
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -15,6 +16,12 @@ from pathlib import Path
 from agents import quarterly_report as qr
 
 PROJECT_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    temp_dir_with_db_cleanup,
+)
 DB_PATH = PROJECT_ROOT / "database" / "assistant.db"
 
 
@@ -389,7 +396,7 @@ class TestRealDataMSFT(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls._tmp = tempfile.TemporaryDirectory()
+        cls._tmp = temp_dir_with_db_cleanup()
         cls.db_copy = Path(cls._tmp.name) / "assistant.db"
         shutil.copy(DB_PATH, cls.db_copy)
         conn = sqlite3.connect(cls.db_copy)
@@ -405,7 +412,7 @@ class TestRealDataMSFT(unittest.TestCase):
         conn.close()
         assert count == cls.snapshot_count, (
             "production financial_snapshots changed")
-        cls._tmp.cleanup()
+        cleanup_temp_dir(cls._tmp)
 
     def test_msft_valuation_snapshot_from_db(self):
         # MSFT has only the single 2026-11-03 snapshot price,

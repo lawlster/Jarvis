@@ -1,0 +1,15 @@
+{
+  "event_id": "2026-11-10_MARKET_01",
+  "ticker": null,
+  "event_type": "economic",
+  "title": "US Oct CPI",
+  "date": "2026-11-10",
+  "time": "21:30",
+  "timezone": "Asia/Singapore",
+  "source": "owner research (caller-supplied)",
+  "notes": "US October CPI release.",
+  "created_at": "2026-11-08T17:06:03.035029Z",
+  "outcome": null,
+  "outcome_recorded_at": null,
+  "file_path": "/home/hatch/workspace/projects/jarvis/data/events/2026-11-10_MARKET_01.json"
+}

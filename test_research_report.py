@@ -13,11 +13,13 @@ optimistic $234.64; tier overvalued at $507.12 (2026-11-03
 snapshot); strongest-alert price $78.82.
 """
 
+import gc
 import hashlib
 import json
 import re
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -30,6 +32,12 @@ from agents import margin_of_safety as mos
 from agents import research_report as rr
 
 BASE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE_DIR))
+
+from db_fingerprint import (  # noqa: E402
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
 DB_PATH = BASE_DIR / "database" / "assistant.db"
 
 PRICE = {"price": 507.12, "market_cap": 3765971714048,
@@ -118,10 +126,6 @@ def _temp_db_copy():
     return tmp.name
 
 
-def _db_hash():
-    return hashlib.sha256(DB_PATH.read_bytes()).hexdigest()
-
-
 def _entry(value):
     return {"value": value, "unit": "USD", "tag": "Test",
             "filed": "2026-07-29", "form": "10-K"}
@@ -205,11 +209,11 @@ class TestResearchReportRealData(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls._hash_before = _db_hash()
+        cls._hash_before = content_fingerprint(DB_PATH)
 
     @classmethod
     def tearDownClass(cls):
-        assert _db_hash() == cls._hash_before, \
+        assert content_fingerprint(DB_PATH) == cls._hash_before, \
             "production DB changed during tests"
 
     def _conn(self):
@@ -407,7 +411,7 @@ class TestResearchReportRealData(unittest.TestCase):
         self.assertIsNone(BUY_SELL.search(text))
 
     def test_generate_report_file_read_only(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with temp_dir_with_db_cleanup() as tmp:
             db_copy = str(Path(tmp) / "copy.db")
             shutil.copy(DB_PATH, db_copy)
             before = hashlib.sha256(
@@ -421,6 +425,7 @@ class TestResearchReportRealData(unittest.TestCase):
             self.assertEqual(
                 hashlib.sha256(Path(db_copy).read_bytes()).hexdigest(),
                 before)
+            gc.collect()
 
 
 class TestResearchReportFixtures(unittest.TestCase):

@@ -3,20 +3,28 @@
 Fake clock only: every test passes an explicit ``now``. No real
 time waits, no network, no production writes. The production
 database is copied to a temporary directory for the built-in
-action tests and its hash is asserted unchanged.
+action tests and its content fingerprint is asserted unchanged.
 """
 
-import hashlib
 import json
 import os
 import shutil
 import sqlite3
+import sys
 import tempfile
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+PROJECT_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from db_fingerprint import (  # noqa: E402
+    cleanup_temp_dir,
+    content_fingerprint,
+    temp_dir_with_db_cleanup,
+)
 from agent import scheduler as sc
 
 SGT = ZoneInfo("Asia/Singapore")
@@ -29,26 +37,22 @@ MON_1000 = datetime(2026, 11, 9, 10, 0, tzinfo=SGT)
 SUN_0900 = datetime(2026, 11, 8, 9, 0, tzinfo=SGT)
 
 
-def _db_hash(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
-
 class SchedulerTestBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls._tmp = tempfile.TemporaryDirectory()
+        cls._tmp = temp_dir_with_db_cleanup()
         cls.store = Path(cls._tmp.name) / "scheduler"
         cls.db_path = Path(cls._tmp.name) / "assistant.db"
-        prod = Path(__file__).resolve().parent / "database" / "assistant.db"
+        prod = PROJECT_ROOT / "database" / "assistant.db"
         shutil.copy(prod, cls.db_path)
-        cls.db_hash_before = _db_hash(cls.db_path)
+        cls._prod_fp_before = content_fingerprint(prod)
 
     @classmethod
     def tearDownClass(cls):
-        cls._tmp.cleanup()
-        prod = Path(__file__).resolve().parent / "database" / "assistant.db"
-        assert _db_hash(prod) == "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187", \
-            "production DB hash changed"
+        cleanup_temp_dir(cls._tmp)
+        prod = PROJECT_ROOT / "database" / "assistant.db"
+        assert content_fingerprint(prod) == cls._prod_fp_before, \
+            "production DB changed"
 
     def setUp(self):
         self.dir = Path(tempfile.mkdtemp(dir=self._tmp.name))

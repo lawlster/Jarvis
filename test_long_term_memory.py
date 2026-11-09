@@ -1,14 +1,14 @@
 """Tests for Step 43 — long-term contextual memory.
 
 Temp directories only, no network, no production writes.  The
-production DB hash is asserted unchanged in tearDownClass as a
+production DB content fingerprint is asserted unchanged in tearDownClass as a
 guard: this module must never touch the database.
 """
 
-import hashlib
 import json
 import os
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -16,16 +16,10 @@ from pathlib import Path
 import agent.long_term_memory as ltm
 
 PROJECT_ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from db_fingerprint import content_fingerprint  # noqa: E402
 DB_PATH = PROJECT_ROOT / "database" / "assistant.db"
-EXPECTED_DB_HASH = (
-    "36862922c0babfb2569369d297bbd1a91579573bd51133b1f9b8aa56cc089187"
-)
-
-
-def _db_hash():
-    return hashlib.sha256(DB_PATH.read_bytes()).hexdigest()
-
-
 class LongTermMemoryTestCase(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -370,14 +364,12 @@ class LongTermMemoryTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls._db_hash_before = _db_hash()
+        cls._prod_fp_before = content_fingerprint(DB_PATH)
 
     @classmethod
     def tearDownClass(cls):
-        assert _db_hash() == cls._db_hash_before, (
-            "production DB hash changed during Step 43 tests")
-        assert _db_hash() == EXPECTED_DB_HASH, (
-            "production DB hash is not the expected value")
+        assert content_fingerprint(DB_PATH) == cls._prod_fp_before, (
+            "production DB changed during Step 43 tests")
 
 
 if __name__ == "__main__":

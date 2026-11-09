@@ -15,6 +15,7 @@ flow $182,935m, capex $115,948m) with the 2026-11-03 snapshot price
 $507.12 and market cap $3,765,971,714,048.
 """
 
+import gc
 import json
 import sqlite3
 import tempfile
@@ -24,6 +25,8 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from db_fingerprint import temp_dir_with_db_cleanup  # noqa: E402
 
 from agents import financial_ratios as fr
 
@@ -417,7 +420,7 @@ class TestTTM(unittest.TestCase):
 
 class TestSnapshotPrice(unittest.TestCase):
     def test_load_snapshot_price_from_temp_db(self):
-        with tempfile.TemporaryDirectory() as tmp:
+        with temp_dir_with_db_cleanup() as tmp:
             db_path = Path(tmp) / "copy.db"
             import shutil
             shutil.copyfile(
@@ -430,6 +433,7 @@ class TestSnapshotPrice(unittest.TestCase):
             self.assertEqual(price["as_of_date"], "2026-11-03")
             self.assertIsNone(fr.load_snapshot_price(conn, "AAPL"))
             conn.close()
+            gc.collect()
 
     def test_market_cap_fallback(self):
         mcap, method = fr.market_cap_for(

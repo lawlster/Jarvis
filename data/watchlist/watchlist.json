@@ -1,0 +1,425 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "ticker": "ALC",
+      "universe_ticker": null,
+      "company_name": "Alcon Inc.",
+      "sources": [
+        "ackman_13f_q2_2026"
+      ],
+      "reason": "Ackman 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "ALG",
+      "universe_ticker": null,
+      "company_name": "Allegro MicroSystems Inc.",
+      "sources": [
+        "owner_basket_1000"
+      ],
+      "reason": "$1,000 small-cap asymmetric-bet basket \u2014 accept-the-loss discipline.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "AMD",
+      "universe_ticker": null,
+      "company_name": "Advanced Micro Devices Inc.",
+      "sources": [
+        "owner_semis"
+      ],
+      "reason": "Semiconductor watch \u2014 AI cycle; value on normalised earnings, not peak earnings.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "AMR",
+      "universe_ticker": null,
+      "company_name": "Alpha Metallurgical Resources Inc.",
+      "sources": [
+        "pabrai_13f_q2_2026"
+      ],
+      "reason": "Pabrai 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "AMZN",
+      "universe_ticker": null,
+      "company_name": "Amazon.com Inc.",
+      "sources": [
+        "ackman_13f_q2_2026"
+      ],
+      "reason": "Ackman 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "AVGO",
+      "universe_ticker": null,
+      "company_name": "Broadcom Inc.",
+      "sources": [
+        "owner_semis"
+      ],
+      "reason": "Semiconductor watch \u2014 AI cycle; value on normalised earnings, not peak earnings.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "BE",
+      "universe_ticker": null,
+      "company_name": "Bloom Energy Corporation",
+      "sources": [
+        "owner_semis"
+      ],
+      "reason": "Energy watch \u2014 AI data-centre power demand.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "BKE",
+      "universe_ticker": null,
+      "company_name": "The Buckle Inc.",
+      "sources": [
+        "owner_combined_screen"
+      ],
+      "reason": "Combined Buffett/Munger + Graham + Greenblatt screen.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "BN",
+      "universe_ticker": null,
+      "company_name": "Brookfield Corporation",
+      "sources": [
+        "ackman_13f_q2_2026"
+      ],
+      "reason": "Ackman 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "BRK.B",
+      "universe_ticker": "BRK-B",
+      "company_name": "Berkshire Hathaway Inc.",
+      "sources": [
+        "owner_core"
+      ],
+      "reason": "Owner core watchlist \u2014 good business at a good price screen.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "DBS",
+      "universe_ticker": "D05",
+      "company_name": "DBS Group Holdings Ltd",
+      "sources": [
+        "owner_sg_banks"
+      ],
+      "reason": "Singapore bank \u2014 Q3 2026 results monitored.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "DECK",
+      "universe_ticker": null,
+      "company_name": "Deckers Outdoor Corporation",
+      "sources": [
+        "owner_combined_screen"
+      ],
+      "reason": "Combined Buffett/Munger + Graham + Greenblatt screen.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "DHI",
+      "universe_ticker": null,
+      "company_name": "D.R. Horton Inc.",
+      "sources": [
+        "owner_combined_screen"
+      ],
+      "reason": "Combined Buffett/Munger + Graham + Greenblatt screen.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "DPZ",
+      "universe_ticker": null,
+      "company_name": "Domino's Pizza Inc.",
+      "sources": [
+        "owner_combined_screen"
+      ],
+      "reason": "Combined Buffett/Munger + Graham + Greenblatt screen.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "GOOGL",
+      "universe_ticker": null,
+      "company_name": "Alphabet Inc.",
+      "sources": [
+        "owner_core"
+      ],
+      "reason": "Owner core watchlist \u2014 good business at a good price screen.",
+      "notes": [
+        "Ackman exited GOOG/GOOGL in Q2 2026 (13F) \u2014 kept as a core watch, not an Ackman holding."
+      ],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "HCC",
+      "universe_ticker": null,
+      "company_name": "Warrior Met Coal Inc.",
+      "sources": [
+        "pabrai_13f_q2_2026"
+      ],
+      "reason": "Pabrai 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "HHH",
+      "universe_ticker": null,
+      "company_name": "Howard Hughes Holdings Inc.",
+      "sources": [
+        "ackman_13f_q2_2026"
+      ],
+      "reason": "Ackman 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "HIMX",
+      "universe_ticker": null,
+      "company_name": "Himax Technologies Inc.",
+      "sources": [
+        "owner_basket_1000"
+      ],
+      "reason": "$1,000 small-cap asymmetric-bet basket \u2014 accept-the-loss discipline.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "ICE",
+      "universe_ticker": null,
+      "company_name": "Intercontinental Exchange Inc.",
+      "sources": [
+        "ackman_13f_q2_2026"
+      ],
+      "reason": "Ackman 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "INTC",
+      "universe_ticker": null,
+      "company_name": "Intel Corporation",
+      "sources": [
+        "owner_semis"
+      ],
+      "reason": "Semiconductor watch \u2014 possible value trap on a deteriorating business; monitor, do not assume cheap.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "KSPI",
+      "universe_ticker": null,
+      "company_name": "Kaspi.kz",
+      "sources": [
+        "pabrai_13f_q2_2026"
+      ],
+      "reason": "Pabrai 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "MA",
+      "universe_ticker": null,
+      "company_name": "Mastercard Inc.",
+      "sources": [
+        "ackman_13f_q2_2026"
+      ],
+      "reason": "Ackman 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "MCRI",
+      "universe_ticker": null,
+      "company_name": "Monarch Casino & Resort Inc.",
+      "sources": [
+        "owner_basket_1000"
+      ],
+      "reason": "$1,000 small-cap asymmetric-bet basket \u2014 accept-the-loss discipline.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "META",
+      "universe_ticker": null,
+      "company_name": "Meta Platforms Inc.",
+      "sources": [
+        "ackman_13f_q2_2026"
+      ],
+      "reason": "Ackman 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "MSFT",
+      "universe_ticker": null,
+      "company_name": "Microsoft Corporation",
+      "sources": [
+        "ackman_13f_q2_2026"
+      ],
+      "reason": "Ackman 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "NFLX",
+      "universe_ticker": null,
+      "company_name": "Netflix Inc.",
+      "sources": [
+        "ackman_13f_q2_2026"
+      ],
+      "reason": "Ackman 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "NRP",
+      "universe_ticker": null,
+      "company_name": "Natural Resource Partners L.P.",
+      "sources": [
+        "owner_basket_1000"
+      ],
+      "reason": "$1,000 small-cap asymmetric-bet basket \u2014 accept-the-loss discipline.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "NVDA",
+      "universe_ticker": null,
+      "company_name": "NVIDIA Corporation",
+      "sources": [
+        "owner_semis"
+      ],
+      "reason": "Semiconductor watch \u2014 AI cycle; value on normalised earnings, not peak earnings.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "OCBC",
+      "universe_ticker": "O39",
+      "company_name": "Oversea-Chinese Banking Corporation Ltd",
+      "sources": [
+        "owner_sg_banks"
+      ],
+      "reason": "Singapore bank \u2014 Q3 2026 results monitored.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "OTIS",
+      "universe_ticker": null,
+      "company_name": "Otis Worldwide Corporation",
+      "sources": [
+        "owner_combined_screen"
+      ],
+      "reason": "Combined Buffett/Munger + Graham + Greenblatt screen.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "QSR",
+      "universe_ticker": null,
+      "company_name": "Restaurant Brands International Inc.",
+      "sources": [
+        "ackman_13f_q2_2026"
+      ],
+      "reason": "Ackman 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "RIG",
+      "universe_ticker": null,
+      "company_name": "Transocean Ltd.",
+      "sources": [
+        "pabrai_13f_q2_2026"
+      ],
+      "reason": "Pabrai 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "SPGI",
+      "universe_ticker": null,
+      "company_name": "S&P Global Inc.",
+      "sources": [
+        "ackman_13f_q2_2026"
+      ],
+      "reason": "Ackman 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "UBER",
+      "universe_ticker": null,
+      "company_name": "Uber Technologies Inc.",
+      "sources": [
+        "ackman_13f_q2_2026"
+      ],
+      "reason": "Ackman 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "UNH",
+      "universe_ticker": null,
+      "company_name": "UnitedHealth Group Inc.",
+      "sources": [
+        "owner_core"
+      ],
+      "reason": "Owner core watchlist \u2014 good business at a good price screen.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "UOB",
+      "universe_ticker": "U11",
+      "company_name": "United Overseas Bank Ltd",
+      "sources": [
+        "owner_sg_banks"
+      ],
+      "reason": "Singapore bank \u2014 Q3 2026 results monitored.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "V",
+      "universe_ticker": null,
+      "company_name": "Visa Inc.",
+      "sources": [
+        "ackman_13f_q2_2026"
+      ],
+      "reason": "Ackman 13F Q2 2026 holding \u2014 research lead only, filing is lagged.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    },
+    {
+      "ticker": "VC",
+      "universe_ticker": null,
+      "company_name": "Visteon Corporation",
+      "sources": [
+        "owner_basket_1000"
+      ],
+      "reason": "$1,000 small-cap asymmetric-bet basket \u2014 accept-the-loss discipline.",
+      "notes": [],
+      "date_added": "2026-11-08"
+    }
+  ]
+}
