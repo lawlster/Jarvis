@@ -265,6 +265,90 @@ input[type="submit"]:hover { background: #67e8f9; }
 }
 .chat-meta { color: var(--text-dim); font-size: 0.9em; }
 
+/* -- Voice (Step 56) ------------------------------------------------
+ * Browser voice panel on the chat page: microphone button with a
+ * pulsing ring while listening or speaking, on/off and hands-free
+ * toggles, reply-voice picker. Voice is off by default and never
+ * starts listening on its own. */
+.voice-panel {
+  background: linear-gradient(180deg, var(--bg-card), var(--bg-panel));
+  border: 1px solid var(--line-bright);
+  border-radius: 10px;
+  padding: 1em 1.2em;
+  margin: 1em 0;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+.voice-panel h3 {
+  margin-top: 0;
+  color: var(--cyan);
+  font-size: 1.05em;
+  letter-spacing: 0.06em;
+}
+.voice-status {
+  color: var(--text-dim);
+  font-size: 0.95em;
+  min-height: 1.4em;
+}
+.voice-mic {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  font-size: 1em;
+  font-weight: 700;
+  color: var(--cyan);
+  background: #071224;
+  border: 2px solid var(--cyan-dim);
+  cursor: pointer;
+}
+.voice-mic:hover:not(:disabled) {
+  border-color: var(--cyan);
+  background: #0e2a4a;
+}
+.voice-mic:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.voice-mic.listening {
+  border-color: var(--red);
+  color: var(--red);
+  animation: voice-pulse 1.2s ease-out infinite;
+}
+.voice-mic.speaking {
+  border-color: var(--cyan);
+  animation: voice-pulse-cyan 1.2s ease-out infinite;
+}
+@keyframes voice-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.55); }
+  70% { box-shadow: 0 0 0 16px rgba(248, 113, 113, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); }
+}
+@keyframes voice-pulse-cyan {
+  0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.55); }
+  70% { box-shadow: 0 0 0 16px rgba(34, 211, 238, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+}
+.voice-toggle {
+  display: inline-block;
+  margin: 0.4em 1em 0.4em 0;
+  color: var(--text);
+  font-size: 0.95em;
+  letter-spacing: 0;
+}
+.voice-toggle input { margin-right: 0.4em; }
+.voice-picker-row { margin: 0.6em 0; }
+.voice-picker-row label { margin-right: 0.5em; }
+select#voice-picker {
+  font-size: 0.95em;
+  padding: 0.4em 0.6em;
+  color: var(--text);
+  background: #071224;
+  border: 1px solid var(--line-bright);
+  border-radius: 6px;
+  max-width: 100%;
+}
+select#voice-picker:disabled { opacity: 0.45; }
+.voice-help { color: var(--text-dim); font-size: 0.9em; }
+
 /* -- Charts -------------------------------------------------------- */
 canvas.dcf-chart {
   width: 100%;

@@ -38,8 +38,9 @@ no external resources: everything works offline from localhost.
 The dashboard shows STORED scan results (``step54-live-scan.json``)
 and stored status — it never re-runs a live scan on page load
 and nothing on it updates live; a refresh re-reads the stored
-files. Voice is out of scope here: no microphone or speech
-features were added.
+files. Step 56 adds browser voice to the chat page (Web Speech
+API — microphone input and spoken replies, opt-in, off by
+default, no wake word, no audio ever leaves the browser).
 
 Rules the UI enforces:
 
@@ -521,6 +522,14 @@ def chat_html(ui, request=None):
     Command chips fill the box (the owner edits before asking);
     the "what is missing" notice stays visible so the stub model
     on this machine is never mistaken for a live turn.
+
+    Step 56 adds the browser-voice panel: a microphone button,
+    a voice on/off switch (OFF by default, honouring the stored
+    text preference), a hands-free toggle, and a reply-voice
+    picker — all Web Speech API in the browser, no server
+    endpoint, no audio ever sent anywhere. The reply paragraph
+    carries id="jarvis-reply-text" so the page script can speak
+    it when voice is on.
     """
     commands = ["/research", "/watchlist", "/alerts", "/summary",
                 "/memory", "/dashboard", "/ui", "/voice", "/help",
@@ -529,17 +538,47 @@ def chat_html(ui, request=None):
         f"<button type=\"button\" class=\"cmd-chip\" "
         f"data-command=\"{_esc(cmd)}\">{_esc(cmd)}</button>"
         for cmd in commands)
+    voice_panel = (
+        "<div class=\"voice-panel\" id=\"voice-panel\">\n"
+        "<h3>Voice</h3>\n"
+        "<p class=\"voice-status\" id=\"voice-status\">Voice off.</p>\n"
+        "<button type=\"button\" id=\"voice-mic\" class=\"voice-mic\" "
+        "disabled aria-label=\"Talk to Jarvis\">\U0001f399\ufe0f Talk"
+        "</button>\n"
+        "<label class=\"voice-toggle\"><input type=\"checkbox\" "
+        "id=\"voice-toggle\"> Voice on</label>\n"
+        "<label class=\"voice-toggle\"><input type=\"checkbox\" "
+        "id=\"voice-handsfree\" disabled> Hands-free</label>\n"
+        "<div class=\"voice-picker-row\"><label for=\"voice-picker\">"
+        "Reply voice</label>\n"
+        "<select id=\"voice-picker\" disabled></select></div>\n"
+        "<p class=\"voice-help\">Voice runs entirely in this "
+        "browser — nothing is recorded or sent anywhere. Switch "
+        "voice on, click the microphone and talk; Jarvis answers "
+        "in text and speaks the reply. Hands-free resumes "
+        "listening after each spoken reply. There is no wake "
+        "word: browsers do not allow always-on background "
+        "listening, so Jarvis cannot listen while this page is "
+        "closed. Voice input is not supported in this browser "
+        "unless it offers speech recognition — try Chrome or "
+        "Edge. Spoken replies need a browser that offers speech "
+        "synthesis — try Chrome or Edge. The reply voice prefers "
+        "a British male voice when the browser offers one.</p>\n"
+        "</div>\n"
+    )
     body = [
         "<div class=\"notice\"><strong>What is missing here:</strong> "
         "no live Ollama turn has run through this chat on this "
         "machine — replies come from a stub model in tests, and "
         "voice is off by default. What you type is answered from "
         "stored data and the valuation engines, never from a live "
-        "price feed.</div>",
+        "price feed. Switch voice on in the Voice panel below to "
+        "talk and hear replies (Chrome or Edge).</div>",
         f"<div class=\"cmd-chips\">{chips}</div>",
         _form("/chat", "Ask Jarvis",
               "What is the intrinsic value of MSFT?",
               value=request or ""),
+        voice_panel,
     ]
     if request:
         result = orch.handle(
@@ -552,7 +591,7 @@ def chat_html(ui, request=None):
             f"{_esc(result.get('intent'))} "
             f"({_esc(result.get('intent_method'))}). "
             f"Status: {_esc(result.get('status'))}.</p>"
-            f"<p>{_esc(result.get('reply'))}</p>"
+            f"<p id=\"jarvis-reply-text\">{_esc(result.get('reply'))}</p>"
             "</div>")
         if result.get("sources"):
             body.append("<h3>Sources</h3>")
@@ -809,7 +848,13 @@ def status_html(ui):
         "No alert has ever fired on real data; every alert rule "
         "is fixture-proven only.",
         "Voice is off by default — the owner prefers text replies "
-        "and declined ongoing voice replies on 2026-11-03.",
+        "and declined ongoing voice replies on 2026-11-03. "
+        "Browser voice (Step 56, Web Speech API, Chrome/Edge) is "
+        "an opt-in mode on the chat page: microphone input and "
+        "spoken replies with a British male voice preferred when "
+        "the browser offers one. No wake word — browsers do not "
+        "allow always-on background listening — and no audio ever "
+        "leaves the browser.",
         "No live Ollama turn has run through the orchestrator on "
         "this machine; model behaviour here is stub-tested.",
         "This interface contains no trading controls by design: "
