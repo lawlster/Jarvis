@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 49 — Build live dashboards and agent monitoring (PARTIAL — built and tested 2026-11-09; status snapshot over the Steps 26/34/38/39/46 logs and state files, `/dashboard` route in the Step 48 UI, 19 new tests, real-data snapshot — see Step 49 section below)
-- Current subtask: Step 49 live dashboards and agent monitoring
+- Current step: 50 — Integrate all modules into main.py (PARTIAL — built and tested 2026-11-09; `main.py` rewired to delegate to the Step 39 orchestrator, Step 40 router, Step 44 registry/loop replacing the old inline tool loop, slash commands, startup banner stating the limitations, `main.py --help` now works; 24 new tests, 1003 total; stub-tested only, no live Ollama turn yet — see Step 50 section below)
+- Current subtask: Step 50 integrate all modules into main.py
 - Overall status: In progress
 
 ## Completed work
@@ -3116,6 +3116,86 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   and leave nothing behind; the full-suite runs left a few
   stale `tmp*.db` files in /tmp, removed with the targeted
   `rm /tmp/tmp*.db` used before — /tmp now 12%.
+  `database/assistant.db` shows as modified in `git status`,
+  but its hash is unchanged (`36862922…089187`) — the known
+  pre-existing state (header rewrites from earlier
+  imports/audit; logical content identical).
+### 2026-11-09 — Step 50 build integrate all modules into main.py (PARTIAL, not complete)
+
+- `main.py` rewired to delegate to the Step 39 orchestrator as the
+  single request pipeline (24 new tests, 1003 total,
+  `python -m unittest discover` from the project root with
+  `~/workspace/projects/jarvis-venv/bin/python`; 1 skipped: the
+  live smoke test, behind `JARVIS_LIVE_WEB_RESEARCH=1`).
+  Production DB hash unchanged (`36862922…089187`).
+- The old inline Ollama tool-calling loop is gone: the `TOOLS`
+  list, `execute_tool` and `ask_ai` are removed. The model is
+  the Step 40 `ModelRouter` (local Ollama first, cloud only as a
+  configured fallback); the tools are the Step 44 registry and
+  call loop, which wrap the four tools `main.py` used to define
+  inline (calculate, search_web, get_company_financials,
+  calculate_dcf) plus the Step 16-38 engines as read-only tools.
+- Last-20-messages memory is preserved (`agent/memory.py`, still
+  the one place `main.py` writes to the database) and now sent
+  to the model with each turn, so a chat turn is not amnesiac.
+  Long-term memory (Step 43) is available on request only, via
+  `/memory` — the conservative option, recorded in the Step 50
+  report rather than decided unilaterally for every turn.
+- Slash commands, all recorded in the Step 39 turn log:
+  `/research` (Step 41 session), `/watchlist` (Step 35 view),
+  `/alerts` (Step 38 active alerts), `/summary` (Step 32 daily
+  summary), `/memory` (Step 43 context block), `/dashboard`
+  (Step 49 snapshot as text), `/ui` (Step 48 UI on localhost,
+  on demand only), `/voice` (spoken reply for the next turn
+  only, gated by the stored text preference), `/help`, `/quit`.
+  The UI starts on demand (`--ui` flag or `/ui`), never
+  automatically — the Step 48 open decision, recorded here.
+- Startup banner states what is missing, never hidden and never
+  faked: cloud models not configured, no live price feed
+  (latest snapshot 2026-11-03, read from the database), no
+  holdings entered, remote computer not configured (no Windows
+  control), voice off by default with the stored preference read
+  back. `python main.py --help` now works (argparse) — that
+  closes the cosmetic open item from the audit. `--db-path` and
+  `--port` are accepted.
+- Small additive hook in `agent/orchestrator.py` (Step 39 file):
+  `handle()` takes optional `tool_caller` (Step 44 ToolCaller —
+  chat/unknown requests try the tool loop first, keyword
+  selection only, and only a successful run answers; otherwise
+  the model answers as before) and `history` (recent
+  conversation sent with the turn); a public `log_turn` wrapper
+  lets `main.py` record slash-command turns in the same log.
+  All defaults are off, so existing callers are unchanged.
+- Fixture example: `~/workspace/projects/step50-example-session.md`
+  — scripted session through the integrated `main.py` (stubbed
+  model, temporary database copy, real project watchlist/data/
+  memory directories read-only): valuation question traces to
+  Step 21/23 (overvalued, $98.52/$163.30/$234.64, $507.12,
+  alert price $78.82); `/watchlist` shows all 38 tickers;
+  "Buy 100 shares of MSFT at $500" is refused with no model
+  call; `/dashboard` shows the real snapshot (4 modules
+  no_data, 6 ok, 1 recent activity item, 9 gaps). `echo exit |
+  python main.py` verified: banner prints, exits cleanly with
+  no Ollama running.
+- **Step 50 is PARTIAL, not complete. No live Ollama turn has
+  ever run through the integrated `main.py`.** All model
+  behaviour is stub-tested (no Ollama on this machine); the old
+  `main.py` loop was the only live path, and it is replaced.
+  The old system prompt's detailed DCF rules are not carried
+  over verbatim (the orchestrator's shorter prompt is used; the
+  valuation route does not use the model at all). The voice turn
+  bypasses the tool loop (Step 45's function, unchanged), and
+  `main.py` configures no text-to-speech client, so a real
+  spoken reply needs a TTS engine set up. No end-to-end testing
+  (Step 51), backup/recovery/security pass (Step 52) or
+  deployment (Step 53). No live cron or scheduled job was
+  created, no remote machine was connected, no live cloud call
+  was made. Sufficient to start Step 51 (complete end-to-end
+  testing).
+- Housekeeping: Step 50's own tests use `TemporaryDirectory`
+  and leave nothing behind; the full-suite runs left a few
+  stale `tmp*.db` files in /tmp, removed with the targeted
+  `rm /tmp/tmp*.db` used before — /tmp now 14%.
   `database/assistant.db` shows as modified in `git status`,
   but its hash is unchanged (`36862922…089187`) — the known
   pre-existing state (header rewrites from earlier

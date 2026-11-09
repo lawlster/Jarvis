@@ -370,7 +370,7 @@ Do not deduplicate by CIK.
 
 48. Build complete user interface — PARTIAL (2026-11-09: local web UI built and tested, 15 tests OK; home / ticker / research / chat / status pages over Steps 29/32/35/38/39/41, localhost-only, no trading controls, DB read-only; no real browser session has ever run through it — see PROJECT_STATUS.md Step 48 section)
 49. Build live dashboards and agent monitoring — PARTIAL (2026-11-09: status snapshot over the Steps 26/34/38/39/46 logs and state files plus a `/dashboard` route in the Step 48 UI built and tested, 19 tests OK; real-data snapshot shows detection/turns/scheduler/alerts all no_data, monitoring last check 2026-11-08, 9 gaps — see PROJECT_STATUS.md Step 49 section)
-50. Integrate all modules into main.py — NOT STARTED
+50. Integrate all modules into main.py — PARTIAL (2026-11-09: `main.py` rewired to delegate to the Step 39 orchestrator as the single pipeline, Step 40 router as model client, Step 44 registry/loop replacing the old inline tool loop (`TOOLS`/`execute_tool`/`ask_ai` removed), last-20-messages memory preserved and sent with each turn, slash commands /research /watchlist /alerts /summary /memory (on request only) /dashboard /ui (on demand) /voice (next turn only, stored text preference still gates it) /help /quit, startup banner stating the limitations, `main.py --help` now works; 24 new tests OK, 1003 total; stub-tested only — no live Ollama turn has ever run through the integrated `main.py` — see PROJECT_STATUS.md Step 50 section)
 51. Complete end-to-end testing — NOT STARTED
 52. Build backup, recovery and security systems — NOT STARTED
 53. Deploy reliable always-on assistant — NOT STARTED

@@ -5,9 +5,10 @@ what already exists rather than replacing it:
 
 - ``agent/memory.py`` still owns persistent conversation memory
   (last 20 messages in the production database).
-- ``main.py`` still owns the interactive loop and the Ollama
-  tool-calling client. This module does NOT replace it and is
-  NOT wired into ``main.py`` (that integration is Step 50).
+- ``main.py`` now delegates to this pipeline (Step 50): the
+  interactive loop hands every request to :func:`handle`, with
+  the Step 40 router as the model client and the Step 44 tool
+  loop available to it (``tool_caller``).
 - ``agent/brain.py`` and ``agent/planner.py`` are empty stubs
   (0 lines each, verified 2026-11-09); nothing is reused from
   them because there is nothing in them.
@@ -551,17 +552,20 @@ def _route_portfolio(context):
     )
 
 
-def _route_chat(text, model_client):
+def _route_chat(text, model_client, history=None):
     if model_client is None:
         return (
             "No model is connected, so I cannot answer that — and "
             "I will not invent an answer instead.",
             [], ["model (not connected)"],
         )
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": text},
-    ]
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    if history:
+        # The caller's recent conversation (last 20 messages in
+        # main.py), so a chat turn is not amnesiac. Only the
+        # current turn is sent when no history is given.
+        messages.extend(history)
+    messages.append({"role": "user", "content": text})
     reply = model_client.chat(messages)
     # Step 40: when the client is a router, label the model that
     # actually answered (local or cloud fallback) instead of
@@ -594,9 +598,19 @@ def _log_turn(record, log_dir=None):
     return str(path)
 
 
+def log_turn(record, log_dir=None):
+    """Append one turn record as a JSON line (public wrapper).
+
+    Step 50: ``main.py`` records its slash-command turns in the
+    same log with this, rather than duplicating the writer.
+    """
+    return _log_turn(record, log_dir=log_dir)
+
+
 def handle(request, model_client=None, db_path=None,
            store_dir=None, news_dir=None, context=None,
-           log_dir=None, as_of=None):
+           log_dir=None, as_of=None, tool_caller=None,
+           history=None):
     """Handle one user request through the pipeline.
 
     Returns a dict: ``request``, ``intent``, ``intent_method``,
@@ -607,6 +621,16 @@ def handle(request, model_client=None, db_path=None,
     ``"model_unavailable"`` (the model could not be reached).
     The turn is appended to the JSON-lines log unless
     ``log_dir`` is False.
+
+    ``tool_caller`` (Step 44, added in Step 50) is a
+    :class:`agent.tool_calling.ToolCaller`: for a chat/unknown
+    request the tool loop runs first (keyword selection only,
+    no model fallback) and its result is the reply when it
+    succeeds; otherwise the model answers as before. When
+    ``tool_caller`` is None the chat route is unchanged.
+    ``history`` is the caller's recent conversation
+    (``{"role", "content"}`` messages, newest last), sent to
+    the model with the current turn; None sends only this turn.
     """
     text = (request or "").strip()
     checked_at = as_of or _utcnow_iso()
@@ -695,18 +719,36 @@ def handle(request, model_client=None, db_path=None,
             reply, modules_called, sources = _route_portfolio(context)
             if not modules_called:
                 status = "unavailable"
-        else:  # chat or unknown — the model answers
-            try:
-                reply, modules_called, sources = _route_chat(
-                    text, model_client)
-            except ModelUnavailable as exc:
-                reply = (
-                    "The local model is unreachable right now "
-                    f"({exc}), so I cannot answer that. I have not "
-                    "invented an answer instead."
-                )
-                status = "model_unavailable"
-                sources = ["model (unreachable)"]
+        else:  # chat or unknown — tools first, then the model
+            tool_result = None
+            if tool_caller is not None:
+                # Keyword selection only (model_client=None): the
+                # model fallback would spend a model call to pick
+                # a tool for a question the model can answer
+                # directly. Only a successful tool run answers
+                # here; anything else falls through to the model.
+                loop = tool_caller.run(
+                    text, model_client=None, db_path=db_path)
+                if loop.get("status") == "ok" and loop.get("calls"):
+                    tool_result = loop
+            if tool_result is not None:
+                reply = (tool_result.get("final_result_summary")
+                         or str(tool_result.get("final_result")))
+                modules_called = list(
+                    tool_result.get("tools_called") or [])
+                sources = [f"tool ({name})" for name in modules_called]
+            else:
+                try:
+                    reply, modules_called, sources = _route_chat(
+                        text, model_client, history=history)
+                except ModelUnavailable as exc:
+                    reply = (
+                        "The local model is unreachable right now "
+                        f"({exc}), so I cannot answer that. I have not "
+                        "invented an answer instead."
+                    )
+                    status = "model_unavailable"
+                    sources = ["model (unreachable)"]
 
     result = {
         "request": text,
@@ -741,12 +783,14 @@ class Orchestrator:
     """
 
     def __init__(self, model_client=None, db_path=None,
-                 store_dir=None, news_dir=None, log_dir=None):
+                 store_dir=None, news_dir=None, log_dir=None,
+                 tool_caller=None):
         self.model_client = model_client
         self.db_path = db_path
         self.store_dir = store_dir
         self.news_dir = news_dir
         self.log_dir = log_dir
+        self.tool_caller = tool_caller
 
     def handle(self, request, **overrides):
         kwargs = {
@@ -755,6 +799,7 @@ class Orchestrator:
             "store_dir": self.store_dir,
             "news_dir": self.news_dir,
             "log_dir": self.log_dir,
+            "tool_caller": self.tool_caller,
         }
         kwargs.update(overrides)
         return handle(request, **kwargs)
