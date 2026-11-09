@@ -63,6 +63,13 @@ class YahooFinanceProvider(BaseFinancialProvider):
                 "industry": info.get("industry"),
                 "exchange": info.get("exchange"),
                 "currency": info.get("currency"),
+                # Step 58: the currency of the financial statements
+                # (Yahoo's financialCurrency) — usually the same as
+                # the listing currency, but not always: KSPI trades
+                # in USD while its statements are in Kazakhstani
+                # tenge, so the fallback must compare the two
+                # before trusting a per-share DCF against the price.
+                "financial_currency": info.get("financialCurrency"),
                 "market_cap": info.get("marketCap"),
                 "country": info.get("country")
             }

@@ -116,6 +116,12 @@ def _fetch_once(ticker, provider_name="yahoo"):
 
             "currency": profile.get("currency"),
 
+            # Step 58: the reporting currency of the financial
+            # statements (Yahoo's financialCurrency), passed
+            # through so the live fallback can refuse a DCF/price
+            # comparison across currencies (the KSPI case).
+            "financial_currency": profile.get("financial_currency"),
+
             "data_source": result.get(
                 "provider",
                 provider_name

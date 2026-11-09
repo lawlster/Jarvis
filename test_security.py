@@ -185,26 +185,37 @@ class Step51FixesTestCase(unittest.TestCase):
 
     def test_provider_logger_writes_to_given_db_only(self):
         from data.providers import provider_logger as pl
+        # Step 58: the production row count is no longer hardcoded
+        # — a live Yahoo pull (for example the Step 58 live smoke
+        # test, which retries and logs each attempt) legitimately
+        # adds provider_logs rows to production, so the test
+        # compares before/after counts instead of asserting
+        # exactly 1 pre-existing row (same fix as the Step 57
+        # fingerprint guard: count the change, not the total).
+        prod_before = pl.get_recent_provider_logs(
+            500, db_path=PROJECT_ROOT / "database" / "assistant.db")
+        temp_before = pl.get_recent_provider_logs(
+            500, db_path=self.db_path)
         row_id = pl.log_provider_request(
             "FIXA", "fixture-provider", "success",
             db_path=self.db_path)
         self.assertIsInstance(row_id, int)
-        logs = pl.get_recent_provider_logs(10, db_path=self.db_path)
-        # The temp copy already holds production's 1 pre-existing
-        # row; the fixture row is the newest.
-        self.assertEqual(len(logs), 2)
+        logs = pl.get_recent_provider_logs(500, db_path=self.db_path)
+        # The temp copy gains exactly the one fixture row.
+        self.assertEqual(len(logs), len(temp_before) + 1)
         self.assertEqual(logs[0]["ticker"], "FIXA")
         summary = pl.get_provider_log_summary(db_path=self.db_path)
         by_provider = {row["provider"]: row["total_requests"]
                        for row in summary}
         self.assertEqual(by_provider["fixture-provider"], 1)
-        self.assertEqual(sum(by_provider.values()), 2)
-        # Production still holds exactly the 1 pre-existing row
-        # (read with an explicit path: the module global may
-        # have been pointed at a temp copy by an earlier suite).
+        self.assertEqual(sum(by_provider.values()),
+                         len(temp_before) + 1)
+        # Production is untouched by this test (read with an
+        # explicit path: the module global may have been pointed
+        # at a temp copy by an earlier suite).
         prod = pl.get_recent_provider_logs(
-            10, db_path=PROJECT_ROOT / "database" / "assistant.db")
-        self.assertEqual(len(prod), 1)
+            500, db_path=PROJECT_ROOT / "database" / "assistant.db")
+        self.assertEqual(len(prod), len(prod_before))
 
     def test_provider_logger_default_still_production(self):
         # Fresh interpreter: the import-time default, immune to

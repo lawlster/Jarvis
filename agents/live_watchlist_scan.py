@@ -257,6 +257,9 @@ def scan_ticker_live(ticker, fetcher=None, yahoo_symbol_override=None,
     record["company_name"] = live.get("company_name")
     record["sector"] = live.get("sector")
     record["currency"] = live.get("currency")
+    # Step 58: the reporting currency of the statements, so a
+    # stored scan can later be checked for a currency mismatch.
+    record["financial_currency"] = live.get("financial_currency")
     freshness = live.get("data_freshness") or {}
     record["price_as_of"] = freshness.get("price_data_as_of_utc")
     record["retrieved_at"] = freshness.get("retrieved_at_utc")

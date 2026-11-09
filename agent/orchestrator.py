@@ -363,7 +363,9 @@ def _fmt_money(value):
     return f"${value:,.2f}"
 
 
-def _route_valuation(ticker, db_path):
+def _route_valuation(ticker, db_path, store_dir=None,
+                     live_fallback=False, live_fetcher=None,
+                     live_scan_path=None, force_live=False):
     from agents import margin_of_safety as mos
 
     conn = _open_read_only(db_path)
@@ -380,13 +382,46 @@ def _route_valuation(ticker, db_path):
         conn.close()
     tier = _tier_text(summary.get("tier"))
     if tier == "insufficient_data":
-        return (
+        stored_reply = (
             f"{ticker}: I do not have enough data to value it — "
             f"{summary.get('warnings') or 'no valuation range could '
-              'be computed'}. No figure is estimated.",
-            ["agents/margin_of_safety.py"],
+              'be computed'}. No figure is estimated.")
+        if not live_fallback:
+            return (
+                stored_reply,
+                ["agents/margin_of_safety.py"],
+                ["agents/margin_of_safety.py::margin_of_safety_summary "
+                 f"(tier {tier})"],
+            )
+        # Step 58: the stored path has nothing, so fall back to
+        # the Step 54 live machinery for this one ticker (a
+        # watchlist ticker, or one the owner named in the
+        # question).  The stored answer is never replaced — this
+        # only fills the gap when there is none.
+        from agents import live_fallback as lfb
+        fallback = lfb.live_valuation(
+            ticker, store_dir=store_dir, fetcher=live_fetcher,
+            live_scan_path=live_scan_path, force_live=force_live,
+            explicitly_named=True)
+        if fallback["status"] == "ok":
+            return (
+                lfb.format_live_valuation(fallback),
+                ["agents/live_fallback.py",
+                 "agents/live_watchlist_scan.py"],
+                ["agents/live_fallback.py::live_valuation "
+                 "(Step 58, live-derived value — provisional)",
+                 "agents/live_watchlist_scan.py::scan_ticker_live "
+                 "(Step 54)"],
+            )
+        return (
+            f"{stored_reply} The live fallback also could not "
+            f"value it: {fallback.get('reason') or fallback['status']}.",
+            ["agents/margin_of_safety.py",
+             "agents/live_fallback.py"],
             ["agents/margin_of_safety.py::margin_of_safety_summary "
-             f"(tier {tier})"],
+             f"(tier {tier})",
+             "agents/live_fallback.py::live_valuation "
+             f"(Step 58, {fallback['status']})"],
         )
     rng = summary.get("fair_value_range") or {}
     quality = summary.get("business_quality") or {}
@@ -610,7 +645,8 @@ def log_turn(record, log_dir=None):
 def handle(request, model_client=None, db_path=None,
            store_dir=None, news_dir=None, context=None,
            log_dir=None, as_of=None, tool_caller=None,
-           history=None):
+           history=None, live_fallback=False, live_fetcher=None,
+           live_scan_path=None, force_live=False):
     """Handle one user request through the pipeline.
 
     Returns a dict: ``request``, ``intent``, ``intent_method``,
@@ -631,6 +667,14 @@ def handle(request, model_client=None, db_path=None,
     ``history`` is the caller's recent conversation
     (``{"role", "content"}`` messages, newest last), sent to
     the model with the current turn; None sends only this turn.
+    ``live_fallback`` (Step 58, off by default) lets a
+    valuation intent fall back to the Step 54 live machinery
+    when the stored path has no data for the ticker;
+    ``live_fetcher`` injects the live pull (None means the real
+    Yahoo fetch), ``live_scan_path`` points at a stored
+    Step 54 scan file, and ``force_live`` skips the stored
+    scan.  Off by default so a caller that does not opt in
+    never touches the network.
     """
     text = (request or "").strip()
     checked_at = as_of or _utcnow_iso()
@@ -687,7 +731,11 @@ def handle(request, model_client=None, db_path=None,
                 status = "unavailable"
             else:
                 reply, modules_called, sources = _route_valuation(
-                    ticker, db_path)
+                    ticker, db_path, store_dir=store_dir,
+                    live_fallback=live_fallback,
+                    live_fetcher=live_fetcher,
+                    live_scan_path=live_scan_path,
+                    force_live=force_live)
                 if not modules_called:
                     status = "unavailable"
         elif intent == "financial_research":
@@ -784,13 +832,19 @@ class Orchestrator:
 
     def __init__(self, model_client=None, db_path=None,
                  store_dir=None, news_dir=None, log_dir=None,
-                 tool_caller=None):
+                 tool_caller=None, live_fallback=False,
+                 live_fetcher=None, live_scan_path=None,
+                 force_live=False):
         self.model_client = model_client
         self.db_path = db_path
         self.store_dir = store_dir
         self.news_dir = news_dir
         self.log_dir = log_dir
         self.tool_caller = tool_caller
+        self.live_fallback = live_fallback
+        self.live_fetcher = live_fetcher
+        self.live_scan_path = live_scan_path
+        self.force_live = force_live
 
     def handle(self, request, **overrides):
         kwargs = {
@@ -800,6 +854,10 @@ class Orchestrator:
             "news_dir": self.news_dir,
             "log_dir": self.log_dir,
             "tool_caller": self.tool_caller,
+            "live_fallback": self.live_fallback,
+            "live_fetcher": self.live_fetcher,
+            "live_scan_path": self.live_scan_path,
+            "force_live": self.force_live,
         }
         kwargs.update(overrides)
         return handle(request, **kwargs)

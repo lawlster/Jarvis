@@ -177,7 +177,11 @@ class JarvisApp:
         self.orchestrator = orch.Orchestrator(
             model_client=self.model_client, db_path=str(self.db_path),
             store_dir=store_dir, news_dir=news_dir, log_dir=log_dir,
-            tool_caller=self.tool_caller)
+            tool_caller=self.tool_caller,
+            # Step 58: a valuation question about a ticker with
+            # no stored statements falls back to the Step 54 live
+            # machinery instead of answering "not enough data".
+            live_fallback=True, live_fetcher=self.live_fetcher)
 
         self.conversation_history = []
         self.voice_armed = False
@@ -344,7 +348,12 @@ class JarvisApp:
                     [], ["agent/research_agents.py"])
         brief = run_research_session(
             argument, db_path=str(self.db_path),
-            save_dir=self.research_save_dir)
+            save_dir=self.research_save_dir,
+            store_dir=self.store_dir,
+            # Step 58: a research session about a ticker with no
+            # stored statements falls back to the Step 54 live
+            # machinery for its scan and valuation steps.
+            live_fallback=True, live_fetcher=self.live_fetcher)
         lines = [f"Research: {brief.get('question', argument)}",
                  f"Status: {brief.get('status', 'unknown')}"]
         for claim in brief.get("claims") or []:

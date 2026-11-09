@@ -63,6 +63,15 @@ SOURCE_EVENTS = (
     "(Step 33, stored files only)"
 )
 SOURCE_CHANGED = "agents/news_monitoring.py::check_ticker (Step 34)"
+# Step 58: claims from a live-derived value name this module,
+# not the stored-data scanner/valuation engine — the value came
+# from a live pull or a stored live scan, and is provisional.
+SOURCE_SCAN_LIVE = (
+    "agents/live_fallback.py (Step 58, live-derived value — "
+    "provisional)")
+SOURCE_VALUATION_LIVE = (
+    "agents/live_fallback.py (Step 58, live-derived value — "
+    "provisional)")
 
 QUESTION_KINDS = ("single", "comparison", "what_changed", "unknown")
 
@@ -282,8 +291,11 @@ def _step_record(step, status, output=None, reason=None):
     }
 
 
-def _run_scan(conn, tickers, prices):
+def _run_scan(conn, tickers, prices, live_fallback=False,
+              live_fetcher=None, live_scan_path=None,
+              force_live=False, live_cache=None, store_dir=None):
     from agents import market_scanner as ms
+    from agents import live_fallback as lfb
 
     results = {}
     for ticker in tickers:
@@ -296,11 +308,28 @@ def _run_scan(conn, tickers, prices):
                 "ticker": ticker, "tier": "insufficient_data",
                 "missing_inputs": [f"scan failed: {exc}"],
             }
+        if (_tier_text(results[ticker].get("tier"))
+                == "insufficient_data" and live_fallback):
+            # Step 58: the stored pipeline has nothing for this
+            # ticker — fall back to the Step 54 live machinery
+            # for this one ticker (a watchlist ticker, or one
+            # the owner named in the question).
+            fallback = lfb.live_valuation(
+                ticker, store_dir=store_dir, fetcher=live_fetcher,
+                live_scan_path=live_scan_path, force_live=force_live,
+                explicitly_named=True, cache=live_cache)
+            if fallback["status"] == "ok":
+                results[ticker] = lfb.candidate_from_live_record(
+                    fallback["record"], fallback["source"])
     return results
 
 
-def _run_valuation(conn, tickers, prices):
+def _run_valuation(conn, tickers, prices, live_fallback=False,
+                   live_fetcher=None, live_scan_path=None,
+                   force_live=False, live_cache=None,
+                   store_dir=None):
     from agents import margin_of_safety as mos
+    from agents import live_fallback as lfb
 
     results = {}
     for ticker in tickers:
@@ -314,6 +343,18 @@ def _run_valuation(conn, tickers, prices):
                 "tier": {"tier": "insufficient_data"},
                 "warnings": [f"valuation failed: {exc}"],
             }
+        if (_tier_text(results[ticker].get("tier"))
+                == "insufficient_data" and live_fallback):
+            # Step 58: same fallback as the scan step, sharing
+            # the session's live cache so one pull serves both.
+            fallback = lfb.live_valuation(
+                ticker, store_dir=store_dir, fetcher=live_fetcher,
+                live_scan_path=live_scan_path, force_live=force_live,
+                explicitly_named=True, cache=live_cache)
+            if fallback["status"] == "ok":
+                results[ticker] = (
+                    lfb.valuation_summary_from_live_record(
+                        fallback["record"], fallback["source"]))
     return results
 
 
@@ -435,6 +476,10 @@ def _claims_from_scan(scan_results, source):
     for ticker, candidate in (scan_results or {}).items():
         if _tier_text(candidate.get("tier")) == "insufficient_data":
             continue
+        # Step 58: a live-derived candidate is sourced to the
+        # fallback, not to the stored-data scanner.
+        claim_source = (SOURCE_SCAN_LIVE
+                        if candidate.get("live_fallback") else source)
         rng = candidate.get("fair_value_range") or {}
         claims.append({
             "text": (
@@ -443,7 +488,7 @@ def _claims_from_scan(scan_results, source):
                 f"{candidate.get('quality_rating', 'unknown')}, "
                 f"health {candidate.get('health_verdict', 'unknown')}."
             ),
-            "source": source,
+            "source": claim_source,
         })
         claims.append({
             "text": (
@@ -454,7 +499,7 @@ def _claims_from_scan(scan_results, source):
                 f"{_fmt_money(candidate.get('price'))} (as of "
                 f"{candidate.get('price_as_of') or 'date unknown'})."
             ),
-            "source": source,
+            "source": claim_source,
         })
         if candidate.get("strongest_alert_threshold_price") is not None:
             claims.append({
@@ -463,7 +508,7 @@ def _claims_from_scan(scan_results, source):
                     f"{_fmt_money(candidate.get('strongest_alert_threshold_price'))} "
                     f"(20% below the conservative value)."
                 ),
-                "source": source,
+                "source": claim_source,
             })
     return claims
 
@@ -473,15 +518,24 @@ def _claims_from_valuation(valuation_results, source):
     for ticker, summary in (valuation_results or {}).items():
         if _tier_text(summary.get("tier")) == "insufficient_data":
             continue
+        # Step 58: a live-derived summary is sourced to the
+        # fallback, not to the stored-data valuation engine.
+        claim_source = (SOURCE_VALUATION_LIVE
+                        if summary.get("live_fallback") else source)
         margin = summary.get("margin_of_safety_vs_conservative")
         deterioration = summary.get("deterioration") or {}
+        # A live-derived summary carries deteriorated=None
+        # (unknown from a live pull); render that as "unknown".
+        deteriorated = deterioration.get("deteriorated")
+        if deteriorated is None:
+            deteriorated = "unknown"
         claims.append({
             "text": (
                 f"{ticker}: margin of safety vs the conservative "
                 f"value {_fmt_pct(margin)}; material deterioration: "
-                f"{deterioration.get('deteriorated', 'unknown')}."
+                f"{deteriorated}."
             ),
-            "source": source,
+            "source": claim_source,
         })
     return claims
 
@@ -784,7 +838,10 @@ def _synthesise(plan, step_records):
 
 def run_research_session(question, db_path=None, peers=None,
                          prices=None, news_dir=None, events_dir=None,
-                         state=None, as_of=None, save_dir=None):
+                         state=None, as_of=None, save_dir=None,
+                         store_dir=None, live_fallback=False,
+                         live_fetcher=None, live_scan_path=None,
+                         force_live=False):
     """Run one research session for ``question``.
 
     Returns a brief dict: ``question``, ``kind``, ``tickers``,
@@ -797,6 +854,18 @@ def run_research_session(question, db_path=None, peers=None,
     JSON + Markdown there (default
     ``data/research_sessions/``).  A trade request is refused
     before any step runs.
+
+    ``live_fallback`` (Step 58, off by default) lets the scan
+    and valuation steps fall back to the Step 54 live machinery
+    for a ticker the stored pipeline cannot judge;
+    ``live_fetcher`` injects the live pull (None means the real
+    Yahoo fetch), ``live_scan_path`` points at a stored Step 54
+    scan file, and ``force_live`` skips the stored scan.  Off by
+    default so a caller that does not opt in never touches the
+    network.  The full research report (Step 29) has no live
+    fallback: for a ticker with no stored statements the
+    session still stops at the report step, with the live
+    scan/valuation claims kept and the limitation recorded.
     """
     from agent import orchestrator as orch
 
@@ -876,7 +945,10 @@ def run_research_session(question, db_path=None, peers=None,
             try:
                 steps, stopped = _execute_plan(
                     conn, plan, prices, news_dir, events_dir,
-                    state, as_of)
+                    state, as_of, live_fallback=live_fallback,
+                    live_fetcher=live_fetcher,
+                    live_scan_path=live_scan_path,
+                    force_live=force_live, store_dir=store_dir)
                 if stopped:
                     status = "insufficient_data"
                     status_reason = (
@@ -917,17 +989,22 @@ def run_research_session(question, db_path=None, peers=None,
 
 
 def _execute_plan(conn, plan, prices, news_dir, events_dir,
-                  state, as_of):
+                  state, as_of, live_fallback=False,
+                  live_fetcher=None, live_scan_path=None,
+                  force_live=False, store_dir=None):
     """Run the planned steps in order. Returns (steps, stopped).
 
     ``stopped`` is True when a step returned insufficient_data
     and the remaining steps were recorded as not attempted.
+    ``live_cache`` memoises live-fallback results by ticker so
+    the scan and valuation steps share one pull.
     """
     steps = []
     stopped = False
     target = plan["target"]
     tickers = plan["tickers"]
     peers = plan["peers"]
+    live_cache = {}
 
     for step in plan["steps"]:
         if stopped:
@@ -938,7 +1015,11 @@ def _execute_plan(conn, plan, prices, news_dir, events_dir,
             continue
         step_id = step["id"]
         if step_id == "scan":
-            results = _run_scan(conn, tickers, prices)
+            results = _run_scan(
+                conn, tickers, prices, live_fallback=live_fallback,
+                live_fetcher=live_fetcher,
+                live_scan_path=live_scan_path, force_live=force_live,
+                live_cache=live_cache, store_dir=store_dir)
             target_result = results.get(target) or {}
             if _tier_text(target_result.get("tier")) == "insufficient_data":
                 missing = target_result.get("missing_inputs") or []
@@ -952,7 +1033,11 @@ def _execute_plan(conn, plan, prices, news_dir, events_dir,
                 steps.append(_step_record(
                     step, "ok", output=results))
         elif step_id == "valuation":
-            results = _run_valuation(conn, tickers, prices)
+            results = _run_valuation(
+                conn, tickers, prices, live_fallback=live_fallback,
+                live_fetcher=live_fetcher,
+                live_scan_path=live_scan_path, force_live=force_live,
+                live_cache=live_cache, store_dir=store_dir)
             target_result = results.get(target) or {}
             if _tier_text(target_result.get("tier")) == "insufficient_data":
                 warnings = target_result.get("warnings") or []
