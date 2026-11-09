@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 38 — Automated watchlist and valuation alerts (PARTIAL — built and tested 2026-11-09; alert engine over caller-supplied evidence, 34 new tests, fixture-proven; no alert has ever fired on real data, MSFT produces none — see Step 38 section below)
-- Current subtask: Step 39 unified AI orchestration
+- Current step: 39 — Unified AI orchestration (PARTIAL — built and tested 2026-11-09; request pipeline with keyword intent classification, guardrails, routing to Step 16-38 modules, sourced replies and a JSON-lines turn log, 27 new tests, stub-tested only — no live Ollama turn has ever run through it — see Step 39 section below)
+- Current subtask: Step 40 integrate cloud AI models
 - Overall status: In progress
 
 ## Completed work
@@ -2117,4 +2117,103 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   helpers (first noted Step 27) — removed with the same
   targeted `rm /tmp/tmp*.db` the parent used, /tmp now 15%.
   Step 38's own tests use `TemporaryDirectory` and leave
+  nothing behind.
+
+### 2026-11-09 — Step 39 unified AI orchestration (PARTIAL, not complete)
+
+- `agent/orchestrator.py` built and tested (27 new
+  tests, 671 total, `python -m unittest discover` from the
+  project root with `~/workspace/projects/jarvis-venv/bin/python`).
+  Production DB hash unchanged (`36862922…089187`); checks ran
+  on fixtures, a stubbed model client and a temp DB copy.
+  Report: `~/workspace/projects/step39-report.md`.
+- Audit first: `agent/brain.py` and `agent/planner.py` are
+  empty stubs (0 lines each) — nothing to reuse, so nothing
+  was reused from them. `agent/memory.py` is the real memory
+  module (conversations table, last 20 messages); the
+  orchestrator does not replace it. `main.py` still owns the
+  interactive loop and the Ollama tool-calling client; this
+  module does not replace it and is not wired into `main.py`
+  (that integration is Step 50).
+- What it does (one `handle()` call, six explicit stages):
+  receive the request; classify intent into `chat /
+  financial_research / valuation / watchlist / news /
+  portfolio / trade / schedule_send / unknown` — keyword
+  rules first, a model call only as a fallback, labelled
+  `method="model_fallback"`; enforce guardrails BEFORE
+  acting (a trade request is refused as a record, never
+  executed, model never called; a send/schedule request is
+  refused — Step 46; no production database writes from
+  orchestration, no invented data); route — financial
+  intents call the existing modules by their public
+  functions (Step 23 `margin_of_safety_summary` for
+  valuation, Step 25 `scan_ticker` for financial research,
+  Step 35 `watchlist_view` for the watchlist with an
+  entry-list fallback when no tracker records exist yet,
+  Step 31 `list_articles` for news — stored articles only,
+  Step 36 `portfolio_summary` for the portfolio on
+  caller-supplied holdings + price history only, no
+  holdings invented); compose the reply — the model's
+  words plus structured module results, with sources
+  labelled (module name + what it computed); record the
+  turn as a JSON line under `data/orchestration/`
+  (caller-chosen directory), never the production
+  database. `OllamaModelClient` mirrors the `main.py`
+  Ollama call without tool calling and raises
+  `ModelUnavailable` on any transport failure, so the
+  orchestrator reports "model unreachable" instead of
+  inventing an answer; `StubModelClient` returns canned
+  replies for tests/offline use. `Orchestrator` class
+  holds defaults (model client, DB path, store/news/log
+  directories) overridable per call.
+- Fixture example (stubbed-model session on a temp DB
+  copy; example files
+  `~/workspace/projects/step39-example-session.json` and
+  `.md`): "What is the intrinsic value of MSFT?" →
+  intent `valuation` (keyword), status `ok`, module
+  `agents/margin_of_safety.py`, source Step 23 tier
+  overvalued — "bear $98.52, base $163.30, optimistic
+  $234.64. Price $507.12 (as of 2026-11-03).
+  Strongest-alert price $78.82. Business quality:
+  excellent. Material deterioration: False."; "Hello, how
+  are you?" → intent `chat`, status `ok`, stub greeting;
+  "Buy 100 shares of MSFT at $500" → intent `trade`,
+  route `guardrail_trade`, status `refused`, no modules
+  called, model never called.
+- Bugs found and fixed during testing: the ticker
+  extraction regex only matched letters, so SG tickers
+  (`D05`, `O39`, `U11`) never matched (now
+  `[A-Z][A-Z0-9]{0,4}`); the valuation reply read the
+  wrong keys — the Step 21/22 range is keyed
+  `conservative / base / optimistic` (no `bear` key, the
+  conservative value is the bear case), so it said "bear
+  unknown", and the deterioration dict carries
+  `deteriorated`, not `material_deterioration`; the Step 23
+  summary carries no health verdict at all (that lives in
+  the Step 25 candidate), so the reply claimed "Health:
+  unknown" — the health line was removed rather than
+  guessed. One test bug (asserted "will not" where the
+  reply says "have not invented").
+- **Step 39 is PARTIAL, not complete.** No live Ollama
+  turn has ever run through the orchestrator — all model
+  behaviour is stub-tested (no Ollama on this machine);
+  the real `OllamaModelClient` path is verified only for
+  the failure case (refused connection raises
+  `ModelUnavailable`). Not wired into `main.py` (Step 50).
+  The portfolio route needs caller-supplied holdings and
+  price history every call — no holdings store exists
+  (open decision, carried from Steps 36–37). No cloud
+  models (Step 40), no deeper financial-agent integration
+  (Step 41), no web research (Step 42), no long-term
+  memory beyond the existing last-20 (Step 43), no tool
+  calling (Step 44), no voice (Step 45), no
+  scheduling/sending (Step 46), no computer interaction
+  (Step 47). The generated `data/orchestration/` turn log
+  is untracked, not committed. Sufficient to start Step 40
+  (integrate cloud AI models).
+- Housekeeping: the full-suite run left 6 stale `tmp*.db`
+  files in /tmp (21%) from older steps' `_temp_db_copy`
+  helpers (first noted Step 27) — removed with the same
+  targeted `rm /tmp/tmp*.db` the parent used, /tmp now 17%.
+  Step 39's own tests use `TemporaryDirectory` and leave
   nothing behind.
