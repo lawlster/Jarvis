@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 37 — Quarterly portfolio reporting (PARTIAL — built and tested 2026-11-09; dict + Markdown reports over caller-supplied holdings and price histories, 23 new tests, fixture-proven; no real portfolio ever reported on, MSFT has only one price point so every history-dependent metric is missing on real data — see Step 37 section below)
-- Current subtask: Step 38 automated watchlist and valuation alerts
+- Current step: 38 — Automated watchlist and valuation alerts (PARTIAL — built and tested 2026-11-09; alert engine over caller-supplied evidence, 34 new tests, fixture-proven; no alert has ever fired on real data, MSFT produces none — see Step 38 section below)
+- Current subtask: Step 39 unified AI orchestration
 - Overall status: In progress
 
 ## Completed work
@@ -1990,3 +1990,131 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   `_temp_db_copy` helpers, which still never delete their
   copies (first noted Step 27). Step 37's own tests use
   `TemporaryDirectory` and leave nothing behind.
+
+### 2026-11-09 — Step 38 automated watchlist and valuation alerts (PARTIAL, not complete)
+
+- `agents/watchlist_alerts.py` built and tested (34 new
+  tests, 644 total, `python -m unittest discover` from the
+  project root with `~/workspace/projects/jarvis-venv/bin/python`).
+  Production DB hash unchanged (`36862922…089187`); checks ran
+  on fixtures and a temp DB copy. Report: `~/workspace/projects/
+  step38-report.md`.
+- Audit first: Step 26 already produces detection bands,
+  value traps and alert-ready briefing lines, and Step 34
+  (`agents/news_monitoring.py::build_alerts`) already turns a
+  Step 26 detection result into `strongest_alert` records and
+  Step 30 reviews into `thesis_confirmed` / `thesis_invalidated`
+  records, raised once per key in the monitoring state. This
+  step reuses `build_alerts` for the thesis rules and does not
+  re-derive bands. The legacy `agents/alert_manager.py` (DB
+  tables `valuation_alerts` / `alert_states` on the production
+  database) was deliberately NOT reused: this step writes no
+  production tables. Alert state lives in one JSON file
+  (default `data/alerts/alert_state.json`).
+- What it does (the alert engine — it evaluates, it does not
+  fetch): rules `strongest_alert` (Step 26 band or Step 23 tier
+  `strongest_alert`), `price_below_alert_price` (a
+  caller-supplied current price at or below the Step 23
+  strongest-alert threshold price — the fresh-price path, when
+  the stored tier was computed on an older price; suppressed
+  when `strongest_alert` already fired in the same run, so the
+  same fact is not reported twice), `watch_discount` /
+  `watch_below_base` (Step 26 watch bands, severity `watch`),
+  `deterioration_material` (material deterioration turned on
+  since the last evaluation — the first evaluation only
+  establishes the baseline), `quality_changed` (Step 24 rating
+  changed since the last evaluation — a first rating is
+  baseline, not a change), `thesis_confirmed` /
+  `thesis_invalidated` (Step 30 reviews, reused from Step 34).
+  Each alert record carries ticker, rule, severity
+  (strongest / watch / warning), trigger value vs threshold,
+  an evidence snapshot (tier, quality, health, deterioration,
+  price, alert price, as-of date) and a one-line briefing text
+  in the Step 32 summary shape. No "buy"/"sell" words in any
+  briefing line (tested). Dedupe: an alert is raised once per
+  key while its condition holds (later runs report it under
+  `already_active`); when the condition is gone and the ticker
+  was evaluated that run, the alert moves to `cleared` with a
+  `cleared_at` timestamp; a later re-fire creates a new record
+  with `refire_count` incremented. A ticker that was not
+  evaluated keeps its active alerts — absence of evidence is
+  not evidence of clearing. Alerts can be acknowledged
+  (records only; acknowledging does not clear). A ticker with
+  no price and no conservative value — or a Step 23 tier of
+  `insufficient_data` — is recorded as `not_evaluated` with the
+  reason, never as "no alert". Thesis reviews for tickers not
+  on the watchlist are listed as skipped, not dropped silently.
+  `evaluate_alerts` (caller-supplied detection / summaries /
+  prices / reviews, in-memory state), `run_alerts` (loads and
+  saves the state file), `evaluate_from_db` /
+  `run_alerts_from_db` (Step 26 detector + Step 23 summaries
+  over a read-only connection), `list_active_alerts` /
+  `list_cleared_alerts` / `acknowledge_alert` /
+  `briefing_lines`. No price fetching, no network, no DB
+  writes, no trades, no sending, no scheduling (Step 46).
+- Fixture example (watchlist FIXA / FIXB / MSFT; example
+  files `~/workspace/projects/step38-example-alerts.json` and
+  `.md`): run 1 raises `strongest_alert:FIXA` (synthetic
+  candidate at $5.00, conservative $25.00, 80.0% below
+  conservative value, quality excellent, health strong) and
+  `watch_discount:FIXB` (synthetic watch name at $21.00);
+  run 2 with the same evidence raises nothing new (both
+  already active); run 3 with FIXA's price recovered to
+  $100.00 clears `strongest_alert:FIXA` and leaves
+  `watch_discount:FIXB` active. MSFT produced no alert on
+  real data in any run.
+- MSFT on real data (temp DB copy): 0 alerts, evaluated,
+  tier overvalued, quality excellent, health strong, price
+  $507.12, alert price $78.82, deterioration False. With a
+  caller-supplied fresh price of $75.00 against the stored
+  $507.12 evidence, `price_below_alert_price` fires
+  (trigger $75.00 vs threshold $78.82). MSFT plus D05
+  together: MSFT evaluated, D05 not evaluated
+  (insufficient_data). **No alert has ever fired on real
+  data** — the strongest-alert rule, the price-crossing rule,
+  the watch bands, the deterioration and quality rules and
+  the thesis rules are all fixture-proven only. A live price
+  feed is what would let this engine evaluate real prices
+  between checks; until then it can only evaluate the prices
+  a caller supplies.
+- Two module bugs found and fixed during testing, both in
+  Step 38 itself: (1) a raw Step 23
+  `margin_of_safety_summary` carries its tier as a dict
+  ({"tier", "reasons", ...}) while Step 25 scanner candidates
+  carry it as a plain string — the module now unwraps either
+  shape (the scanner unwraps it too; the summary shape is a
+  Step 23 interface quirk, recorded here, not changed);
+  the same fix reads the health verdict from the summary's
+  deterioration inputs, where a raw summary keeps it (a
+  scanner candidate carries it top-level). (2) a
+  caller-supplied bare price (e.g. 75.00) was passed straight
+  into `margin_of_safety_summary`, which expects a
+  price-input dict — it crashed with "'float' object has no
+  attribute 'get'" and the ticker was misreported as
+  insufficient_data; the module now normalises prices with
+  Step 25's `normalise_price_input` first. Note the same
+  latent pattern exists in Step 34's `run_monitor`, which
+  passes caller-supplied prices straight through to the
+  evidence snapshot — it only bites when prices are actually
+  supplied (Step 34's real runs passed none), so it was left
+  alone as a Step 34 file. Three further failures were test
+  bugs (fixture summaries priced at $5.00, below their own
+  $20.00 alert price, so the price-crossing rule legitimately
+  fired in tests that expected no valuation alert; and the
+  MSFT fresh-price test first passed $75.00 into
+  `evaluate_from_db`, which re-computes the tier at $75.00 —
+  strongest_alert — instead of testing the fresh-price path
+  against stored $507.12 evidence).
+- **Step 38 is PARTIAL, not complete.** No alert has ever
+  fired on real data; no live price feed exists, so the
+  engine only evaluates caller-supplied prices; no sending
+  or scheduling (Step 46); not wired into `main.py`
+  (Step 50). The generated `data/alerts/` state file is
+  untracked, not committed. Sufficient to start Step 39
+  (unified AI orchestration).
+- Housekeeping: the full-suite run left 6 stale `tmp*.db`
+  files in /tmp (19%) from older steps' `_temp_db_copy`
+  helpers (first noted Step 27) — removed with the same
+  targeted `rm /tmp/tmp*.db` the parent used, /tmp now 15%.
+  Step 38's own tests use `TemporaryDirectory` and leave
+  nothing behind.
