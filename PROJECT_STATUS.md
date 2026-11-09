@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 45 — Build voice interaction (PARTIAL — built and tested 2026-11-09; pluggable STT/TTS clients + voice turn over the Step 39 orchestrator + stored text preference gate, 32 new tests, fixture example — see Step 45 section below)
-- Current subtask: Step 45 voice interaction
+- Current step: 46 — Build reminders and scheduled automation (PARTIAL — built and tested 2026-11-09; job store + due-check + runner + stub delivery, 42 new tests, fixture example on a fake clock — see Step 46 section below)
+- Current subtask: Step 46 reminders and scheduled automation
 - Overall status: In progress
 
 ## Completed work
@@ -2771,3 +2771,101 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   imports/audit; logical content identical). The new
   `data/memory/` store (the owner's text-preference record +
   `index.json`) is untracked generated data, not committed.
+
+### 2026-11-09 — Step 46 build reminders and scheduled automation (PARTIAL, not complete)
+
+- `agent/scheduler.py` built and tested (42 new tests, 892 total,
+  `python -m unittest discover` from the project root with
+  `~/workspace/projects/jarvis-venv/bin/python`; 1 skipped: the
+  live smoke test, behind `JARVIS_LIVE_WEB_RESEARCH=1`).
+  Production DB hash unchanged (`36862922…089187`); this step
+  does not touch the database at all except through the
+  read-only connections the built-in actions open. Report:
+  `~/workspace/projects/step46-report.md`.
+- **No live job was created and no live cron or scheduled job
+  was touched.** The owner's two jobs running outside Jarvis
+  (morning briefing ~07:36, daily valuation check ~09:36
+  Asia/Singapore) are untouched and are NOT duplicated here.
+  This step builds the in-project scheduling layer Jarvis
+  itself would use; wiring a job to a real clock and a real
+  channel is a later decision.
+- Audit first: no reminders or scheduling module existed
+  (`agent/scheduler.py` and `agent/reminders.py` both absent).
+  Reused, not duplicated: Step 44's forbidden-name token set
+  (mirrored, with a comment naming the source), Step 32
+  `generate_summary`, Step 34 `run_monitor`, Step 38
+  `load_state` / `list_active_alerts` / `briefing_lines`, the
+  one-JSON-file-per-record pattern from Steps 30–43, and the
+  JSON-lines log pattern from Step 26.
+- What it does: job store (one JSON file per job under a
+  caller-chosen directory, default `data/scheduler/`), each job
+  carrying id, name, kind (`reminder` / `daily_summary` /
+  `watchlist_check` / `alert_digest`), schedule (once at a
+  datetime, daily at a time, or weekly on a weekday at a time —
+  all with an explicit timezone), payload, delivery, enabled
+  flag, creator, and last/next run. `due_jobs` lists the jobs
+  due at an injectable clock, in order, without running them.
+  `run_job` / `run_due_jobs` run a due job by calling its
+  payload function (caller-supplied only — the module never
+  invents a payload), record the run in a JSON-lines run log
+  (`runs.jsonl`), and compute the next run; a failing job is
+  recorded as failed and does not block the others. Pluggable
+  `DeliveryClient` (`deliver(recipient, subject, body)`); the
+  only implementation shipped is `StubDelivery`, which records
+  deliveries and returns a fake receipt with `delivered: False`
+  — no real sending, no Telegram, no email. A reminder is a job
+  of kind `reminder` with a message and a due time; creating
+  one records it, it does not send it. `builtin_actions()`
+  returns the three Step 32/34/38 actions by payload action
+  name (thin wrappers, read-only on the database; the alert
+  digest only lists what the Step 38 engine already raised).
+  A thin `Scheduler` class wraps store, actions, and delivery.
+- Safety: the runner refuses a job whose payload names a
+  trade, send, or schedule action — the same forbidden tokens
+  as Step 44 — and fails loudly at creation time, so a job
+  that would place a trade can never be stored. A reminder
+  phrased as a trade instruction ("Buy 100 shares of MSFT",
+  "Place an order to buy NVDA") is refused at creation time.
+  Every schedule carries an explicit timezone; a schedule
+  without one, or with an unknown IANA name, is rejected. The
+  runner never runs a job whose next run is in the future; a
+  disabled job never runs. A delivery failure is recorded on
+  the run record, not hidden.
+- Fixture example (files
+  `~/workspace/projects/step46-example-scheduler-run.json` /
+  `.md`, fake clock Monday 2026-11-09 09:36 Asia/Singapore,
+  jobs created Sunday 09:00 SGT, temp DB copy, stub delivery):
+  daily 09:36 watchlist check (MSFT) ran, status `ok` —
+  "Watchlist check: 1 ticker(s), 0 new article(s), 0 upcoming
+  event(s), 0 change(s), 0 new alert(s).", next run Tuesday
+  09:36; daily 09:35 alert digest ran, status `ok` — "Alert
+  digest: no active alerts.", next run Tuesday 09:35; one-off
+  NVDA earnings reminder (Tue 17 Nov 08:30) did not run, next
+  run unchanged. Two stub receipts, both `delivered: false`.
+- No module bugs found. Three test bugs were found and fixed
+  while writing the tests, all in the tests, all confirmed as
+  correct module behaviour first: `_actions` defined on the
+  wrong test class; a daily 08:00 job created at 09:00
+  expected due the same day (next runs are strictly after
+  creation, so it is due tomorrow); due-ordering expected
+  creation order (the module correctly orders by next run — a
+  daily 09:36 job created Sunday 09:00 was next due Sunday
+  09:36, before a daily 08:00 job due Monday 08:00).
+- **Step 46 is PARTIAL, not complete. No job has ever run on a
+  real clock.** Every run so far is on a fake clock in tests
+  and in the fixture example. Nothing has ever really been
+  sent: the only delivery client is a stub, and no Telegram bot
+  or email sender is configured for Jarvis. The project's
+  `data/scheduler/` directory was never created by this step.
+  Not wired into `main.py` (Step 50). No live price feed; no
+  holdings store (open decisions carried from Steps 36–37).
+  Sufficient to start Step 47 (computer and application
+  interaction).
+- Housekeeping: Step 46's own tests use `TemporaryDirectory`
+  and leave nothing behind; the full-suite runs left a few
+  stale `tmp*.db` files in /tmp, removed with the targeted
+  `rm /tmp/tmp*.db` used before — /tmp now 5%.
+  `database/assistant.db` shows as modified in `git status`,
+  but its hash is unchanged (`36862922…089187`) — the known
+  pre-existing state (header rewrites from earlier
+  imports/audit; logical content identical).
