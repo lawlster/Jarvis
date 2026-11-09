@@ -21,6 +21,9 @@ the UI derives nothing new about value):
 - ``/chat`` — a text box that runs the Step 39 orchestrator and
   shows the reply with its sources labelled.
 - ``/status`` — what the UI can and cannot do.
+- ``/dashboard`` — Step 49: the status snapshot (module health,
+  recent activity, gaps) over the logs and state files the other
+  steps already write. Read-only; it never runs a module.
 
 Rules the UI enforces:
 
@@ -35,10 +38,9 @@ Rules the UI enforces:
 - Candidates are worth a closer look, never recommendations; the
   final decision is always the owner's.
 
-Not built here: live dashboards and agent monitoring (Step 49),
-wiring into ``main.py`` (Step 50). No real browser session has
-ever run through this UI — it is tested with a test HTTP client
-against a server in a thread.
+Not built here: wiring into ``main.py`` (Step 50). No real
+browser session has ever run through this UI — it is tested
+with a test HTTP client against a server in a thread.
 """
 
 import html
@@ -50,6 +52,7 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from agent import dashboard as dash
 from agent import orchestrator as orch
 from agent import research_agents as ra
 from agents import daily_summary as ds
@@ -99,11 +102,13 @@ class JarvisUI:
     is the Step 39 model client (a stub in tests, the real Ollama
     client on the owner's PC). ``log_dir=False`` disables the Step
     39 turn log (tests); ``None`` keeps the default log location.
+    ``data_dir`` is the Step 49 dashboard's data root (defaults
+    to the project's ``data/`` directory).
     """
 
     def __init__(self, db_path=None, store_dir=None, news_dir=None,
                  events_dir=None, alert_state_path=None,
-                 model_client=None, log_dir=None):
+                 model_client=None, log_dir=None, data_dir=None):
         base = _project_root()
         self.db_path = db_path or str(base / "database" / "assistant.db")
         self.store_dir = store_dir
@@ -112,6 +117,7 @@ class JarvisUI:
         self.alert_state_path = alert_state_path
         self.model_client = model_client
         self.log_dir = log_dir
+        self.data_dir = data_dir
 
 
 # ---------------------------------------------------------------------------
@@ -163,6 +169,7 @@ def _page(title, body, active=""):
     """A full HTML document with navigation. Text-first, no scripts."""
     nav = [
         ("/", "Home", "home"),
+        ("/dashboard", "Dashboard", "dashboard"),
         ("/research", "Research", "research"),
         ("/chat", "Chat", "chat"),
         ("/status", "Status", "status"),
@@ -328,6 +335,47 @@ def chat_html(ui, request=None):
     return _page("Chat", "\n".join(body), active="chat")
 
 
+def dashboard_html(ui):
+    """Dashboard page: the Step 49 status snapshot.
+
+    Module health, recent activity, and gaps, read from the logs
+    and state files the other steps already write. Read-only —
+    the page runs nothing, writes nothing, and sends nothing.
+    """
+    snapshot = dash.collect_status(data_dir=ui.data_dir)
+    sections = [
+        f"<p>Generated {_esc(snapshot.get('generated_at'))}.</p>",
+        "<h3>Modules</h3>",
+    ]
+    rows = []
+    for name, entry in (snapshot.get("modules") or {}).items():
+        last = entry.get("last_run_at") or "never"
+        rows.append(
+            f"{name}: {entry.get('status')} — last run {last}"
+            f"{' (' + entry['age'] + ' ago)' if entry.get('age') and entry.get('last_run_at') else ''}"
+            f"; {entry.get('records')} record(s) — "
+            f"{entry.get('detail')}")
+    sections.append(_lines(rows))
+    sections.append("<h3>Recent activity</h3>")
+    activity = snapshot.get("recent_activity") or []
+    if activity:
+        sections.append(_lines([
+            f"{item.get('at') or 'no date'}: {item.get('kind')} — "
+            f"{item.get('summary')} [{item.get('status')}]"
+            for item in activity]))
+    else:
+        sections.append("<p>No activity recorded yet.</p>")
+    sections.append("<h3>Gaps</h3>")
+    gaps = snapshot.get("gaps") or []
+    if gaps:
+        sections.append(_lines([
+            f"{item.get('text')} ({item.get('source')})"
+            for item in gaps]))
+    else:
+        sections.append("<p>None recorded.</p>")
+    return _page("Dashboard", "\n".join(sections), active="dashboard")
+
+
 def status_html(ui):
     """Status page: what the UI can and cannot do."""
     items = [
@@ -396,6 +444,8 @@ class JarvisRequestHandler(BaseHTTPRequestHandler):
             self._send(200, research_html(self.ui))
         elif path == "/chat":
             self._send(200, chat_html(self.ui))
+        elif path == "/dashboard":
+            self._send(200, dashboard_html(self.ui))
         elif path == "/status":
             self._send(200, status_html(self.ui))
         elif path == "/static/style.css":

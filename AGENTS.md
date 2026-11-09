@@ -369,7 +369,7 @@ Do not deduplicate by CIK.
 ### Part 8 — Final application and deployment
 
 48. Build complete user interface — PARTIAL (2026-11-09: local web UI built and tested, 15 tests OK; home / ticker / research / chat / status pages over Steps 29/32/35/38/39/41, localhost-only, no trading controls, DB read-only; no real browser session has ever run through it — see PROJECT_STATUS.md Step 48 section)
-49. Build live dashboards and agent monitoring — NOT STARTED
+49. Build live dashboards and agent monitoring — PARTIAL (2026-11-09: status snapshot over the Steps 26/34/38/39/46 logs and state files plus a `/dashboard` route in the Step 48 UI built and tested, 19 tests OK; real-data snapshot shows detection/turns/scheduler/alerts all no_data, monitoring last check 2026-11-08, 9 gaps — see PROJECT_STATUS.md Step 49 section)
 50. Integrate all modules into main.py — NOT STARTED
 51. Complete end-to-end testing — NOT STARTED
 52. Build backup, recovery and security systems — NOT STARTED

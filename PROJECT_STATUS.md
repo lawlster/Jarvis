@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 48 — Build complete user interface (PARTIAL — built and tested 2026-11-09; local web UI, 15 new tests, fixture example on localhost — see Step 48 section below)
-- Current subtask: Step 48 complete user interface
+- Current step: 49 — Build live dashboards and agent monitoring (PARTIAL — built and tested 2026-11-09; status snapshot over the Steps 26/34/38/39/46 logs and state files, `/dashboard` route in the Step 48 UI, 19 new tests, real-data snapshot — see Step 49 section below)
+- Current subtask: Step 49 live dashboards and agent monitoring
 - Overall status: In progress
 
 ## Completed work
@@ -3031,6 +3031,91 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   and leave nothing behind; the full-suite runs left a few
   stale `tmp*.db` files in /tmp, removed with the targeted
   `rm /tmp/tmp*.db` used before — /tmp now 9%.
+  `database/assistant.db` shows as modified in `git status`,
+  but its hash is unchanged (`36862922…089187`) — the known
+  pre-existing state (header rewrites from earlier
+  imports/audit; logical content identical).
+
+### 2026-11-09 — Step 49 build live dashboards and agent monitoring (PARTIAL, not complete)
+
+- `agent/dashboard.py` built and tested (19 new tests, 979
+  total, `python -m unittest discover` from the project root
+  with `~/workspace/projects/jarvis-venv/bin/python`;
+  1 skipped: the live smoke test, behind
+  `JARVIS_LIVE_WEB_RESEARCH=1`). Production DB hash unchanged
+  (`36862922…089187`); the dashboard never touches the
+  database. Report: `~/workspace/projects/step49-report.md`.
+- Audit first: no dashboard or monitoring module existed
+  (`agent/dashboard.py` and `agent/monitoring.py` both
+  absent). Reused, not duplicated: the Step 48 server and
+  page helpers, the JSON-lines log pattern from Steps
+  26/39/46, the one-JSON-file-per-record pattern from Steps
+  30–43.
+- `collect_status(data_dir=None, now=None, stale_after_hours=24,
+  recent_limit=20)` reads the logs and state files the other
+  steps already write and returns one snapshot: `generated_at`,
+  per-module health (`status`, `last_run_at`, `records`,
+  `freshness`, `age_seconds`, `age`, `detail`),
+  `recent_activity` (newest first, capped), and `gaps` (each
+  with `text` and `source`). Sources: `data/detection_runs.jsonl`
+  (Step 26), `data/orchestration/turns.jsonl` (Step 39),
+  `data/scheduler/runs.jsonl` (Step 46),
+  `data/alerts/alert_state.json` (Step 38),
+  `data/monitoring/monitoring_state.json` (Step 34),
+  `data/watchlist/` (Step 35), `data/memory/index.json`
+  (Step 43), `data/news/` and `data/events/` counts (Steps
+  31/33), `data/cloud_models.json` existence (Step 40).
+- Rules enforced: a missing log directory or file is `"no
+  data"`, never an error; a corrupt JSON line is skipped and
+  counted, never a crash; a corrupt state file is reported as
+  `"corrupt"`. Every timestamp is aged against an injectable
+  `now`; anything older than `stale_after_hours` is labelled
+  stale with its age, and a module whose last run is stale
+  reports status `"stale"`. The snapshot changes no file
+  (asserted by file hashes in tests).
+- A `/dashboard` route was added to the Step 48 UI
+  (`agent/ui.py`, plus a Dashboard nav link and a `data_dir`
+  option on `JarvisUI`): module health, recent activity, and
+  gaps in text form. It runs nothing and writes nothing, and
+  contains no trading controls (asserted in tests).
+- Fixture example — snapshot from the project's real `data/`
+  directories as they are now (`~/workspace/projects/step49-example-dashboard.json`
+  and `step49-example-dashboard.md`, generated
+  2026-11-08T20:52:05Z): detection / orchestrator / scheduler /
+  alerts all `no_data` (those four logs do not exist in the
+  project at all — no detection run, turn, scheduled run, or
+  alert has ever been recorded on real data); monitoring `ok`
+  (last check 2026-11-08T17:30:13Z, 1 ticker, 10 articles
+  seen); watchlist `ok` (38 tickers, 1 scannable); memory `ok`
+  (1 record); news `ok` (2 run files, 10 articles); events
+  `ok` (12 files); cloud `no_data`. Recent activity: exactly
+  1 item (the 2026-11-08 watchlist check). Gaps (9): no
+  detection run ever logged; no orchestrator turn ever logged
+  (no live Ollama turn on this machine); no scheduled job ever
+  run on a real clock; no alert ever fired on real data; 37 of
+  38 watchlist tickers insufficient data (only MSFT has
+  statements); voice off by default; no cloud model
+  configured (no cloud key exists); no live price feed
+  (2026-11-03 snapshot); no holdings store exists.
+- One module gap found and fixed: a missing alert state file
+  hid the alert gap — the gap was only added when the state
+  file existed and was empty. A missing state file means no
+  alert has ever been recorded either, so the gap is now added
+  in both cases (regression test added).
+- **Step 49 is PARTIAL, not complete. No real browser session
+  has ever run through this dashboard.** Every page is
+  exercised by a test HTTP client; the owner has never opened
+  `/dashboard` in a browser. The snapshot is a point in time:
+  it is rebuilt on every page load, but nothing refreshes it
+  live and nothing pushes updates — a live-updating dashboard
+  is not built here. Not wired into `main.py` (Step 50). No
+  live price feed; no holdings store (open decisions carried
+  from Steps 36–37). Sufficient to start Step 50 (integrate
+  all modules into `main.py`).
+- Housekeeping: Step 49's own tests use `TemporaryDirectory`
+  and leave nothing behind; the full-suite runs left a few
+  stale `tmp*.db` files in /tmp, removed with the targeted
+  `rm /tmp/tmp*.db` used before — /tmp now 12%.
   `database/assistant.db` shows as modified in `git status`,
   but its hash is unchanged (`36862922…089187`) — the known
   pre-existing state (header rewrites from earlier
