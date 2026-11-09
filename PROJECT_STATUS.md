@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 35 — Watchlist and financial tracker foundation (PARTIAL — built and tested 2026-11-09; JSON watchlist store with reasons/sources/notes, per-ticker tracker records refreshed by the Step 25 scanner, watchlist view — seeded with the owner's 38-ticker list, MSFT only scannable on real data — see Step 35 section below)
-- Current subtask: Step 36 portfolio performance and risk analysis
+- Current step: 36 — Portfolio performance and risk analysis (PARTIAL — built and tested 2026-11-09; pure analysis over caller-supplied holdings and price histories, 40 new tests, fixture-proven; no real portfolio ever analysed, MSFT has only one price point so every history-dependent metric is missing on real data — see Step 36 section below)
+- Current subtask: Step 37 quarterly portfolio reporting
 - Overall status: In progress
 
 ## Completed work
@@ -1835,3 +1835,70 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   same foundation Step 10 of the roadmap calls "watchlist and
   financial tracking foundation", PARTIAL). Sufficient to start
   Step 36 (portfolio performance and risk analysis).
+
+### 2026-11-09 — Step 36 portfolio performance and risk analysis (PARTIAL, not complete)
+
+- `agents/portfolio_performance.py` built and tested (40 new
+  tests, 587 total, `python -m unittest discover` from the
+  project root with `~/workspace/projects/jarvis-venv/bin/python`).
+  Production DB hash unchanged (`36862922…089187`); checks ran
+  on fixtures and a temp DB copy. Report: `~/workspace/projects/
+  step36-report.md`.
+- Audit first: no performance module existed to reuse —
+  `agents/financial_tracker.py` only stores Yahoo snapshot
+  rows, and Step 28 sizes *proposed* allocations, never
+  measures a live portfolio. Step 36 is the measurement half.
+- What it computes, all from caller-supplied inputs (no price
+  fetching, no network, no DB writes, no trades): per-position
+  return/value/income with a realised/unrealised split from
+  `sold` entries; time-weighted return (geometric linking,
+  price only, dividends excluded and stated); money-weighted
+  return / IRR (bisection on NPV = 0, no solution means
+  missing, never guessed); volatility (sample stdev,
+  annualised only when periods-per-year is supplied);
+  maximum drawdown with peak/trough dates; beta
+  (cov/var on overlapping dated returns, with the overlap
+  count and benchmark variance returned); concentration on
+  current value using Step 28's thresholds (25% / 40% / 60%)
+  — Step 28 assesses a proposal's cost, a live portfolio
+  concentrates on what it is worth now, and the difference
+  is stated on the output; income (dividends, yield on cost
+  and on value); contributors/detractors, risk flags, and
+  JSON snapshot save/load under a caller-chosen directory.
+  Every metric carries value, status, reason and period;
+  currency is an input, never assumed.
+- Fixture example (3 positions, $1,000 cost each, 24 monthly
+  prices Nov 2024 – Oct 2026): total $3,000 → $4,000,
+  +33.3% (ALPHA +50%, BETA −10%, GAMMA +60%); dividends
+  $100, yield on cost 3.33%; TWR +28.1% (from 2025-06-01,
+  when GAMMA first has a price); MWR +16.2% (different
+  period — money went in Nov 2024); volatility 0.12%
+  monthly; drawdown 0.0%; portfolio beta 3.88. Two fixture
+  caveats recorded in the report, not hidden: the benchmark
+  is a smooth straight line, so its tiny variance inflates
+  the betas (GAMMA 7.35) — the beta arithmetic is separately
+  hand-verified (1.3087 on [0.10, −0.05, 0.20] vs [0.08,
+  −0.04, 0.15]); and the near-zero volatility is a property
+  of the linear fixture prices.
+- MSFT on real data (temp copy): `financial_snapshots` holds
+  3 rows, all 2026-11-03 at $507.12 — one distinct price
+  point. A 10-share holding at $400 cost basis gives a
+  simple return of +26.78% (value $5,071.20), which *is*
+  computable from one price point; TWR, volatility, max
+  drawdown and beta are all missing with reasons, and MWR
+  is missing (no cash flows supplied). Concentration still
+  works on the single current value.
+- One test bug fixed during the run (an assertion checked
+  for "overlapping" where the module says "shared"); the
+  module itself needed no fix.
+- **Step 36 is PARTIAL, not complete.** No real portfolio
+  has ever been analysed; a live price feed (Step 38) is
+  what unlocks this module on real data. The owner's actual
+  holdings have never been entered — there is no holdings
+  store in this step (inputs are caller-supplied each call).
+  Concentration thresholds are Step 28's judgement rules,
+  uncalibrated; sector is NULL for every US/HK row, so
+  sector concentration cannot be assessed from stored data
+  on real portfolios. Not wired into `main.py` (Step 50);
+  no sending or scheduling. Sufficient to start Step 37
+  (quarterly portfolio reporting).
