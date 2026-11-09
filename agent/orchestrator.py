@@ -562,6 +562,16 @@ def _route_chat(text, model_client):
         {"role": "user", "content": text},
     ]
     reply = model_client.chat(messages)
+    # Step 40: when the client is a router, label the model that
+    # actually answered (local or cloud fallback) instead of
+    # always claiming Ollama.
+    routing = getattr(model_client, "last_routing", None)
+    if routing and routing.get("used"):
+        label = f"model ({routing['used']}"
+        if routing.get("fallback_used"):
+            label += ", cloud fallback"
+        label += ")"
+        return reply, [], [label]
     return reply, [], ["model (qwen3:8b via Ollama)"]
 
 
@@ -599,6 +609,10 @@ def handle(request, model_client=None, db_path=None,
     """
     text = (request or "").strip()
     checked_at = as_of or _utcnow_iso()
+    # Step 40: snapshot the router's last routing decision so
+    # the turn record only claims routing for a turn that
+    # actually called the model (see the record step below).
+    _routing_before = getattr(model_client, "last_routing", None)
 
     classification = classify_intent(text, model_client=model_client)
     intent = classification["intent"]
@@ -704,6 +718,15 @@ def handle(request, model_client=None, db_path=None,
         "sources": sources,
         "checked_at": checked_at,
     }
+    # Step 40: when the model client is a router, record which
+    # model answered and whether the cloud fallback ran, so the
+    # fallback decision is in the turn record — but only when
+    # this turn actually called the model. A stale routing
+    # record from an earlier turn (e.g. a refused trade turn)
+    # must not be copied into a turn that never used it.
+    routing = getattr(model_client, "last_routing", None)
+    if routing is not None and routing is not _routing_before:
+        result["model_routing"] = routing
     if log_dir is not False:
         result["log_file"] = _log_turn(result, log_dir=log_dir)
     return result

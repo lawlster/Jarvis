@@ -357,7 +357,7 @@ Do not deduplicate by CIK.
 ### Part 7 — JARVIS general-purpose assistant
 
 39. Build unified AI orchestration — PARTIAL (2026-11-09: request pipeline built and tested, 27 tests OK; keyword intent classification with a labelled model fallback, guardrails refusing trade and send/schedule requests, routing to Step 16-38 modules, sourced replies, JSON-lines turn log under data/orchestration/; `agent/brain.py` and `agent/planner.py` are empty stubs, nothing reused from them; MSFT valuation traces to Step 21/23 outputs — tier overvalued, range $98.52/$163.30/$234.64, alert price $78.82; stub-tested only — no live Ollama turn has ever run through it; not wired into `main.py` (Step 50) — see PROJECT_STATUS.md Step 39 section)
-40. Integrate cloud AI models — NOT STARTED
+40. Integrate cloud AI models — PARTIAL (2026-11-09: provider-agnostic clients, local-first router with cloud fallback, config with secret refusal, cost recording built and tested, 30 tests OK; stub-tested only — no live cloud call has ever been made and no cloud key exists — see PROJECT_STATUS.md Step 40 section)
 41. Integrate financial research agents — NOT STARTED
 42. Build general-purpose web research — NOT STARTED
 43. Build long-term contextual memory — NOT STARTED

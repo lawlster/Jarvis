@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 39 — Unified AI orchestration (PARTIAL — built and tested 2026-11-09; request pipeline with keyword intent classification, guardrails, routing to Step 16-38 modules, sourced replies and a JSON-lines turn log, 27 new tests, stub-tested only — no live Ollama turn has ever run through it — see Step 39 section below)
-- Current subtask: Step 40 integrate cloud AI models
+- Current step: 40 — Integrate cloud AI models (PARTIAL — built and tested 2026-11-09; provider-agnostic clients, local-first router with cloud fallback, config with secret refusal, cost recording, 30 new tests, stub-tested only — no live cloud call has ever been made and no cloud key exists — see Step 40 section below)
+- Current subtask: Step 41 integrate financial research agents
 - Overall status: In progress
 
 ## Completed work
@@ -2217,3 +2217,93 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   targeted `rm /tmp/tmp*.db` the parent used, /tmp now 17%.
   Step 39's own tests use `TemporaryDirectory` and leave
   nothing behind.
+### 2026-11-09 — Step 40 integrate cloud AI models (PARTIAL, not complete)
+
+- `agent/cloud_models.py` built and tested (30 new
+  tests, 701 total, `python -m unittest discover` from the
+  project root with `~/workspace/projects/jarvis-venv/bin/python`).
+  Production DB hash unchanged (`36862922…089187`); checks ran
+  on fixtures and stubbed transports, no live calls, no
+  production writes. Report: `~/workspace/projects/step40-report.md`.
+- Audit first: no cloud-model integration existed anywhere
+  (no `agent/cloud.py`, no `tools/cloud.py`, no cloud mention
+  outside `agent/orchestrator.py` itself). Step 39 already had
+  `OllamaModelClient` and `StubModelClient` plus a pipeline
+  that accepts any client exposing `chat(messages) -> str`.
+- What it does: provider-agnostic clients sharing the Step 39
+  call shape; `LocalModelClient` is the Step 39 Ollama client
+  re-exported, not duplicated; `CloudModelClient` for one
+  OpenAI-compatible chat endpoint through a pluggable HTTP
+  transport (tests stub it, no test ever touches a network),
+  with configurable endpoint/model/timeout/retries (transient
+  timeout/connection/5xx retried, 4xx not retried);
+  `ModelRouter` tries local first and falls back to a
+  configured cloud client only when local is unavailable AND
+  that client has credentials, recording the decision on
+  `last_routing`; if nothing answers it raises
+  `ModelUnavailable` and never invents an answer. Credentials
+  are read from environment variables only, at call time, and
+  are never stored, logged or written anywhere;
+  `validate_config` refuses any config carrying a secret-looking
+  key (with `api_key_env` exempt — it names an env var, not a
+  secret). Config from a plain dict or a JSON file (default
+  `data/cloud_models.json`; a missing file means local-only).
+  Cost: token counts when reported, estimated cost only when
+  per-token prices are supplied in the config — a price is
+  never guessed. Failures are `CloudModelError`
+  (`ModelUnavailable` subclass) with a machine-readable
+  `reason` (missing_credentials / unreachable / timeout /
+  http_error / malformed_response / empty_reply).
+- Small additive hook in `agent/orchestrator.py` (Step 39
+  file): the turn log now records `model_routing` when the
+  model client is a router, and the chat source is labelled
+  with the model that actually answered instead of always
+  claiming Ollama — recorded only for a turn that actually
+  called the model, so a refused trade turn no longer
+  inherits a stale routing record (bug found in the fixture
+  example, fixed).
+- Fixture example (stubbed transports, temp DB copy; example
+  files `~/workspace/projects/step40-example-session.json`
+  and `.md`): local down, cloud stub up. "What is the
+  intrinsic value of MSFT?" → intent `valuation`, status
+  `ok`, Step 23 tier overvalued (bear $98.52, base $163.30,
+  optimistic $234.64, price $507.12, alert price $78.82,
+  quality excellent, no material deterioration) — the model
+  is not needed, the valuation comes from the module.
+  "Hello, how are you?" → intent `chat`, status `ok`,
+  routing used `example-cloud`, fallback True, cloud usage
+  42 prompt + 18 completion tokens, estimated cost $0.00096
+  (fixture prices $0.01/$0.03 per 1k). "Buy 100 shares of
+  MSFT at $500" → intent `trade`, status `refused`, no
+  model call, no routing recorded.
+- Bugs found and fixed during testing:
+  `validate_config` rejected `api_key_env` itself (substring
+  match on "api_key") — now exempt; the estimated cost had
+  floating-point noise ($0.0009599999999999999) — now rounded
+  to 6 decimals; two test bugs (`client.calls` is an int
+  counter, not a list; expected router name for a stub local
+  client is its class name).
+- **Step 40 is PARTIAL, not complete. No live cloud call
+  has ever been made.** Every cloud behaviour is stub-tested;
+  no cloud key exists (the owner has never supplied one and
+  has never asked for a cloud model), no provider endpoint
+  has ever been contacted, and no cost has ever been
+  incurred. A real cloud call happens only if he later
+  supplies a key through the Secure Vault flow and explicitly
+  approves it. Not wired into `main.py` (Step 50) — the
+  router is usable as the Step 39 orchestrator's model
+  client, but `main.py` still uses its own Ollama
+  tool-calling loop. Only OpenAI-compatible chat endpoints
+  are supported; a provider with a different API shape would
+  need a new client class, not a config change. No cloud
+  model has been chosen by the owner, and no per-token prices
+  are real — the fixture prices are illustrative only. The
+  generated `data/cloud_models.json` default file is not
+  shipped; `load_config` returns the local-only default when
+  no file exists. Sufficient to start Step 41 (integrate
+  financial research agents).
+- Housekeeping: the full-suite run left 6 stale `tmp*.db`
+  files in /tmp (20%) from older steps' `_temp_db_copy`
+  helpers (first noted Step 27) — removed with the same
+  targeted `rm /tmp/tmp*.db` the parent used. Step 40's own
+  tests use `TemporaryDirectory` and leave nothing behind.
