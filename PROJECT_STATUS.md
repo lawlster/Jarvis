@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 43 — Build long-term contextual memory (PARTIAL — built and tested 2026-11-09; durable record store with recall, supersede and context blocks, 27 new tests, fixture-only example — see Step 43 section below)
-- Current subtask: Step 44 natural-language tool calling
+- Current step: 44 — Build natural-language tool calling (PARTIAL — built and tested 2026-11-09; registry + keyword/model-fallback selection + validated execution + follow-up chains, 49 new tests, fixture example — see Step 44 section below)
+- Current subtask: Step 45 voice interaction
 - Overall status: In progress
 
 ## Completed work
@@ -2568,3 +2568,107 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   `tmp*.db` files in /tmp, removed with the targeted
   `rm /tmp/tmp*.db` used before — /tmp now 5%. No broad
   cleanup was run, per instructions.
+
+### 2026-11-09 — Step 44 build natural-language tool calling (PARTIAL, not complete)
+
+- `agent/tool_calling.py` built and tested (49 new tests, 818
+  total, `python -m unittest discover` from the project root
+  with `~/workspace/projects/jarvis-venv/bin/python`; 1 skipped:
+  the live smoke test, behind `JARVIS_LIVE_WEB_RESEARCH=1`).
+  Production DB hash unchanged (`36862922…089187`); this step
+  does not touch the database except through read-only
+  connections opened by the engine tools. Report:
+  `~/workspace/projects/step44-report.md`.
+- Audit first: the only tool calling in the project was the
+  inline loop in `main.py` (calculate, search_web,
+  get_company_financials, calculate_dcf). No
+  `agent/tool_calling.py` or `tools/registry.py` existed. This
+  module does NOT replace `main.py`'s loop. The four `main.py`
+  tools are registered by wrapping their existing
+  implementations — never reimplemented. The Step 16–38 engines
+  are registered as read-only tools calling their existing
+  public functions (Step 23 margin-of-safety summary, Step 25
+  scan, Step 35 watchlist view, Step 31 stored news, Step 33
+  events, Step 41 research session). Step 39's `classify_intent`
+  / `extract_tickers` are reused for selection inputs.
+- What it does: a `ToolRegistry` (name, plain-language
+  description, JSON argument schema, function; `ollama_tools()`
+  returns the `main.py` Ollama tool-call shape). Registration
+  refuses, loudly and at registration time, any tool whose name
+  suggests trading, sending or scheduling (`trade`, `buy`,
+  `sell`, `send`, `schedule`, `remind`, `order`, `place`,
+  `purchase`, `email`, `message`, `telegram`, `short`) —
+  token-split, so `buyback_info` is allowed but `buy_shares`
+  and `place_order` are not; duplicates are also rejected.
+  Selection is keyword rules first (one per tool), a model call
+  only as a fallback that must return exactly `{"tool", 
+  "arguments"}` and is labelled `method="model_fallback"`; a
+  request matching no tool returns `tool=None` rather than
+  guessing, and the fallback rejects unparseable JSON, unknown
+  tools and invalid arguments as "no tool". Argument validation
+  is a JSON-schema subset with no silent coercion (a string
+  where a number is required is an error; a bool is not a
+  number). Every call is recorded (tool, arguments, result
+  summary, duration, success/failure); a tool that raises is
+  recorded as `tool_error`, never allowed to crash the loop.
+  Multi-step chains have one explicit follow-up rule:
+  `get_company_financials` succeeding on a valuation/DCF
+  question, with a usable free-cash-flow figure, triggers
+  `calculate_dcf` with that FCF and the Step 21 defaults
+  (growth 10%, WACC 11%, terminal growth 2.5%, 10 years), net
+  debt and shares from the same financials where available —
+  labelled as Step 21 defaults, never the user's assumptions.
+  Chain cap default 5 calls; loop guard (same tool with the
+  same arguments may not repeat). A thin `ToolCaller` class
+  mirrors the Step 39 `Orchestrator` class shape.
+- Fixture example (files
+  `~/workspace/projects/step44-example-tool-loop.json` / `.md`,
+  stubbed model and stubbed search/financials, temp DB copy):
+  "what is the DCF value of MSFT?" → `valuation_summary`
+  (keyword), tier overvalued, range $98.52 / $163.30 / $234.64,
+  price $507.12, strongest-alert price $78.82, quality
+  excellent — traces to the Step 21/23 outputs. "tell me a
+  joke" → `no_tool` (no keyword rule; the stubbed model did not
+  return JSON). "get MSFT financials and value it with a DCF"
+  → `get_company_financials` → `calculate_dcf` (follow-up),
+  intrinsic value per share $162.65 on the stubbed financials.
+- Bugs found and fixed during testing: rule order swallowed the
+  chain (the `valuation_summary` "dcf" rule came before
+  `get_company_financials`, so the financials → DCF follow-up
+  could never fire — financials now come first); "are" read as
+  ticker ARE ("what events are coming up for MSFT?" extracted
+  ARE before MSFT — selection now uses case-aware extraction:
+  tokens written in uppercase in the original text first, with a
+  case-insensitive fallback for requests typed entirely in
+  lowercase); `ARE` was missing from the Step 39
+  `_TICKER_STOPWORDS` in `agent/orchestrator.py` — added (one
+  word; same precedent as the Step 32 flag fix in the Step 35
+  push), full suite still passes; the MSFT valuation test
+  asserted the tier as a plain string but the raw Step 23
+  summary carries it as a dict (the same shape Step 38 unwraps)
+  — the test now unwraps it, the loop returns tool results
+  as-is. The `search_web` rule was also moved ahead of
+  `list_events`, so "search the web for Microsoft earnings" is a
+  web search, not an events lookup.
+- **Step 44 is PARTIAL, not complete. No live Ollama
+  tool-calling turn has ever run through this module.** All
+  model behaviour is stub-tested (no Ollama on this machine);
+  the `main.py` loop is the only live tool-calling path, and it
+  is unchanged. A live turn needs the owner's PC with Ollama
+  running. Selection is keyword rules plus a model fallback
+  exercised only with stubbed replies. The follow-up rules cover
+  one chain (financials → DCF); other chains are not wired as
+  follow-ups — they are separate selections. Not wired into
+  `main.py` (Step 50), and the Step 39 orchestrator does not yet
+  call the tool loop — the registry and loop are available to
+  it, not yet used by it. No sending or scheduling (Step 46).
+  No live price feed, no holdings store (open decisions carried
+  from Steps 36–37). Sufficient to start Step 45 (voice
+  interaction).
+- Housekeeping: Step 44's own tests use `TemporaryDirectory`
+  and leave nothing behind; the full-suite runs left a few stale
+  `tmp*.db` files in /tmp, removed with the targeted
+  `rm /tmp/tmp*.db` used before — /tmp now 2%. One exec call
+  during verification was interrupted by a service restart; it
+  was re-run cleanly afterwards (818 tests OK) — no partial
+  state was relied on.

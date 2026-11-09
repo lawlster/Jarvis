@@ -225,6 +225,7 @@ _TICKER_STOPWORDS = {
     "DO", "NO", "YES", "HI", "HEY", "Q", "Q1", "Q2", "Q3", "Q4",
     "BUY", "SELL", "NEWS", "VALUE", "WORTH", "CHEAP", "GOOD",
     "PRICE", "WHAT", "HOW", "WHY", "WHEN", "WITH", "FROM",
+    "ARE",  # ARE is a real ticker; "what are…" must not match it
     "ABOUT", "THERE", "THIS", "THAT", "WILL", "CAN", "SHOULD",
     "LATEST", "ANY", "SOME", "ALL", "ONE", "TWO", "TEN",
 }
