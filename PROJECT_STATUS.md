@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 40 — Integrate cloud AI models (PARTIAL — built and tested 2026-11-09; provider-agnostic clients, local-first router with cloud fallback, config with secret refusal, cost recording, 30 new tests, stub-tested only — no live cloud call has ever been made and no cloud key exists — see Step 40 section below)
-- Current subtask: Step 41 integrate financial research agents
+- Current step: 41 — Integrate financial research agents (PARTIAL — built and tested 2026-11-09; research-session layer over the Step 39 orchestrator, plan / execute / synthesise, 15 new tests, MSFT session verified on real data, no multi-ticker comparison has ever run on real data — see Step 41 section below)
+- Current subtask: Step 42 general-purpose web research
 - Overall status: In progress
 
 ## Completed work
@@ -2307,3 +2307,86 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   helpers (first noted Step 27) — removed with the same
   targeted `rm /tmp/tmp*.db` the parent used. Step 40's own
   tests use `TemporaryDirectory` and leave nothing behind.
+
+### 2026-11-09 — Step 41 integrate financial research agents (PARTIAL, not complete)
+
+- `agent/research_agents.py` built and tested (15 new
+  tests, 716 total, `python -m unittest discover` from the
+  project root with `~/workspace/projects/jarvis-venv/bin/python`).
+  Production DB hash unchanged (`36862922…089187`); checks ran
+  on temp DB copies, no network, no production writes. Report:
+  `~/workspace/projects/step41-report.md`.
+- Audit first: no research-agent integration existed beyond the
+  Step 39 routing (no `agent/research.py`). The orchestrator's
+  route handlers each call one module and return one reply;
+  there was no plan, no multi-step execution, no synthesis.
+  Reused, not duplicated: Step 39 `classify_intent` (trade
+  guardrail) and `extract_tickers` (universe-validated),
+  Step 25 `scan_ticker`, Step 23 `margin_of_safety_summary`,
+  Step 29 `generate_report`, Step 28b `compare_companies`,
+  Step 31 `list_articles` (stored files only), Step 33
+  `list_events` (stored files only), Step 34 `check_ticker`.
+- What it does: `plan_research` produces an explicit step plan
+  (single: scan → valuation → report → news → events;
+  comparison: scan → valuation → comparison → news → events;
+  what_changed: scan → what_changed → news → events) naming
+  the module and the question each step answers.
+  `run_research_session` runs the plan step by step against a
+  caller-supplied database path (read-only); the first step
+  returning `insufficient_data` stops the session and the
+  remaining steps are recorded as not attempted with the reason,
+  never invented. A peer with no statements does not stop the
+  session — the Step 28b comparison reports it as not
+  comparable. A trade request is refused before any step runs.
+  Synthesis draws claims, what-would-change-the-view and
+  limitations only from steps with status `ok`; every claim
+  names the source module that produced it (tests assert no
+  claim names a module that did not run). What-would-change
+  comes from the Step 23 `conditions_to_change`. The brief is
+  dict + Markdown, written as JSON + `.md` (default
+  `data/research_sessions/`); the brief's own words contain no
+  recommendation (quoted news titles are the articles' words,
+  labelled as such).
+- Fixture examples (temp DB copy, stored news/events; files
+  `~/workspace/projects/step41-example-msft-session.json` /
+  `.md` and `step41-example-comparison-session.json` / `.md`):
+  "Research MSFT" → kind `single`, status `partial`, 29 claims
+  (tier overvalued, quality excellent, health strong, range
+  $98.52/$163.30/$234.64, price $507.12, alert price $78.82,
+  margin vs conservative −414.7%, no material deterioration),
+  3 limitations (report partial: peer comparison insufficient,
+  business summary partial — no description stored).
+  "Compare MSFT with NVDA" → kind `comparison`, status
+  `partial`, 26 claims; NVDA's scan is insufficient_data and
+  the comparison records it as not comparable with ranking not
+  meaningful, never faked; NVDA earnings 2026-11-17 is a
+  stored Step 33 event. "Research D05" (DBS) → status
+  `insufficient_data`: scan fails and valuation, report, news
+  and events are all recorded as not attempted; no claims are
+  made. A trade question ("Buy 100 shares of MSFT at $500")
+  is refused with no steps run.
+- Bugs found and fixed during testing: the first run reported
+  the MSFT brief as `complete` even though the Step 29 report
+  was `partial` — the synthesis now adds a limitation for
+  every report section with status `partial` or
+  `insufficient_data`, and for a non-meaningful comparison
+  ranking / non-comparable peers, so the brief status
+  correctly becomes `partial`; one test typo.
+- **Step 41 is PARTIAL, not complete. No multi-ticker
+  comparison has ever run on real data** — every comparison so
+  far has had at most one ticker with statements (MSFT), so no
+  ranking has ever been meaningful. That needs statements for
+  a second ticker (15F full-universe enrichment NOT authorised
+  beyond the pilot; 11D PAUSED; no HKEX statement collector).
+  The session is caller-driven only: no background runs, no
+  sending, no scheduling (Step 46). No live price feed —
+  prices are the stored 2026-11-03 snapshot or caller-supplied.
+  No holdings store exists (open decision, carried from Steps
+  36–37). Not wired into `main.py` (Step 50). Sufficient to
+  start Step 42 (general-purpose web research).
+- Housekeeping: Step 41's own tests use `TemporaryDirectory`
+  and leave nothing behind; /tmp is at 22% from older steps'
+  per-step temp directories (`step22-test-*`, `step35-*`,
+  `step38-probe-*`, each ~3.6 MB) — not `tmp*.db` files, so the
+  targeted `rm /tmp/tmp*.db` used before does not touch them.
+  No broad cleanup was run, per instructions.
