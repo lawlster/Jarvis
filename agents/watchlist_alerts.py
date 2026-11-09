@@ -285,6 +285,12 @@ def _evidence_snapshot(ticker, candidate, summary, price, alert_price,
         "health_verdict": health,
         "deteriorated": _deteriorated_of(candidate, summary),
         "as_of": as_of,
+        # Step 59: a live-derived candidate is provisional —
+        # quality and deterioration are unknown from a live
+        # pull.  The alert engine uses this flag so its reasons
+        # never claim otherwise.
+        "live_fallback": bool(
+            (candidate or {}).get("live_fallback")),
     }
 
 
@@ -348,7 +354,15 @@ def _briefing_line(alert_type, ticker, evidence, reason):
                 f"{_money(price)}, health {health}")
     else:  # thesis rules
         body = reason
-    return (f"{ticker} — {label}: {body}"
+    # Step 59: a live-derived band is provisional — say so in
+    # the briefing line, next to the (already honest) "unknown
+    # (live pull)" quality and health.
+    provisional_note = (
+        " — PROVISIONAL: live-derived value; business quality "
+        "and deterioration are unknown from a live pull, so "
+        "this is not a confirmed Step 26 candidate"
+        if evidence.get("live_fallback") else "")
+    return (f"{ticker} — {label}: {body}{provisional_note}"
             + " (worth a closer look; the final decision is "
             "always the owner's)")
 
@@ -400,13 +414,33 @@ def _rules_for_ticker(ticker, candidate, summary, price, alert_price,
     band = (candidate or {}).get("detection_band")
 
     strongest = False
+    # Step 59: a live-derived candidate is provisional — the
+    # live pull says nothing about business quality or
+    # deterioration, so the engine must never claim "no
+    # material deterioration and quality adequate or better"
+    # for one.  The alert still fires on the band (that is
+    # the point of the daily scan), but the reason says
+    # exactly what is and is not known.
+    provisional = bool((candidate or {}).get("live_fallback"))
     if band == ud.BAND_STRONGEST_ALERT or tier == "strongest_alert":
         strongest = True
+        if provisional:
+            strongest_reason = (
+                "PROVISIONAL strongest alert from a "
+                "live-derived margin band: price at least 20% "
+                "below the live-derived conservative value. "
+                "Business quality and deterioration are unknown "
+                "from a live pull, so this is NOT a confirmed "
+                "Step 26 candidate — worth a closer look, never "
+                "a recommendation.")
+        else:
+            strongest_reason = (
+                "strongest alert: price at least 20% below the "
+                "conservative intrinsic value with no material "
+                "deterioration and quality adequate or better")
         fired.append(_alert_record(
             RULE_STRONGEST_ALERT, ticker,
-            "strongest alert: price at least 20% below the "
-            "conservative intrinsic value with no material "
-            "deterioration and quality adequate or better",
+            strongest_reason,
             evidence, trigger_value=margin_cons,
             threshold=mos.STRONGEST_ALERT_MARGIN, as_of=as_of))
 
@@ -421,12 +455,27 @@ def _rules_for_ticker(ticker, candidate, summary, price, alert_price,
             as_of=as_of))
 
     if band in (ud.BAND_WATCH_DISCOUNT, ud.BAND_WATCH_BELOW_BASE):
+        if provisional:
+            watch_reason = (
+                f"PROVISIONAL watch band '{band}' from a "
+                "live-derived margin band: price is below the "
+                "live-derived conservative value (or below "
+                "base value) but by less than the 20% "
+                "strongest-alert threshold. Business quality "
+                "and deterioration are unknown from a live "
+                "pull, so this is NOT a confirmed Step 26 "
+                "candidate — worth a closer look, never a "
+                "recommendation.")
+        else:
+            watch_reason = (
+                f"watch band '{band}': price is below the "
+                "conservative value (or below base value) but "
+                "by less than the 20% strongest-alert "
+                "threshold, with quality adequate or better "
+                "and no material deterioration")
         fired.append(_alert_record(
             band, ticker,
-            f"watch band '{band}': price is below the conservative "
-            "value (or below base value) but by less than the 20% "
-            "strongest-alert threshold, with quality adequate or "
-            "better and no material deterioration",
+            watch_reason,
             evidence, trigger_value=margin_cons,
             threshold=mos.STRONGEST_ALERT_MARGIN, as_of=as_of))
 
@@ -440,7 +489,13 @@ def _rules_for_ticker(ticker, candidate, summary, price, alert_price,
                 evidence, trigger_value=True, threshold=False,
                 as_of=as_of))
         prev_quality = previous_evidence.get("quality_rating")
-        if (prev_quality and quality and prev_quality != quality):
+        # Step 59: no quality-change alert for a provisional
+        # candidate — its quality is "unknown (live pull)", so
+        # a change from a stored-data rating to "unknown" is a
+        # change in what evidence is available, not a change in
+        # the business, and must not raise an alert.
+        if (not provisional and prev_quality and quality
+                and prev_quality != quality):
             quality_evidence = dict(evidence)
             quality_evidence["quality_from"] = prev_quality
             quality_evidence["quality_to"] = quality

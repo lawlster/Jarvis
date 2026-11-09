@@ -489,6 +489,13 @@ def candidate_from_live_record(record, source):
     return {
         "ticker": record.get("ticker"),
         "tier": record.get("tier"),
+        # Step 59: the candidate must also carry the Step 26
+        # detection band, because the Step 38 alert engine
+        # fires on it (it does not re-derive the band from the
+        # tier — for a live record the tier is a blocked
+        # reasonable_price or overvalued tier, since Step 23
+        # blocks the strongest tier on unknown deterioration).
+        "detection_band": record.get("detection_band"),
         "quality_rating": "unknown (live pull)",
         "health_verdict": "unknown (live pull)",
         "price": record.get("price"),

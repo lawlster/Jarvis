@@ -76,6 +76,7 @@ from agent import orchestrator as orch
 from agent import research_agents as ra
 from agents import daily_summary as ds
 from agents import research_report as rr
+from agents import scheduled_scan as ss
 from agents import watchlist_alerts as wa
 from agents import watchlist_foundation as wf
 
@@ -298,6 +299,27 @@ def _load_live_scan(ui):
         return None, (f"No live scan stored at "
                       f"{ui.live_scan_path}.")
     return None, None
+
+
+def _scheduled_scans_dir(ui):
+    """The Step 59 scans directory for this UI instance."""
+    if getattr(ui, "data_dir", None):
+        return Path(ui.data_dir) / "scans"
+    return _project_root() / "data" / "scans"
+
+
+def _load_latest_scheduled_run(ui):
+    """(run, error) for the latest Step 59 scheduled run.
+
+    Read-only, never raises — no run yet returns (None, None)
+    and the dashboard says so plainly.
+    """
+    try:
+        run, _path = ss.latest_run(_scheduled_scans_dir(ui))
+    except Exception as exc:  # noqa: BLE001 - a broken scan
+        # directory must not take the dashboard down.
+        return None, f"Could not read the scheduled runs: {exc}"
+    return run, None
 
 
 def _compute_readiness_background(ui):
@@ -601,12 +623,15 @@ def chat_html(ui, request=None):
 
 def dashboard_html(ui):
     """Dashboard page: Step 49 status snapshot + Step 54 live scan
-    + Step 53 readiness verdict.
+    + Step 59 scheduled daily scan + Step 53 readiness verdict.
 
     Module health, recent activity, and gaps, read from the logs
     and state files the other steps already write. The live-scan
     panel shows the STORED ``step54-live-scan.json`` results —
-    it never re-runs a scan. The readiness panel shows the Step 53
+    it never re-runs a scan. The scheduled-scan panel shows the
+    latest Step 59 run (its diff against the previous run and
+    the run history), or says plainly that no scheduled scan
+    has run yet. The readiness panel shows the Step 53
     verdict (computed once per UI instance and cached). Read-only —
     the page runs nothing, writes nothing, and sends nothing.
     """
@@ -767,6 +792,102 @@ def dashboard_html(ui):
                              "</p>")
         sections.append(_card("Live watchlist scan",
                               "\n".join(scan_body)))
+
+    # -- Scheduled daily scan (Step 59) -----------------------------
+    run, run_error = _load_latest_scheduled_run(ui)
+    if run is None:
+        sched_body = (
+            "<p>No scheduled scan has run yet. The daily scan "
+            "runs once a day at 05:30 SGT, after the US close — "
+            "set it up on the owner's PC with "
+            "<code>scripts/setup_daily_scan.ps1</code> (run "
+            "PowerShell as administrator). The PC must be on or "
+            "asleep at 05:30; a missed run is recorded as missed, "
+            "never backfilled.</p>")
+        if run_error:
+            sched_body += f"<p>{_esc(run_error)}</p>"
+        sections.append(_card("Scheduled daily scan", sched_body))
+    else:
+        summary = run.get("summary") or {}
+        diff = run.get("diff") or {}
+        sched_body = []
+        sched_body.append(
+            f"<p>Latest run {_esc(run.get('run_id') or '')} — "
+            f"scanned {_esc(run.get('scanned_at') or '')}, "
+            f"{run.get('run_seconds', 0):.0f}s. "
+            f"{summary.get('selected', '?')} tickers, "
+            f"{summary.get('scannable', '?')} scannable, "
+            f"{summary.get('strongest_alerts', 0)} strongest-alert "
+            f"bands, {summary.get('watch', 0)} watch bands, "
+            f"{summary.get('provider_unavailable', 0)} "
+            f"provider-unavailable, "
+            f"{summary.get('insufficient_data', 0)} insufficient "
+            f"data.</p>")
+        new_strongest = diff.get("new_strongest_alert") or []
+        if new_strongest:
+            items = []
+            for entry in new_strongest:
+                rng = entry.get("fair_value_range") or {}
+                margin = entry.get(
+                    "margin_of_safety_vs_conservative")
+                margin_text = (
+                    f"{margin:.1%} below conservative"
+                    if isinstance(margin, (int, float))
+                    else "below conservative")
+                items.append(
+                    f"{entry.get('ticker')}: price "
+                    f"{_money(entry.get('price'))} vs conservative "
+                    f"{_money(rng.get('conservative'))} "
+                    f"({margin_text}; was "
+                    f"{entry.get('previous_band') or 'no band'}) "
+                    f"— PROVISIONAL, worth a closer look.")
+            sched_body.append("<h4>New strongest-alert bands</h4>")
+            sched_body.append(_lines(items))
+        else:
+            sched_body.append(
+                "<p>No new strongest-alert bands since the "
+                "previous run.</p>")
+        new_watch = diff.get("new_watch") or []
+        if new_watch:
+            sched_body.append(
+                "<p>New watch bands: " + _esc(", ".join(
+                    f"{e.get('ticker')} ({e.get('band')})"
+                    for e in new_watch)) + "</p>")
+        disappeared = diff.get("disappeared") or []
+        if disappeared:
+            sched_body.append(
+                "<p>Bands that disappeared: " + _esc(", ".join(
+                    f"{e.get('ticker')} (was "
+                    f"{e.get('previous_band')})"
+                    for e in disappeared)) + "</p>")
+        unavailable = diff.get("newly_unavailable") or []
+        if unavailable:
+            sched_body.append(
+                "<p>Newly unavailable: " + _esc(", ".join(
+                    f"{e.get('ticker')} ({e.get('status')})"
+                    for e in unavailable)) + "</p>")
+        # Scan history: every dated run file, newest first.
+        history_items = []
+        for path in reversed(
+                ss.list_runs(_scheduled_scans_dir(ui))):
+            try:
+                entry = json.loads(
+                    path.read_text(encoding="utf-8"))
+                entry_summary = entry.get("summary") or {}
+                history_items.append(
+                    f"{path.stem}: "
+                    f"{entry_summary.get('scannable', '?')} "
+                    f"scannable, "
+                    f"{entry_summary.get('strongest_alerts', 0)} "
+                    f"strongest-alert bands, "
+                    f"{entry_summary.get('watch', 0)} watch bands")
+            except (OSError, ValueError):
+                history_items.append(f"{path.stem}: unreadable")
+        if history_items:
+            sched_body.append("<h4>Scan history</h4>")
+            sched_body.append(_lines(history_items))
+        sections.append(_card("Scheduled daily scan",
+                              "\n".join(sched_body)))
 
     # -- Deployment readiness (Step 53 verdict) ----------------------
     report, readiness_error = _readiness(ui)
