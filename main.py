@@ -35,6 +35,8 @@ Slash commands (all recorded in the Step 39 turn log):
 - ``/summary`` — Step 32 daily summary for today
 - ``/memory <question>`` — Step 43 context block, on request
 - ``/dashboard`` — Step 49 status snapshot as text
+- ``/livescan`` — Step 54 live watchlist scan (live Yahoo
+  pulls + DCF; in memory only, never written to the database)
 - ``/ui`` — start the Step 48 web UI on localhost:8765
 - ``/voice`` — request a spoken reply for the next turn only
 - ``/help`` — list the commands; ``/quit`` — exit
@@ -78,6 +80,10 @@ from agents.watchlist_alerts import (
     list_active_alerts,
     load_state as load_alert_state,
 )
+from agents.live_watchlist_scan import (
+    scan_watchlist_live,
+    summary_lines as live_scan_summary_lines,
+)
 from agents.watchlist_foundation import watchlist_view
 
 COMMANDS = (
@@ -87,6 +93,7 @@ COMMANDS = (
     ("/summary", "Step 32 daily summary for today"),
     ("/memory <question>", "Step 43 context block, on request only"),
     ("/dashboard", "Step 49 status snapshot as text"),
+    ("/livescan", "Step 54 live watchlist scan (live pulls + DCF)"),
     ("/ui", "Start the Step 48 web UI on localhost:8765"),
     ("/voice", "Request a spoken reply for the next turn only"),
     ("/help", "List these commands"),
@@ -121,7 +128,11 @@ class JarvisApp:
                  store_dir=None, news_dir=None, events_dir=None,
                  alert_state_path=None, memory_dir=None, data_dir=None,
                  research_save_dir=None, ui_port=DEFAULT_UI_PORT,
-                 search_function=None, financials_function=None):
+                 search_function=None, financials_function=None,
+                 live_fetcher=None):
+        # Step 54: injectable live fetcher for /livescan (tests
+        # pass a stub; None means the real Yahoo fetch).
+        self.live_fetcher = live_fetcher
         self.db_path = Path(db_path) if db_path else DEFAULT_DB_PATH
         # Step 52: conversation memory follows the database this
         # session was pointed at (``--db-path`` or the default).
@@ -221,7 +232,7 @@ class JarvisApp:
             "Voice: off by default "
             f"(text replies; stored preference '{preference}')",
             "Commands: /research /watchlist /alerts /summary "
-            "/memory /dashboard /ui /voice /help /quit",
+            "/memory /dashboard /livescan /ui /voice /help /quit",
             "Type 'exit' to end.",
         ]
 
@@ -312,6 +323,7 @@ class JarvisApp:
             "summary": self._cmd_summary,
             "memory": self._cmd_memory,
             "dashboard": self._cmd_dashboard,
+            "livescan": self._cmd_livescan,
             "ui": self._cmd_ui,
             "voice": self._cmd_voice,
             "help": self._cmd_help,
@@ -416,6 +428,28 @@ class JarvisApp:
         return ("\n".join(dash.summary_lines(snapshot)), "ok",
                 ["agent/dashboard.py"],
                 ["agent/dashboard.py::collect_status"])
+
+    def _cmd_livescan(self, _argument):
+        """Step 54: scan the watchlist from live pulls.
+
+        Fetches live financials for each watchlist ticker and
+        values it with a 10-year FCF DCF.  Live data is used in
+        memory only — nothing is written to the database.  Takes
+        a while over 38 tickers (one live fetch each, rate
+        limited); the reply says how long it took.
+        """
+        import time as _time
+        started = _time.monotonic()
+        result = scan_watchlist_live(
+            store_dir=self.store_dir, fetcher=self.live_fetcher)
+        elapsed = _time.monotonic() - started
+        lines = live_scan_summary_lines(result)
+        lines.insert(
+            1, f"Scan took {elapsed:.0f}s over "
+               f"{result['summary']['selected']} ticker(s).")
+        return ("\n".join(lines), "ok",
+                ["agents/live_watchlist_scan.py"],
+                ["agents/live_watchlist_scan.py::scan_watchlist_live"])
 
     def _start_ui(self):
         if self.ui_server is not None:

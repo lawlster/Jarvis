@@ -184,7 +184,95 @@ class MainIntegrationTestCase(unittest.TestCase):
 
     def test_help_and_unknown_command(self):
         self.assertIn("/research", self.app.ask("/help"))
+        self.assertIn("/livescan", self.app.ask("/help"))
         self.assertIn("Unknown command", self.app.ask("/frobnicate"))
+
+    def test_banner_lists_livescan(self):
+        banner = "\n".join(self.app.banner_lines())
+        self.assertIn("/livescan", banner)
+
+    # -- Step 54: /livescan -------------------------------------------
+
+    def _livescan_app(self):
+        from agents.watchlist_foundation import save_watchlist
+        store_dir = self.root / "live_watchlist"
+        save_watchlist([
+            {"ticker": "CHEAP", "universe_ticker": None,
+             "company_name": "Cheap Co", "sources": ["test"],
+             "reason": "test", "notes": [],
+             "date_added": "2026-11-09"},
+            {"ticker": "OVER", "universe_ticker": None,
+             "company_name": "Over Co", "sources": ["test"],
+             "reason": "test", "notes": [],
+             "date_added": "2026-11-09"},
+        ], store_dir=str(store_dir))
+        pulls = {
+            "CHEAP": {
+                "ticker": "CHEAP", "company_name": "Cheap Co",
+                "currency": "USD", "data_available": True,
+                "data_freshness": {
+                    "retrieved_at_utc": "2026-11-09T03:00:00+00:00",
+                    "price_data_as_of_utc": "2026-11-06T21:00:00+00:00",
+                    "financial_statements_latest_period": {}},
+                "current_price": 50.0,
+                "free_cash_flow": {"2026-06-30": 10e9},
+                "total_debt": {"2026-06-30": 0.0},
+                "cash": {"2026-06-30": 0.0},
+                "shares_outstanding": 1e9,
+            },
+            "OVER": {
+                "ticker": "OVER", "company_name": "Over Co",
+                "currency": "USD", "data_available": True,
+                "data_freshness": {
+                    "retrieved_at_utc": "2026-11-09T03:00:00+00:00",
+                    "price_data_as_of_utc": "2026-11-06T21:00:00+00:00",
+                    "financial_statements_latest_period": {}},
+                "current_price": 1000.0,
+                "free_cash_flow": {"2026-06-30": 10e9},
+                "total_debt": {"2026-06-30": 0.0},
+                "cash": {"2026-06-30": 0.0},
+                "shares_outstanding": 1e9,
+            },
+        }
+        app = main_mod.JarvisApp(
+            db_path=self.db_path, model_client=self.stub,
+            log_dir=self.log_dir, store_dir=str(store_dir),
+            news_dir=self.root / "news",
+            events_dir=self.root / "events",
+            alert_state_path=self.root / "alerts" / "alert_state.json",
+            memory_dir=self.memory_dir, data_dir=self.data_dir,
+            research_save_dir=self.sessions_dir,
+            search_function=lambda query: "stub search result",
+            financials_function=lambda ticker: "stub financials",
+            live_fetcher=lambda symbol: pulls[symbol])
+        with redirect_stdout(io.StringIO()):
+            app.start()
+        return app
+
+    def test_livescan_command_scans_stub_watchlist(self):
+        app = self._livescan_app()
+        try:
+            reply = app.ask("/livescan")
+        finally:
+            app.stop_ui()
+        self.assertIn("Live watchlist scan", reply)
+        self.assertIn("2 tickers", reply)
+        self.assertIn("1 candidate(s)", reply)
+        self.assertIn("CHEAP", reply)
+        self.assertIn("strongest_alert", reply)
+        self.assertIn("provisional", reply)
+
+    def test_livescan_command_is_logged(self):
+        app = self._livescan_app()
+        try:
+            app.ask("/livescan")
+        finally:
+            app.stop_ui()
+        log_file = self.log_dir / "turns.jsonl"
+        records = [json.loads(line) for line in
+                   log_file.read_text(encoding="utf-8").splitlines()]
+        routes = [record["route"] for record in records]
+        self.assertIn("command_livescan", routes)
 
     def test_commands_are_logged_in_the_turn_log(self):
         self.app.ask("/watchlist")
