@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 42 — Build general-purpose web research (PARTIAL — built and tested 2026-11-09; question → plan → fetch → sourced extractive answer, 26 new tests, one live MSFT news run, answer is the sources' words only — see Step 42 section below)
-- Current subtask: Step 43 long-term contextual memory
+- Current step: 43 — Build long-term contextual memory (PARTIAL — built and tested 2026-11-09; durable record store with recall, supersede and context blocks, 27 new tests, fixture-only example — see Step 43 section below)
+- Current subtask: Step 44 natural-language tool calling
 - Overall status: In progress
 
 ## Completed work
@@ -2478,4 +2478,93 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   and leave nothing behind; the full-suite runs left 12 stale
   `tmp*.db` files in /tmp, removed with the targeted
   `rm /tmp/tmp*.db` used before — /tmp now 3%. No broad
+  cleanup was run, per instructions.
+
+### 2026-11-09 — Step 43 build long-term contextual memory (PARTIAL, not complete)
+
+- `agent/long_term_memory.py` built and tested (27 new
+  tests, 769 total, `python -m unittest discover` from the
+  project root with `~/workspace/projects/jarvis-venv/bin/python`;
+  1 skipped: the live smoke test, behind
+  `JARVIS_LIVE_WEB_RESEARCH=1`). Production DB hash unchanged
+  (`36862922…089187`); this step does not touch the database at
+  all. Report: `~/workspace/projects/step43-report.md`.
+- Audit first: no long-term memory module existed
+  (`agent/long_term_memory.py` and `agent/context.py` both
+  absent). What already existed: `agent/memory.py` (the
+  short-term memory — the last 20 messages in the SQLite
+  `conversations` table; this module sits over it, does not
+  replace it), the Step 39 per-turn JSON-lines log under
+  `data/orchestration/`, the Step 41 research briefs under
+  `data/research_sessions/`, and the Step 30 thesis records
+  under `data/theses/`. Reused, not duplicated: the
+  one-JSON-file-per-record storage pattern from Steps 30–42.
+- What it does: a durable record store with five types —
+  `fact`, `preference`, `decision`, `commitment`,
+  `observation` — every record carrying `id`, `type`, `text`,
+  `stated_by`, `stated_at`, `source`, `source_kind`, `tags`,
+  `status` and `superseded_by`. Storage is one JSON file per
+  record under a caller-chosen directory (default
+  `data/memory/`), plus an `index.json` rebuilt from the record
+  files on every load. `recall` retrieves by tag
+  (case-insensitive), by type, by date range (`since`
+  inclusive, `until` exclusive), and by keyword search over
+  text and tags; filters combine (AND); newest first; per-query
+  cap (default 20). Superseded records are excluded by
+  default. `supersede_record` saves the replacement first,
+  then marks the old record `superseded` with `superseded_by`
+  pointing at the replacement — the old record is kept and
+  still readable; nothing is silently deleted.
+  `build_context(question, ticker)` pulls the relevant records
+  into a small block the Step 39 orchestrator can hand to the
+  model: tag match (a ticker tag scores highest) plus keyword
+  match with whole-word matching only; every line labelled with
+  its type, who stated it, when, and its source; hard caps on
+  record count (default 5) and characters (default 2000);
+  `truncated` says whether a cap cut something off; only active
+  records are used. A thin `MemoryStore` class wraps the
+  functions. Corrupt record files are skipped and listed in
+  `load_store`'s `skipped`, never allowed to crash the store.
+  No network, no trades, no sending, no scheduling. Nothing in
+  the module is a recommendation.
+- Fixture example (files
+  `~/workspace/projects/step43-example-context.json` / `.md`):
+  a temporary store seeded with 7 caller-supplied fixture
+  records — every one labelled FIXTURE, none of them the
+  owner's real facts — then a context block for "What do we
+  know about MSFT, and when should we look at it again?". The
+  block contains exactly the 4 MSFT-tagged records (the
+  commitment to review MSFT after the next quarterly results,
+  the overvaluation fact, the deterioration observation, the
+  quality fact); the NVDA fact and the preferences record stay
+  out; the alert-rule decision carries no MSFT tag and none of
+  the question's content words, so it is not in the block — but
+  it is still found by recall by type, and only the corrected
+  wording is active (the old wording is kept, marked
+  superseded).
+- Bugs found and fixed during testing: substring matching in
+  the context scorer — the first example run pulled the
+  alert-rule decision into the MSFT block because the question
+  token `we` matched as a substring inside `weak`. Scoring is
+  now whole-word only and the stopword set was widened; a
+  regression test (`test_context_no_substring_match`) covers
+  it.
+- **Step 43 is PARTIAL, not complete. The store has never held
+  a real record from a real conversation.** It starts empty and
+  records only what the caller supplies; no fixture record in
+  the example is the owner's real memory. Nothing has ever
+  written a real fact, preference, decision, commitment or
+  observation into it, and no orchestrator turn has ever read
+  from it. Not wired into `main.py` (Step 50), and the Step 39
+  orchestrator does not yet call `build_context` — the context
+  block is available to it, not yet used by it. Whether the
+  orchestrator should pull long-term memory into every turn, or
+  only on request, is an open design question for the owner.
+  No sending or scheduling (Step 46). No live price feed, no
+  holdings store (open decisions carried from Steps 36–37).
+  Sufficient to start Step 44 (natural-language tool calling).
+- Housekeeping: Step 43's own tests use `TemporaryDirectory`
+  and leave nothing behind; the full-suite runs left 6 stale
+  `tmp*.db` files in /tmp, removed with the targeted
+  `rm /tmp/tmp*.db` used before — /tmp now 5%. No broad
   cleanup was run, per instructions.
