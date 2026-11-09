@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 50 — Integrate all modules into main.py (PARTIAL — built and tested 2026-11-09; `main.py` rewired to delegate to the Step 39 orchestrator, Step 40 router, Step 44 registry/loop replacing the old inline tool loop, slash commands, startup banner stating the limitations, `main.py --help` now works; 24 new tests, 1003 total; stub-tested only, no live Ollama turn yet — see Step 50 section below)
-- Current subtask: Step 50 integrate all modules into main.py
+- Current step: 51 — Complete end-to-end testing (PARTIAL — built and tested 2026-11-09; 12-scenario suite over the integrated `main.py`, 1015 tests total; stub-tested only, no live Ollama turn yet — see Step 51 section below)
+- Current subtask: Step 51 complete end-to-end testing
 - Overall status: In progress
 
 ## Completed work
@@ -3196,6 +3196,102 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   and leave nothing behind; the full-suite runs left a few
   stale `tmp*.db` files in /tmp, removed with the targeted
   `rm /tmp/tmp*.db` used before — /tmp now 14%.
+  `database/assistant.db` shows as modified in `git status`,
+  but its hash is unchanged (`36862922…089187`) — the known
+  pre-existing state (header rewrites from earlier
+  imports/audit; logical content identical).
+
+### 2026-11-09 — Step 51 build complete end-to-end testing (PARTIAL, not complete)
+
+New module `test_e2e.py`: a 12-scenario suite driving the
+INTEGRATED `main.py` (`JarvisApp`) end to end, one fresh
+assistant per scenario, each from a fresh temporary database
+copy and temporary data directories (small real data
+subdirectories only — `watchlist`, `memory`, `news`, `events`,
+`macro`, `monitoring` — deliberately not the 1.3 GB
+`data/market_data` or the 66 MB `data/financial_statements`).
+Results per scenario in `step51-scenario-results.json`; full
+report in `~/workspace/projects/step51-report.md`.
+
+- (a) Valuation question typed in, answered: numbers trace to
+  Step 21/23 — range $98.52 / $163.30 / $234.64, alert price
+  $78.82, tier overvalued, quality excellent, sources labelled.
+  Scripted session (valuation, /watchlist, refused trade,
+  /dashboard, /quit) also passes.
+- (b) `/research MSFT`, command to brief file: brief is partial
+  with sourced claims and limitations; the file lands in the
+  temp directory only.
+- (c) Watchlist + alerts + summary + dashboard round trip:
+  38-ticker watchlist, MSFT overvalued, alert price $78.82,
+  10,619 scanned, 1 scannable, 0 candidates, 0 alerts; the
+  outputs agree with each other.
+- (d) Trade request refused end to end: no model call, turn
+  logged as `guardrail_trade` / refused, and the only file that
+  changed was the turn log itself.
+- (e) Scheduled job end to end (fake clock Mon 2026-11-09
+  09:36 SGT): daily watchlist check ran ok, a failing job
+  failed without blocking it, the NVDA earnings reminder was
+  not due, the stub receipt says delivered: false, next run
+  advanced to Tue 2026-11-10 09:36.
+- (f) UI end to end: home, MSFT ticker and dashboard pages
+  fetched over real localhost HTTP with the same numbers as
+  the CLI path.
+- (g) Voice turn end to end: spoken reply refused by default
+  (owner prefers text); with a voice-allowed preference in a
+  temporary store, a spoken reply is produced as a file via
+  the stub.
+- (h) Model unavailable (no Ollama): structured reply
+  ("unreachable", "have not invented an answer"), session
+  continues once the model is back.
+- (i) Startup banner and `--help`: a real subprocess run of
+  `main.py` with a temp database prints the banner and exits
+  cleanly with no Ollama running. Audit O1 (`--help`
+  unsupported) is verified closed.
+- (j) Audit O5: the legacy valuation monitor still reports
+  "No valuation profile found for MSFT" rather than crashing,
+  production hash unchanged afterwards.
+- (k) Open decisions re-checked, NOT changed: Step 23
+  exact-20% boundary float edge (price at 80% of the
+  DCF-derived $98.52 gives margin 0.19999999999999996, tier
+  reasonable_price, not strongest_alert; literal 0.20 fires;
+  deterioration blocks it) and Step 27 "warning" calibration
+  (MSFT overall warning, no material deterioration, flags
+  free cash flow softening / working capital falling / capex
+  surge compressing FCF).
+
+Findings (not fixes — no `main.py` behaviour was changed):
+
+- `agents/valuation_profiles.py` hardcodes the production
+  database path (`DB_PATH` module constant, no `db_path`
+  parameter). Safe here — the table exists with 0 rows, so
+  the call is a read plus a no-op CREATE TABLE IF NOT EXISTS
+  (hash asserted before/after) — but any future E2E scenario
+  needing a valuation profile would need a `db_path`
+  parameter or touch the real database.
+- Latent, not scenario-exposed: `classify_tier` crashes with
+  a `TypeError` (formatting `None`) when `margin_base` /
+  `margin_optimistic` are `None`; not reachable through the
+  real pipeline, which always supplies all three margins.
+- `agent/memory.py` has no env override for `DB_PATH`; the
+  harness monkeypatches it to the temp copy, and the
+  subprocess scenario only types "exit" (handled before any
+  message is saved).
+
+**Step 51 is PARTIAL, not complete. No live Ollama turn has
+ever run end to end.** All model turns used `StubModelClient`
+(no Ollama on this machine). Only a live run on the owner's
+PC with Ollama running can prove the model-dependent paths.
+No `main.py` behaviour was changed, no production database
+write, no commit, no push. Sufficient to start Step 52
+(backup, recovery and security systems).
+
+- Housekeeping: Step 51's harness uses `TemporaryDirectory`
+  only and asserts the set of `/tmp/tmp*.db` files is
+  unchanged across the run and every scenario temp directory
+  is gone when the test ends — both held, it adds no residue.
+  /tmp was 16% after the full suite (older helpers still
+  leave files; removed with the targeted `rm /tmp/tmp*.db`
+  used before).
   `database/assistant.db` shows as modified in `git status`,
   but its hash is unchanged (`36862922…089187`) — the known
   pre-existing state (header rewrites from earlier
