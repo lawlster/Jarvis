@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 36 — Portfolio performance and risk analysis (PARTIAL — built and tested 2026-11-09; pure analysis over caller-supplied holdings and price histories, 40 new tests, fixture-proven; no real portfolio ever analysed, MSFT has only one price point so every history-dependent metric is missing on real data — see Step 36 section below)
-- Current subtask: Step 37 quarterly portfolio reporting
+- Current step: 37 — Quarterly portfolio reporting (PARTIAL — built and tested 2026-11-09; dict + Markdown reports over caller-supplied holdings and price histories, 23 new tests, fixture-proven; no real portfolio ever reported on, MSFT has only one price point so every history-dependent metric is missing on real data — see Step 37 section below)
+- Current subtask: Step 38 automated watchlist and valuation alerts
 - Overall status: In progress
 
 ## Completed work
@@ -1902,3 +1902,91 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   on real portfolios. Not wired into `main.py` (Step 50);
   no sending or scheduling. Sufficient to start Step 37
   (quarterly portfolio reporting).
+
+### 2026-11-09 — Step 37 quarterly portfolio reporting (PARTIAL, not complete)
+
+- `agents/quarterly_report.py` built and tested (23 new
+  tests, 610 total, `python -m unittest discover` from the
+  project root with `~/workspace/projects/jarvis-venv/bin/python`).
+  Production DB hash unchanged (`36862922…089187`); checks ran
+  on fixtures and a temp DB copy. Report: `~/workspace/projects/
+  step37-report.md`.
+- Audit first: no quarterly-report module existed to reuse —
+  `agents/report_generator.py` is an Ollama-based narrative
+  generator, not a quarterly report. Step 37 reuses Step 36
+  (`agents/portfolio_performance.py`) for all performance and
+  risk arithmetic and Step 25 (`agents/market_scanner.py`) for
+  valuation snapshots, and derives nothing new about value.
+- What it produces (dict + Markdown, saved as one JSON and one
+  Markdown file per quarter under a caller-chosen directory,
+  default `data/quarterly_reports/`): quarter label parsing
+  ("Q3 2026", "2026-Q3", "2026Q3") or explicit dates; holdings
+  with quarter-start/end values from boundary prices; quarter
+  return (price only) and quarter total return (including
+  quarter dividends, supplied per holding as
+  `quarter_dividends`); TWR, MWR, volatility, drawdown and
+  beta from Step 36 over the quarter's own history (the
+  quarter-start boundary price is prepended so the series
+  covers the whole quarter); benchmark return and excess
+  return where a benchmark history is supplied; contributors
+  and detractors for the quarter; concentration and risk flags
+  from Step 36; income (quarter dividends, yield on cost and
+  on value); a valuation snapshot per holding (caller-supplied
+  snapshots win, otherwise the Step 25 scanner runs read-only
+  over a caller-supplied database path at quarter-end prices,
+  otherwise insufficient_data with the reason); notable events
+  in the quarter from Step 33 event files and Step 31 news run
+  files in caller-supplied directories (market-wide events
+  listed once, corrupt files skipped); quarter-over-quarter
+  comparison against a supplied previous report (value,
+  return, tier changes, alert-price changes, risk flags added
+  and removed); and a limitations section listing every
+  unavailable metric and why. No price fetching, no network,
+  no DB writes, no trades, no sending or scheduling
+  (Step 46). Generated reports contain no "buy"/"sell" words
+  (tested).
+- No holdings store was built: the owner has never entered
+  his actual holdings, and every input is caller-supplied
+  each call. That open question (whether a persistent holdings
+  store belongs in a later step) is recorded in the report
+  rather than decided unilaterally.
+- Fixture example (Q3 2026, 3 positions, monthly prices,
+  benchmark 1000 → 1100): value $3,000 → $3,600, quarter
+  return +20.00% price only, +21.00% including $30 dividends;
+  TWR +20.00%; MWR unavailable (no cash flows supplied);
+  benchmark +10.00%, excess +11.00%; contributors GAMMA +$400
+  and ALPHA +$300, detractor BETA −$100; volatility 4.67%,
+  drawdown 0.00%, beta 0.29; GAMMA 38.9% of value flagged
+  (above the 25% single-name threshold); yields 1.00% on cost,
+  0.83% on value. Example files:
+  `~/workspace/projects/step37-example-q3-2026-quarterly-report.json`
+  and `.md`. The fixture benchmark's small variance is a
+  known caveat (same as Step 36) — the beta arithmetic was
+  hand-verified in Step 36.
+- MSFT on real data (temp copy, Q4 2026, 10 shares at $400,
+  prices 2026-10-01 $500.00 and 2026-11-03 $507.12): the
+  valuation snapshot from the database is tier overvalued,
+  quality excellent, health strong, alert price $78.82
+  (unrounded $78.8165…). Q3 2026 for MSFT has no price at
+  all, so the quarter return is missing, never estimated from
+  the November price.
+- Two bugs found and fixed during testing, both in Step 37
+  itself: (1) a single price point in a quarter produced a
+  meaningless 0% quarter return via the start-price fallback
+  — now treated as missing when the quarter has fewer than
+  two price dates; (2) beta was rendered as a percentage
+  (29.18%) in Markdown and summary lines — beta is a plain
+  ratio, now formatted as 0.29. Two further failures were
+  test bugs (Q2 reusing Q3 dividends; an unrounded alert
+  price asserted exactly).
+- **Step 37 is PARTIAL, not complete.** No real portfolio has
+  ever been reported on; a live price feed (Step 38) and the
+  owner's actual holdings are what unlock this module on real
+  data. Not wired into `main.py` (Step 50); no sending or
+  scheduling. Sufficient to start Step 38 (automated
+  watchlist and valuation alerts — PARTIAL FOUNDATION EXISTS).
+- Housekeeping: the full-suite runs pushed /tmp from 56% to
+  75% — the residue is entirely from older steps'
+  `_temp_db_copy` helpers, which still never delete their
+  copies (first noted Step 27). Step 37's own tests use
+  `TemporaryDirectory` and leave nothing behind.
