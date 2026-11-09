@@ -193,6 +193,8 @@ class EndToEndTestCase(unittest.TestCase):
         self.counts_before = _logical_counts(self.db_path)
         self._old_db_path = memory_mod.DB_PATH
         memory_mod.DB_PATH = self.db_path
+        from data.providers import provider_logger as _pl
+        self._old_pl_db_path = _pl.DB_PATH
 
         # Temp data dir: copies of the small real stores.
         self.data_dir = self.root / "data"
@@ -225,6 +227,10 @@ class EndToEndTestCase(unittest.TestCase):
     def tearDown(self):
         self.app.stop_ui()
         memory_mod.DB_PATH = self._old_db_path
+        # Step 52: JarvisApp also points provider logging at the
+        # session database; restore that too.
+        from data.providers import provider_logger as _pl
+        _pl.DB_PATH = self._old_pl_db_path
         self.tmp.cleanup()
         # The harness must clean up after itself: the whole
         # scenario directory is gone when the test ends.

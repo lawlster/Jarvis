@@ -1,5 +1,10 @@
 
+import os
+
 import requests
+from dotenv import load_dotenv
+
+from pathlib import Path
 
 from agents.market_universe import (
     initialise_market_universe,
@@ -8,13 +13,22 @@ from agents.market_universe import (
 )
 
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
+
 SEC_TICKER_URL = (
     "https://www.sec.gov/files/company_tickers_exchange.json"
 )
 
-# Replace this with your own contact email.
-# The SEC requires automated requests to identify the application.
-SEC_USER_AGENT = "AiAssistant Research checkme123ymail.com@gmail.com"
+# Step 52: the SEC contact address used to live here as a
+# hardcoded personal email in tracked code.  It now comes from
+# SEC_USER_AGENT in .env (the same pattern as
+# agents/us_issuer_enrichment.py and
+# data/financial_statements/sec_collector.py) and is empty by
+# default — fetch_us_company_listings() refuses to contact the
+# SEC until it is configured, instead of sending a request
+# with a placeholder or someone else's address.
+SEC_USER_AGENT = os.getenv("SEC_USER_AGENT", "").strip()
 
 SUPPORTED_EXCHANGES = {
     "nasdaq": "NASDAQ",
@@ -25,6 +39,13 @@ SUPPORTED_EXCHANGES = {
 
 def fetch_us_company_listings():
     """Download the SEC company ticker and exchange dataset."""
+
+    if not SEC_USER_AGENT:
+        return {
+            "error": "SEC_USER_AGENT is not configured. "
+                     "Configure SEC_USER_AGENT in .env before "
+                     "contacting SEC EDGAR."
+        }
 
     headers = {
         "User-Agent": SEC_USER_AGENT,

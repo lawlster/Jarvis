@@ -58,6 +58,7 @@ DEFAULT_DB_PATH = PROJECT_ROOT / "database" / "assistant.db"
 DEFAULT_DATA_DIR = PROJECT_ROOT / "data"
 DEFAULT_UI_PORT = 8765
 
+from agent import memory as memory_mod
 from agent.memory import (
     initialise_memory,
     load_recent_messages,
@@ -122,6 +123,23 @@ class JarvisApp:
                  research_save_dir=None, ui_port=DEFAULT_UI_PORT,
                  search_function=None, financials_function=None):
         self.db_path = Path(db_path) if db_path else DEFAULT_DB_PATH
+        # Step 52: conversation memory follows the database this
+        # session was pointed at (``--db-path`` or the default).
+        # Before this, ``agent/memory.py`` always wrote to the
+        # production database even when the rest of the session
+        # used a different one.  Tests still monkeypatch
+        # ``memory_mod.DB_PATH`` first; this assignment then
+        # writes the same temp path back, so they are unaffected.
+        memory_mod.DB_PATH = self.db_path
+        # Step 52: the same for provider request logging.  The
+        # Step 52 audit found that tools/finance.py (wrapped as
+        # a Step 44 tool) logs every provider request into the
+        # ``provider_logs`` table — a second write path the
+        # earlier steps had missed, and that table already holds
+        # 1 row in the production database.  A --db-path session
+        # now logs to its own database instead.
+        from data.providers import provider_logger as _pl
+        _pl.DB_PATH = self.db_path
         self.data_dir = Path(data_dir) if data_dir else DEFAULT_DATA_DIR
         self.store_dir = store_dir
         self.news_dir = news_dir

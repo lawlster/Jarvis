@@ -711,6 +711,29 @@ def classify_tier(margin_conservative, margin_base, margin_optimistic,
                         "would remove the alert"],
                 }
 
+    # Step 52: a missing base or optimistic margin must never
+    # crash the tier logic (the old code formatted ``None`` with
+    # ``:.1%`` and raised TypeError).  The conservative margin
+    # alone can only justify a strongest alert (handled above);
+    # without the base value the price cannot be placed inside
+    # the fair-value range, and without the optimistic value a
+    # price above base cannot be split into fairly_valued vs
+    # overvalued — so the honest answer is insufficient_data,
+    # with the blocked flag preserved.
+    if margin_base is None:
+        reasons.append(
+            "base value is missing, so the price cannot be placed "
+            "inside the fair-value range")
+        return {
+            "tier": "insufficient_data",
+            "reasons": reasons,
+            "strongest_alert_blocked": blocked,
+            "quality_rating": quality_rating,
+            "conditions_to_change": [
+                "a base intrinsic value is needed before any tier "
+                "can be assigned"],
+        }
+
     if margin_base is not None and margin_base >= 0:
         # Price at or below base value: reasonable, not an alert.
         if blocked:
@@ -758,6 +781,25 @@ def classify_tier(margin_conservative, margin_base, margin_optimistic,
                 "strongest_alert_blocked": blocked,
                 "quality_rating": quality_rating,
                 "conditions_to_change": conditions}
+
+    # Step 52: same guard as for the base margin — a price above
+    # base with no optimistic value cannot be split into
+    # fairly_valued vs overvalued.  (At this point margin_base is
+    # known not None, and margin_optimistic is the only remaining
+    # unknown.)
+    if margin_optimistic is None:
+        reasons.append(
+            "optimistic value is missing, so a price above base "
+            "value cannot be placed as fairly_valued or overvalued")
+        return {
+            "tier": "insufficient_data",
+            "reasons": reasons,
+            "strongest_alert_blocked": blocked,
+            "quality_rating": quality_rating,
+            "conditions_to_change": [
+                "an optimistic intrinsic value is needed before "
+                "any tier can be assigned"],
+        }
 
     # Price above the optimistic value.
     if blocked:

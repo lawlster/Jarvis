@@ -1,4 +1,3 @@
-
 import sqlite3
 from pathlib import Path
 
@@ -7,14 +6,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH = BASE_DIR / "database" / "assistant.db"
 
 
-def get_connection():
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    return sqlite3.connect(DB_PATH)
+def _resolve_db_path(db_path=None):
+    """Database path for this call.
+
+    ``db_path`` wins when given; otherwise the module default
+    (the project's production database).  Step 52: the parameter
+    exists so tests and end-to-end scenarios can point the
+    profiles at a temporary copy instead of the real database.
+    """
+    return Path(db_path) if db_path is not None else DB_PATH
 
 
-def initialise_valuation_profiles():
+def get_connection(db_path=None):
+    path = _resolve_db_path(db_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return sqlite3.connect(path)
 
-    with get_connection() as conn:
+
+def initialise_valuation_profiles(db_path=None):
+
+    with get_connection(db_path) as conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS valuation_profiles (
                 ticker TEXT PRIMARY KEY,
@@ -34,12 +45,13 @@ def save_valuation_profile(
     discount_rate,
     terminal_growth_rate,
     margin_of_safety=0.25,
-    forecast_years=5
+    forecast_years=5,
+    db_path=None
 ):
 
     ticker = ticker.upper().strip()
 
-    initialise_valuation_profiles()
+    initialise_valuation_profiles(db_path)
 
     # Validate assumptions
     if not ticker:
@@ -60,7 +72,7 @@ def save_valuation_profile(
     if forecast_years < 1 or forecast_years > 20:
         return "Error: Forecast years must be between 1 and 20."
 
-    with get_connection() as conn:
+    with get_connection(db_path) as conn:
         conn.execute("""
             INSERT INTO valuation_profiles (
                 ticker,
@@ -92,13 +104,13 @@ def save_valuation_profile(
     return f"Valuation profile saved for {ticker}."
 
 
-def get_valuation_profile(ticker):
+def get_valuation_profile(ticker, db_path=None):
 
     ticker = ticker.upper().strip()
 
-    initialise_valuation_profiles()
+    initialise_valuation_profiles(db_path)
 
-    with get_connection() as conn:
+    with get_connection(db_path) as conn:
         row = conn.execute("""
             SELECT
                 ticker,
@@ -126,11 +138,11 @@ def get_valuation_profile(ticker):
     }
 
 
-def get_all_valuation_profiles():
+def get_all_valuation_profiles(db_path=None):
 
-    initialise_valuation_profiles()
+    initialise_valuation_profiles(db_path)
 
-    with get_connection() as conn:
+    with get_connection(db_path) as conn:
         rows = conn.execute("""
             SELECT
                 ticker,

@@ -9,7 +9,10 @@ from agents.valuation_history import (
 )
 
 
-def evaluate_watchlist():
+def evaluate_watchlist(db_path=None):
+    # Step 52: ``db_path`` is passed through to the valuation
+    # monitor so the profile read can point at a temporary
+    # database; the default is unchanged.
 
     # Ensure historical valuation storage exists
     initialise_valuation_history()
@@ -39,7 +42,8 @@ def evaluate_watchlist():
         )
 
         try:
-            valuation = monitor_company_valuation(ticker)
+            valuation = monitor_company_valuation(
+                ticker, db_path=db_path)
 
             results.append({
                 "ticker": ticker,

@@ -10,14 +10,18 @@ def monitor_company_valuation(
     discount_rate=None,
     terminal_growth_rate=None,
     margin_of_safety=None,
-    years=None
+    years=None,
+    db_path=None
 ):
     ticker = ticker.upper().strip()
 
     print(f"\nMonitoring valuation for {ticker}...")
 
-    # Retrieve the company's saved valuation profile
-    profile = get_valuation_profile(ticker)
+    # Retrieve the company's saved valuation profile.  Step 52:
+    # ``db_path`` lets callers point the profile read at a
+    # temporary database instead of the production one; the
+    # default is unchanged (the production database).
+    profile = get_valuation_profile(ticker, db_path=db_path)
 
     if profile is None:
         return {

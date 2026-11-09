@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 51 — Complete end-to-end testing (PARTIAL — built and tested 2026-11-09; 12-scenario suite over the integrated `main.py`, 1015 tests total; stub-tested only, no live Ollama turn yet — see Step 51 section below)
-- Current subtask: Step 51 complete end-to-end testing
+- Current step: 52 — Build backup, recovery and security systems (PARTIAL — built and tested 2026-11-09; backup/recovery + secrets scan + permissions + DB-write audit, 1060 tests total; no scheduled backup job yet, no live restore ever needed — see Step 52 section below)
+- Current subtask: Step 52 backup, recovery and security systems
 - Overall status: In progress
 
 ## Completed work
@@ -3296,3 +3296,16 @@ write, no commit, no push. Sufficient to start Step 52
   but its hash is unchanged (`36862922…089187`) — the known
   pre-existing state (header rewrites from earlier
   imports/audit; logical content identical).
+
+### 2026-11-09 — Step 52 build backup, recovery and security systems (PARTIAL)
+
+- New modules: `agents/backup_recovery.py` (timestamped DB backups via the SQLite backup API from a read-only source, SHA-256 manifest `backups.jsonl`, verify hash + integrity_check, restore to a named target only, list newest-first, prune keep-N never deleting the newest, JSON data-store snapshots with a per-file hash manifest; CLI `python -m agents.backup_recovery backup|verify|restore|list|prune|backup-data|verify-data`; default backup dir is the existing `jarvis-backups` directory next to the repo, overridable with `JARVIS_BACKUP_DIR`) and `agents/security.py` (secrets scan of tree + Git history, permissions check, static DB-write audit). Tests `test_backup_recovery.py` (18) + `test_security.py` (27) — 45 new tests OK, 1060 total, 1 skipped (Step 42 live smoke test). DB hash unchanged.
+- All three Step 51 findings fixed: (1) `agents/valuation_profiles.py` takes an optional `db_path` (monitor and watchlist evaluator pass it through; production still holds 0 profiles); (2) `classify_tier` returns `insufficient_data` with a reason instead of crashing on a missing base/optimistic margin, blocked flag preserved, strongest alert still fires on the conservative margin alone; (3) `agent/memory.py` honours `JARVIS_DB_PATH` and takes a `db_path` parameter, and `JarvisApp` now points memory at the session database — a `--db-path` session previously still wrote conversation history to production.
+- The audit caught a second write path the earlier steps had missed: `tools/finance.py` (`get_company_financials`, a Step 44 tool) logs every provider request into `provider_logs` via `data/providers/provider_logger.py`, and that table already holds 1 row in production. The documented runtime write set is now TWO paths (`agent/memory.py`, `data/providers/provider_logger.py`); the audit test asserts exactly that set. `provider_logger` got the same env-override + `db_path` treatment, and `JarvisApp` points it at the session database. Static audit: 45 runtime modules from `main.py`, 19 read-only connect sites, 19 write-capable sites repo-wide, exactly the 2 documented ones in the runtime, `matches_documented_set` True.
+- Secrets scan, real repo (counts and locations only, no values): tree 184 files — local `.env` line 1 (untracked + gitignored, correct state), `.env.example` line 1 (placeholder), test fixtures only otherwise. History 68 commits — the known `.env` case flagged at its commit/file/line without reproducing the address. Remediation: the SEC contact address was hardcoded in tracked `agents/us_market_discovery.py` line 17 — now reads `SEC_USER_AGENT` from `.env` like the other SEC modules and refuses to contact the SEC until configured; tests assert no email-shaped value in the file, the scan no longer flags it, and the fetch makes no network call without a user agent. History still holds the old value (initial commit) and the old `.env` — scrubbing published history is the owner's call, not done here.
+- Permissions: production DB `0o660`, data-store dirs `0o2770`, none world-writable; `data/alerts`, `data/scheduler`, `data/orchestration` do not exist yet (no alert state, no scheduled job, no turn log ever written).
+- Recovery drill on a temp copy of production: backup 3,715,072 bytes, verify ok, drop `market_universe`, restore — byte-identical to the verified backup, 10,619 rows back, integrity ok. Restore over production refused; restore of a tampered backup refused.
+- Two full-suite failures during development were a test-ordering issue from the new `JarvisApp` wiring (the provider-logger module global was not restored by the Step 50/51 harnesses) — fixed by restoring it in their tearDowns and making the new tests order-independent.
+- Step 52 is PARTIAL: backup, recovery and the security checks are built and tested, but no scheduled backup job exists (no cron created), no live restore has ever been needed, and no live Ollama turn has ever run through the integrated `main.py`. No backup was taken into the real `jarvis-backups` directory by this step (all drills ran on temp copies). Sufficient to start Step 53 (deploy reliable always-on assistant).
+
+- Housekeeping: Step 52's tests use `TemporaryDirectory` only and add no `/tmp` residue. `database/assistant.db` shows as modified in `git status`, but its hash is unchanged (`36862922…089187`) — the known pre-existing state (header rewrites from earlier imports/audit; logical content identical).

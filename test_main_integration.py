@@ -69,6 +69,8 @@ class MainIntegrationTestCase(unittest.TestCase):
         # production database.
         self._old_db_path = memory_mod.DB_PATH
         memory_mod.DB_PATH = self.db_path
+        from data.providers import provider_logger as _pl
+        self._old_pl_db_path = _pl.DB_PATH
         self.log_dir = self.root / "orchestration"
         self.memory_dir = self.root / "memory"
         self.data_dir = self.root / "data"
@@ -91,6 +93,10 @@ class MainIntegrationTestCase(unittest.TestCase):
     def tearDown(self):
         self.app.stop_ui()
         memory_mod.DB_PATH = self._old_db_path
+        # Step 52: JarvisApp also points provider logging at the
+        # session database; restore that too.
+        from data.providers import provider_logger as _pl
+        _pl.DB_PATH = self._old_pl_db_path
         self.tmp.cleanup()
 
     # -- the loop delegates to the orchestrator ----------------------

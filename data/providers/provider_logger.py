@@ -1,4 +1,5 @@
 
+import os
 import sqlite3
 
 from pathlib import Path
@@ -6,22 +7,32 @@ from datetime import datetime, timezone
 
 
 BASE_DIR = Path(__file__).resolve().parents[2]
-DB_PATH = BASE_DIR / "database" / "assistant.db"
+# Step 52: the path honours JARVIS_DB_PATH, like agent/memory.py,
+# so a session pointed at another database (``--db-path`` or a
+# test copy) logs provider requests there instead of into the
+# production database.  The default is unchanged.
+DB_PATH = Path(os.environ.get("JARVIS_DB_PATH") or
+               (BASE_DIR / "database" / "assistant.db"))
 
 
-def get_connection():
+def _resolve_db_path(db_path=None):
+    return Path(db_path) if db_path is not None else DB_PATH
 
-    DB_PATH.parent.mkdir(
+
+def get_connection(db_path=None):
+
+    path = _resolve_db_path(db_path)
+    path.parent.mkdir(
         parents=True,
         exist_ok=True
     )
 
-    return sqlite3.connect(DB_PATH)
+    return sqlite3.connect(path)
 
 
-def initialise_provider_logs():
+def initialise_provider_logs(db_path=None):
 
-    with get_connection() as conn:
+    with get_connection(db_path) as conn:
 
         conn.execute("""
             CREATE TABLE IF NOT EXISTS provider_logs (
@@ -67,16 +78,17 @@ def log_provider_request(
     fallback_used=False,
     quality_status=None,
     quality_score=None,
-    error_message=None
+    error_message=None,
+    db_path=None
 ):
 
-    initialise_provider_logs()
+    initialise_provider_logs(db_path)
 
     retrieved_at = datetime.now(
         timezone.utc
     ).isoformat()
 
-    with get_connection() as conn:
+    with get_connection(db_path) as conn:
 
         cursor = conn.execute("""
             INSERT INTO provider_logs (
@@ -108,13 +120,13 @@ def log_provider_request(
         return cursor.lastrowid
 
 
-def get_recent_provider_logs(limit=50):
+def get_recent_provider_logs(limit=50, db_path=None):
 
-    initialise_provider_logs()
+    initialise_provider_logs(db_path)
 
     limit = max(1, min(int(limit), 500))
 
-    with get_connection() as conn:
+    with get_connection(db_path) as conn:
 
         rows = conn.execute("""
             SELECT *
@@ -141,11 +153,11 @@ def get_recent_provider_logs(limit=50):
     ]
 
 
-def get_provider_log_summary():
+def get_provider_log_summary(db_path=None):
 
-    initialise_provider_logs()
+    initialise_provider_logs(db_path)
 
-    with get_connection() as conn:
+    with get_connection(db_path) as conn:
 
         rows = conn.execute("""
             SELECT
