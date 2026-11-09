@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 47 — Build computer and application interaction (PARTIAL — built and tested 2026-11-09; capability registry + local executor + remote gate + audit log, 53 new tests, fixture example in a temp workspace — see Step 47 section below)
-- Current subtask: Step 47 computer and application interaction
+- Current step: 48 — Build complete user interface (PARTIAL — built and tested 2026-11-09; local web UI, 15 new tests, fixture example on localhost — see Step 48 section below)
+- Current subtask: Step 48 complete user interface
 - Overall status: In progress
 
 ## Completed work
@@ -2954,6 +2954,83 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   and leave nothing behind; the full-suite runs left a few
   stale `tmp*.db` files in /tmp, removed with the targeted
   `rm /tmp/tmp*.db` used before — /tmp now 7%.
+  `database/assistant.db` shows as modified in `git status`,
+  but its hash is unchanged (`36862922…089187`) — the known
+  pre-existing state (header rewrites from earlier
+  imports/audit; logical content identical).
+
+### 2026-11-09 — Step 48 build complete user interface (PARTIAL, not complete)
+
+- `agent/ui.py` plus `agent/ui_static/style.css` built and tested
+  (15 new tests, 960 total, `python -m unittest discover` from
+  the project root with `~/workspace/projects/jarvis-venv/bin/python`;
+  1 skipped: the live smoke test, behind
+  `JARVIS_LIVE_WEB_RESEARCH=1`). Production DB hash unchanged
+  (`36862922…089187`); the UI opens the database read-only.
+  Report: `~/workspace/projects/step48-report.md`.
+- Audit first: no UI existed — no web server module, no
+  templates, no static directory, nothing in `main.py` serving
+  anything. Reused, not duplicated: Step 39 `handle` (chat
+  page), Step 41 `run_research_session` (research page, with
+  `save_dir=False` so the page writes nothing), Step 32
+  `generate_summary` (home), Step 35 `watchlist_view` (home),
+  Step 38 `load_state` / `list_active_alerts` (home), Step 29
+  `generate_report` / `report_to_markdown` (ticker page).
+- Pages: `/` home (daily summary, watchlist view, active
+  alerts); `/ticker/<TICKER>` Step 29 research report;
+  `/research` Step 41 session from a question box;
+  `/chat` Step 39 orchestrator from a text box;
+  `/status` what the UI can and cannot do. Served by the
+  standard-library `http.server` — no new dependencies, no
+  hosted service, no cloud account or key. The server binds
+  `127.0.0.1` only (`make_server` refuses any other host).
+- Rules enforced: no trade button, no order form, and no
+  control whose name, action, or label suggests trading
+  anywhere in the served HTML (asserted in tests on every
+  page); a trade request typed into chat is refused by the
+  Step 39 guardrail. All user input is HTML-escaped; report /
+  brief Markdown is escaped before a small safe subset
+  (headings, lists, bold) is rendered. Tickers are validated
+  (`[A-Z0-9][A-Z0-9.\-]{0,9}`, else 400); POST bodies are
+  capped at 64 KiB.
+- Fixture example (server on localhost, temp DB copy, real
+  seeded watchlist store, stubbed model client; pages saved as
+  `~/workspace/projects/step48-example-home.html` and
+  `~/workspace/projects/step48-example-msft.html`): home
+  headline "Daily market summary — 2026-11-08 (Sunday): 10619
+  tickers scanned, 1 scannable, 0 candidate(s) (0 strongest
+  alert, 0 watch), 0 value trap(s)"; MSFT watchlist line
+  "overvalued | quality excellent | health strong | -414.7% vs
+  conservative value | price $507.12 (as of 2026-11-03) |
+  alert price $78.82 | deterioration warning (free cash flow
+  softening, working capital falling, capex surge compressing
+  FCF)"; "No active alerts." MSFT ticker page: tier
+  overvalued, DCF range $98.52 / $163.30 / $234.64, price
+  $507.12, alert price $78.82, quality excellent, health
+  strong. D05 ticker page shows insufficient data and no
+  invented numbers (MSFT's $507.12 does not leak into it).
+- One module bug found and fixed: Step 35's `watchlist_view`
+  returns one dict per ticker (the display line is its
+  `"note"` field), not a list of strings. The first home page
+  rendered each entry with Python's `str()` of the whole dict,
+  so the page showed the note text followed by
+  `', 'tier': 'overvalued', ...` for all 38 tickers (22,776
+  bytes). The home page now takes the `"note"` field; the Step
+  35 module itself was not changed.
+- **Step 48 is PARTIAL, not complete. No real browser session
+  has ever run through this UI.** Every page is exercised by a
+  test HTTP client; the owner has never opened it in a browser,
+  and no live Ollama turn has run through the chat page
+  (stubbed model client only). Not wired into `main.py`
+  (Step 50); the UI is started by `agent/ui.py run_local()`,
+  not by the assistant entry point. No live price feed; no
+  holdings store (open decisions carried from Steps 36–37). No
+  sending or scheduling from the UI (Step 46). Sufficient to
+  start Step 49 (live dashboards and agent monitoring).
+- Housekeeping: Step 48's own tests use `TemporaryDirectory`
+  and leave nothing behind; the full-suite runs left a few
+  stale `tmp*.db` files in /tmp, removed with the targeted
+  `rm /tmp/tmp*.db` used before — /tmp now 9%.
   `database/assistant.db` shows as modified in `git status`,
   but its hash is unchanged (`36862922…089187`) — the known
   pre-existing state (header rewrites from earlier

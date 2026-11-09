@@ -1,0 +1,25 @@
+/* Step 48 — Jarvis local UI. Plain, text-first, no scripts. */
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1em 2em;
+  color: #1a1a1a;
+  background: #fdfdf8;
+  line-height: 1.5;
+}
+header { border-bottom: 2px solid #1a1a1a; padding-bottom: 0.5em; }
+header h1 { margin-bottom: 0.2em; }
+nav a { margin-right: 0.2em; color: #1a4d8f; }
+nav a.active { font-weight: bold; color: #1a1a1a; }
+h2, h3, h4 { color: #1a1a1a; }
+footer {
+  border-top: 1px solid #999;
+  margin-top: 2em;
+  font-size: 0.9em;
+  color: #555;
+}
+input[type="text"] { font-size: 1em; padding: 0.3em; width: 90%; }
+input[type="submit"] { font-size: 1em; padding: 0.3em 1em; }
+table { border-collapse: collapse; }
+th, td { border: 1px solid #999; padding: 0.3em 0.6em; text-align: left; }

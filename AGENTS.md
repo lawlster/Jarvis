@@ -368,7 +368,7 @@ Do not deduplicate by CIK.
 
 ### Part 8 — Final application and deployment
 
-48. Build complete user interface — NOT STARTED
+48. Build complete user interface — PARTIAL (2026-11-09: local web UI built and tested, 15 tests OK; home / ticker / research / chat / status pages over Steps 29/32/35/38/39/41, localhost-only, no trading controls, DB read-only; no real browser session has ever run through it — see PROJECT_STATUS.md Step 48 section)
 49. Build live dashboards and agent monitoring — NOT STARTED
 50. Integrate all modules into main.py — NOT STARTED
 51. Complete end-to-end testing — NOT STARTED
