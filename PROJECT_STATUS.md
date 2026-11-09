@@ -1,7 +1,7 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 44 — Build natural-language tool calling (PARTIAL — built and tested 2026-11-09; registry + keyword/model-fallback selection + validated execution + follow-up chains, 49 new tests, fixture example — see Step 44 section below)
+- Current step: 45 — Build voice interaction (PARTIAL — built and tested 2026-11-09; pluggable STT/TTS clients + voice turn over the Step 39 orchestrator + stored text preference gate, 32 new tests, fixture example — see Step 45 section below)
 - Current subtask: Step 45 voice interaction
 - Overall status: In progress
 
@@ -2672,3 +2672,102 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   during verification was interrupted by a service restart; it
   was re-run cleanly afterwards (818 tests OK) — no partial
   state was relied on.
+
+### 2026-11-09 — Step 45 build voice interaction (PARTIAL, not complete)
+
+- `agent/voice.py` built and tested (32 new tests, 850 total,
+  `python -m unittest discover` from the project root with
+  `~/workspace/projects/jarvis-venv/bin/python`; 1 skipped: the
+  live smoke test, behind `JARVIS_LIVE_WEB_RESEARCH=1`).
+  Production DB hash unchanged (`36862922…089187`); this step
+  does not touch the database at all except through the
+  read-only connections the Step 39 orchestrator opens. Report:
+  `~/workspace/projects/step45-report.md`.
+- **Voice is OFF by default. The owner prefers text replies and
+  declined ongoing voice replies on 2026-11-03.** Voice is a
+  capability built here, not a default switched on; nothing in
+  this step changes the text default. The owner's text
+  preference is recorded as a Step 43 long-term memory record
+  (type `preference`, tags `voice` + `preference`, `voice_mode`
+  `"text"`, stated by the owner on 2026-11-03) in the project's
+  store at `data/memory/` (record id
+  `0ab447a357e3434e8e169208620850d9`; the write is idempotent).
+  The voice turn reads it back with `get_voice_preference()`
+  before speaking; with no stored preference the default is
+  `"text"`.
+- Audit first: no voice module existed (`agent/voice.py` and
+  `tools/voice.py` both absent). Reused, not duplicated: Step 39
+  `handle()` (the voice turn feeds the orchestrator as a normal
+  text request), Step 39 `ModelUnavailable` (voice errors
+  subclass it, following the Step 40 `CloudModelError` pattern),
+  Step 43 `new_record` / `save_record` / `recall` /
+  `supersede_record` (the preference store), and the Step 39
+  turn-log shape. No microphone, speaker, or speech engine
+  exists on this machine, and no cloud speech API key exists —
+  none was invented or stored, and no live call was made to any
+  speech provider.
+- What it does: pluggable `SpeechToText` / `TextToSpeech`
+  interfaces (one call, structured `VoiceError` with a
+  machine-readable `reason` on failure, never a crash, never
+  invented text). The only clients shipped are stubs: `StubSTT`
+  returns a caller-supplied transcript (or per-path transcripts)
+  and can be told to raise; `StubTTS` writes the reply text to
+  a file and returns its path — no audio synthesis, no network,
+  no real engine. `voice_turn` (plus a thin `VoiceSession`
+  class) runs the transcript through the Step 39 orchestrator
+  with its own logging suppressed, then logs one record in the
+  Step 39 turn-log shape plus `mode` (`"voice"`),
+  `transcript_source`, `spoken_reply` (a file path, or `None`),
+  `spoken_reply_reason` and `voice_preference`. A spoken reply
+  is produced ONLY when the caller explicitly asks for one for
+  that turn AND the stored preference allows it AND the turn
+  status is `"ok"`. An STT failure, an empty transcript, or no
+  input returns status `"unavailable"`; a TTS failure leaves
+  the turn `"ok"` with `spoken_reply` `None` and the reason
+  recorded. Model-unavailable and guardrail-refused turns are
+  never spoken. `get_voice_preference()` reads the newest
+  active Step 43 preference record tagged `voice` (a
+  `voice_mode` of `"text"`/`"voice"` decides, otherwise its
+  wording is read); superseded records are excluded.
+- Fixture example (files
+  `~/workspace/projects/step45-example-voice-turn.json` / `.md`,
+  stubbed model, stubbed speech clients, temp DB copy;
+  transcript "what is the intrinsic value of MSFT?" in both
+  turns): Turn A (voice-allowed preference in a temporary
+  memory store, explicit per-turn request) → intent
+  `valuation`, status `ok`, reply traces to the Step 21/23
+  outputs (tier overvalued, $98.52 / $163.30 / $234.64, price
+  $507.12, alert price $78.82), spoken reply produced. Turn B
+  (no spoken-reply request) → same reply, `spoken_reply`
+  `None`, reason "no spoken reply: a spoken reply was not
+  requested for this turn (voice is off by default)".
+- No module bugs found. One test was corrected during writing
+  (the D05 insufficient-data assertion was written with a
+  confused `or` expression; it now asserts the reply plainly).
+- **Step 45 is PARTIAL, not complete. No real voice turn has
+  ever run through this module.** All speech behaviour is
+  stub-tested: no microphone, no speaker, no speech engine, no
+  cloud speech key. A real turn needs the owner's PC with a
+  real engine and his explicit per-turn request — and even then
+  the stored preference is text, so a spoken reply needs him to
+  change that preference first. Not wired into `main.py`
+  (Step 50), and the Step 39 orchestrator does not yet accept
+  voice input — the voice turn is available to it, not yet used
+  by it. The Step 43 store in the project now holds exactly one
+  record — the owner's text preference. It has never held a
+  real record from a real conversation beyond that stated
+  preference, and no orchestrator turn has ever read long-term
+  memory (Step 43 open question, carried). No sending or
+  scheduling (Step 46). No live price feed, no holdings store
+  (open decisions carried from Steps 36–37). Sufficient to
+  start Step 46 (reminders and scheduled automation).
+- Housekeeping: Step 45's own tests use `TemporaryDirectory`
+  and leave nothing behind; the full-suite run left a few stale
+  `tmp*.db` files in /tmp, removed with the targeted
+  `rm /tmp/tmp*.db` used before — /tmp now 3%.
+  `database/assistant.db` shows as modified in `git status`,
+  but its hash is unchanged (`36862922…089187`) — the known
+  pre-existing state (header rewrites from earlier
+  imports/audit; logical content identical). The new
+  `data/memory/` store (the owner's text-preference record +
+  `index.json`) is untracked generated data, not committed.
