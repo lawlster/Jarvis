@@ -1,8 +1,8 @@
 ﻿# Jarvis Project Status
 
 ## Current development position
-- Current step: 41 — Integrate financial research agents (PARTIAL — built and tested 2026-11-09; research-session layer over the Step 39 orchestrator, plan / execute / synthesise, 15 new tests, MSFT session verified on real data, no multi-ticker comparison has ever run on real data — see Step 41 section below)
-- Current subtask: Step 42 general-purpose web research
+- Current step: 42 — Build general-purpose web research (PARTIAL — built and tested 2026-11-09; question → plan → fetch → sourced extractive answer, 26 new tests, one live MSFT news run, answer is the sources' words only — see Step 42 section below)
+- Current subtask: Step 43 long-term contextual memory
 - Overall status: In progress
 
 ## Completed work
@@ -2390,3 +2390,92 @@ Prioritize the five evidence-quality and issuer-structure improvements recorded 
   `step38-probe-*`, each ~3.6 MB) — not `tmp*.db` files, so the
   targeted `rm /tmp/tmp*.db` used before does not touch them.
   No broad cleanup was run, per instructions.
+
+### 2026-11-09 — Step 42 build general-purpose web research (PARTIAL, not complete)
+
+- `agent/web_research.py` built and tested (26 new
+  tests, 742 total, `python -m unittest discover` from the
+  project root with `~/workspace/projects/jarvis-venv/bin/python`;
+  1 skipped: the live smoke test, behind
+  `JARVIS_LIVE_WEB_RESEARCH=1`). Production DB hash unchanged
+  (`36862922…089187`); this step does not touch the database at
+  all. Report: `~/workspace/projects/step42-report.md`.
+- Audit first: no general web-research module existed
+  (`agent/web_research.py` and `tools/web.py` both absent).
+  Reused, not duplicated: `tools/research.py::search_web`
+  (text search), the Step 31
+  `agents/news_collection.py::default_fetcher` (ddgs news
+  endpoint first, text search as fallback), and Step 31's
+  normalisers (`normalize_url`, `parse_published_date`,
+  `source_from_url`). Step 41's research sessions run over
+  stored data only; this step is the live-web counterpart.
+- What it does: `plan_research` names the searches to run
+  explicitly (news-shaped questions: one news search plus one
+  text-search fallback phrasing; fact questions: two text
+  searches; explainers and general questions: one text
+  search). `research` runs the plan through injectable
+  fetchers (the defaults are the existing ones above) with a
+  per-query cap (default 5), a per-session request cap
+  (default 20; a longer plan is truncated and the truncation
+  is recorded) and a rate-limit delay between requests
+  (default 1.0s, via an injectable sleep function). Every
+  finding carries title, URL, source name and published /
+  fetched dates where available; findings without a URL are
+  dropped (they cannot be cited); findings are deduplicated
+  by normalised URL, then by title+source; a caller-supplied
+  source allowlist is respected and drops are counted. The
+  answer is extractive only — one sourced claim per finding,
+  quoting the finding's title and snippet and citing its
+  source by number; nothing is paraphrased or filled in.
+  Disagreement detection is a labelled heuristic, fact
+  questions only: a unit reported with two or more distinct
+  values across sources is flagged with the values and their
+  reporters. Status is `ok`, `partial` (some searches failed
+  or the plan was truncated, or the searches all failed with
+  nothing retrieved) or `no_sources` (nothing found, nothing
+  failed — the question is unanswered, not answered from
+  memory). The limitations section lists the source count,
+  freshest / oldest published dates, empty and failed
+  searches, truncations, allowlist drops and any
+  disagreement. `save_research` writes JSON + Markdown under
+  a caller-chosen directory (default `data/web_research/`).
+  No DB writes, no trades, no sending, no scheduling. Nothing
+  in the module is a recommendation — the answer is the
+  sources' words, cited.
+- Live example (files
+  `~/workspace/projects/step42-example-msft-news.json` /
+  `.md`): "latest news on MSFT" through the real fetchers,
+  caps respected — status `ok`, 2 requests made, 10 findings
+  (5 real dated news articles, 27–29 Oct 2026, plus 5 hub
+  pages from the text-search fallback with no parseable date
+  — the same news-then-hub-pages pattern Step 31 saw),
+  freshest 2026-10-29, oldest 2026-04-22. One source title
+  contains the word "Buy" ("Should You Buy Microsoft (MSFT)
+  Stock?") — the article's word, quoted as a source title,
+  not the module's.
+- Bugs found and fixed during testing: classification order
+  ("what is the current US CPI?" hit the explainer rule before
+  the fact rule — fact words now win over the generic "what
+  is"); status semantics (a search returning no results
+  wrongly downgraded the result to `partial`, and a run whose
+  searches all failed was reported as `no_sources` — now only
+  failed or truncated searches make a result partial, and an
+  all-failed run is `partial`); two test bugs (allowlist drop
+  count, source "www." stripping).
+- **Step 42 is PARTIAL, not complete. The live example is the
+  only live run** — one question proves the wiring, not the
+  reliability: no fact question has ever been run live (so the
+  disagreement heuristic has never fired on real data), and no
+  explainer or general question has been run live either. The
+  answer is extractive only — quoted titles and snippets; a
+  model-written synthesis is not built (that would use the
+  Step 39/40 model clients and is not in this step's scope).
+  The module fetches search-result snippets, not full article
+  bodies. No holdings store, no live price feed, no sending
+  or scheduling (Step 46). Not wired into `main.py` (Step 50).
+  Sufficient to start Step 43 (long-term contextual memory).
+- Housekeeping: Step 42's own tests use `TemporaryDirectory`
+  and leave nothing behind; the full-suite runs left 12 stale
+  `tmp*.db` files in /tmp, removed with the targeted
+  `rm /tmp/tmp*.db` used before — /tmp now 3%. No broad
+  cleanup was run, per instructions.
