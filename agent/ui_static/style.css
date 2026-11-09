@@ -1,25 +1,282 @@
-/* Step 48 — Jarvis local UI. Plain, text-first, no scripts. */
+/* Step 55 — Jarvis mission-control UI.
+ *
+ * Dark theme, deep navy/black background, cyan and amber accents.
+ * Plain CSS only — no frameworks, no CDN, no external resources:
+ * everything works offline from localhost. Vanilla JavaScript in
+ * app.js draws the charts on <canvas>; the CSS only styles them.
+ */
+:root {
+  --bg: #050a12;
+  --bg-panel: #0a1424;
+  --bg-card: #0d1b2e;
+  --bg-card-2: #10233c;
+  --line: #1e3a52;
+  --line-bright: #2b5878;
+  --text: #d7e6f5;
+  --text-dim: #8fa9c2;
+  --cyan: #22d3ee;
+  --cyan-dim: #0e7490;
+  --amber: #f59e0b;
+  --green: #34d399;
+  --red: #f87171;
+  --violet: #a78bfa;
+}
+
+* { box-sizing: border-box; }
+
 body {
-  font-family: Georgia, "Times New Roman", serif;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 1em 2em;
-  color: #1a1a1a;
-  background: #fdfdf8;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: var(--text);
+  background:
+    radial-gradient(1200px 500px at 50% -10%, #0e2a4a 0%, transparent 60%),
+    var(--bg);
   line-height: 1.5;
+  min-height: 100vh;
 }
-header { border-bottom: 2px solid #1a1a1a; padding-bottom: 0.5em; }
-header h1 { margin-bottom: 0.2em; }
-nav a { margin-right: 0.2em; color: #1a4d8f; }
-nav a.active { font-weight: bold; color: #1a1a1a; }
-h2, h3, h4 { color: #1a1a1a; }
+
+/* -- Header bar ---------------------------------------------------- */
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75em 1.5em;
+  padding: 0.8em 1.5em;
+  background: linear-gradient(90deg, #071224, #0a1f38 60%, #071224);
+  border-bottom: 2px solid var(--cyan-dim);
+  box-shadow: 0 0 24px rgba(34, 211, 238, 0.15);
+}
+.brand {
+  font-size: 1.6em;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  color: var(--cyan);
+  text-shadow: 0 0 12px rgba(34, 211, 238, 0.65);
+  margin: 0;
+}
+.brand small {
+  display: block;
+  font-size: 0.42em;
+  letter-spacing: 0.25em;
+  color: var(--text-dim);
+  text-shadow: none;
+  font-weight: 400;
+}
+.status-pill {
+  font-size: 0.8em;
+  letter-spacing: 0.12em;
+  color: var(--green);
+  border: 1px solid var(--green);
+  border-radius: 999px;
+  padding: 0.25em 0.9em;
+  background: rgba(52, 211, 153, 0.08);
+  white-space: nowrap;
+}
+nav { margin-left: auto; }
+nav a {
+  color: var(--text-dim);
+  text-decoration: none;
+  margin-left: 0.4em;
+  padding: 0.35em 0.8em;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 0.95em;
+}
+nav a:hover { color: var(--cyan); border-color: var(--line-bright); }
+nav a.active {
+  color: #04121f;
+  background: var(--cyan);
+  font-weight: 700;
+}
+
+/* -- Layout -------------------------------------------------------- */
+main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.2em 1.2em 2em;
+}
+main > h2 {
+  color: var(--cyan);
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.4em;
+  margin-top: 0.4em;
+}
+h3 { color: var(--text); }
+h4 { color: var(--cyan); margin-bottom: 0.3em; }
+a { color: var(--cyan); }
+p { margin: 0.5em 0; }
+
 footer {
-  border-top: 1px solid #999;
-  margin-top: 2em;
-  font-size: 0.9em;
-  color: #555;
+  border-top: 1px solid var(--line);
+  margin: 2em auto 0;
+  padding: 1em 1.5em 2em;
+  max-width: 1180px;
+  font-size: 0.85em;
+  color: var(--text-dim);
 }
-input[type="text"] { font-size: 1em; padding: 0.3em; width: 90%; }
-input[type="submit"] { font-size: 1em; padding: 0.3em 1em; }
-table { border-collapse: collapse; }
-th, td { border: 1px solid #999; padding: 0.3em 0.6em; text-align: left; }
+
+/* -- Cards and grids ----------------------------------------------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1em;
+  margin: 1em 0;
+}
+.card {
+  background: linear-gradient(180deg, var(--bg-card), var(--bg-panel));
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1em 1.2em;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+}
+.card h3 {
+  margin-top: 0;
+  color: var(--cyan);
+  font-size: 1.05em;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.4em;
+}
+.card.alert-card { border-color: var(--amber); }
+.card.alert-card h3 { color: var(--amber); }
+
+.notice {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid var(--amber);
+  border-left-width: 4px;
+  border-radius: 6px;
+  padding: 0.7em 1em;
+  margin: 1em 0;
+  color: var(--text);
+}
+.notice strong { color: var(--amber); }
+.info-box {
+  background: rgba(34, 211, 238, 0.07);
+  border: 1px solid var(--cyan-dim);
+  border-radius: 6px;
+  padding: 0.7em 1em;
+  margin: 1em 0;
+}
+
+/* -- Badges -------------------------------------------------------- */
+.badge {
+  display: inline-block;
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border-radius: 4px;
+  padding: 0.15em 0.6em;
+  white-space: nowrap;
+}
+.badge-strongest_alert { background: var(--red); color: #2b0505; }
+.badge-watch_discount { background: var(--amber); color: #2b1a02; }
+.badge-watch_below_base { background: var(--cyan); color: #04121f; }
+.badge-overvalued { background: #475569; color: #e2e8f0; }
+.badge-fairly_valued { background: #166534; color: #dcfce7; }
+.badge-reasonable_price { background: #1d4ed8; color: #dbeafe; }
+.badge-insufficient_data { background: #3f3f46; color: #d4d4d8; }
+.badge-provider_unavailable { background: #7c2d12; color: #ffedd5; }
+.badge-ok { background: var(--green); color: #052e1b; }
+.badge-no_data { background: #3f3f46; color: #d4d4d8; }
+.badge-stale { background: var(--amber); color: #2b1a02; }
+.badge-corrupt { background: var(--red); color: #2b0505; }
+.badge-not_ready { background: var(--red); color: #fff; }
+.badge-ready { background: var(--green); color: #052e1b; }
+
+/* -- Tables -------------------------------------------------------- */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.8em 0;
+  font-size: 0.95em;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.45em 0.7em;
+  text-align: left;
+}
+th {
+  background: #12294a;
+  color: var(--cyan);
+  letter-spacing: 0.04em;
+  cursor: default;
+}
+table.sortable th { cursor: pointer; }
+table.sortable th:hover { color: #fff; }
+tr:nth-child(even) td { background: rgba(255, 255, 255, 0.02); }
+tr.row-alert td { background: rgba(248, 113, 113, 0.10); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* -- Forms and chat ------------------------------------------------ */
+form { margin: 1em 0; }
+label { color: var(--text-dim); font-size: 0.9em; letter-spacing: 0.05em; }
+input[type="text"] {
+  font-size: 1em;
+  padding: 0.55em 0.7em;
+  width: 100%;
+  max-width: 640px;
+  color: var(--text);
+  background: #071224;
+  border: 1px solid var(--line-bright);
+  border-radius: 6px;
+  outline: none;
+}
+input[type="text"]:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.3);
+}
+input[type="submit"] {
+  font-size: 1em;
+  font-weight: 700;
+  padding: 0.55em 1.4em;
+  margin-top: 0.6em;
+  color: #04121f;
+  background: var(--cyan);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+input[type="submit"]:hover { background: #67e8f9; }
+
+.cmd-chips { margin: 0.6em 0 0.2em; }
+.cmd-chip {
+  display: inline-block;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.85em;
+  color: var(--cyan);
+  background: #071224;
+  border: 1px solid var(--cyan-dim);
+  border-radius: 999px;
+  padding: 0.3em 0.9em;
+  margin: 0.2em 0.3em 0.2em 0;
+  cursor: pointer;
+}
+.cmd-chip:hover { background: #0e2a4a; color: #fff; }
+
+.chat-reply {
+  background: var(--bg-card-2);
+  border: 1px solid var(--line-bright);
+  border-left: 4px solid var(--cyan);
+  border-radius: 8px;
+  padding: 0.8em 1em;
+  margin: 1em 0;
+}
+.chat-meta { color: var(--text-dim); font-size: 0.9em; }
+
+/* -- Charts -------------------------------------------------------- */
+canvas.dcf-chart {
+  width: 100%;
+  background: #071224;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin: 0.8em 0;
+}
+.chart-note { color: var(--text-dim); font-size: 0.85em; }
+
+/* -- Lists --------------------------------------------------------- */
+ul { padding-left: 1.3em; }
+li { margin: 0.3em 0; }
+li::marker { color: var(--cyan); }
+strong { color: #fff; }

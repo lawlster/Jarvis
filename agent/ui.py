@@ -14,7 +14,8 @@ the UI derives nothing new about value):
 - ``/ticker/<TICKER>`` — the Step 29 research report for a ticker
   (tier, quality, health, DCF range, alert price, deterioration,
   news, events). A ticker with no data gets a report whose sections
-  say so — nothing is invented.
+  say so — nothing is invented. The DCF range is also drawn as a
+  bar chart (Step 55).
 - ``/research`` — a question box that runs a Step 41 research
   session (caller-driven, read-only database) and shows the sourced
   brief.
@@ -23,7 +24,22 @@ the UI derives nothing new about value):
 - ``/status`` — what the UI can and cannot do.
 - ``/dashboard`` — Step 49: the status snapshot (module health,
   recent activity, gaps) over the logs and state files the other
-  steps already write. Read-only; it never runs a module.
+  steps already write. Read-only; it never runs a module. Step 55
+  adds the stored Step 54 live-scan results and the Step 53
+  deployment-readiness verdict to this page.
+
+Step 55 redesign (2026-11-09): the same pages, URLs, localhost-
+only binding, read-only database and no-trading-controls rules,
+restyled as a dark mission-control dashboard — deep navy
+background, cyan/amber accents, card layout, sortable watchlist
+table, canvas DCF charts drawn by vanilla JavaScript in
+``agent/ui_static/app.js``. No new Python dependencies, no CDN,
+no external resources: everything works offline from localhost.
+The dashboard shows STORED scan results (``step54-live-scan.json``)
+and stored status — it never re-runs a live scan on page load
+and nothing on it updates live; a refresh re-reads the stored
+files. Voice is out of scope here: no microphone or speech
+features were added.
 
 Rules the UI enforces:
 
@@ -44,6 +60,7 @@ with a test HTTP client against a server in a thread.
 """
 
 import html
+import json
 import os
 import re
 import sqlite3
@@ -53,6 +70,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from agent import dashboard as dash
+from agent import deployment as dep
 from agent import orchestrator as orch
 from agent import research_agents as ra
 from agents import daily_summary as ds
@@ -103,12 +121,20 @@ class JarvisUI:
     client on the owner's PC). ``log_dir=False`` disables the Step
     39 turn log (tests); ``None`` keeps the default log location.
     ``data_dir`` is the Step 49 dashboard's data root (defaults
-    to the project's ``data/`` directory).
+    to the project's ``data/`` directory). ``live_scan_path`` is
+    the Step 54 stored live-scan JSON (defaults to
+    ``step54-live-scan.json`` next to the project directory, if
+    it exists); the dashboard reads it, never re-runs a scan.
+    ``readiness`` is a precomputed Step 53 readiness report dict
+    (tests); when None the dashboard computes it once per UI
+    instance and caches it, because the secrets check takes
+    seconds and a page load must not re-run it.
     """
 
     def __init__(self, db_path=None, store_dir=None, news_dir=None,
                  events_dir=None, alert_state_path=None,
-                 model_client=None, log_dir=None, data_dir=None):
+                 model_client=None, log_dir=None, data_dir=None,
+                 live_scan_path=None, readiness=None):
         base = _project_root()
         self.db_path = db_path or str(base / "database" / "assistant.db")
         self.store_dir = store_dir
@@ -118,6 +144,12 @@ class JarvisUI:
         self.model_client = model_client
         self.log_dir = log_dir
         self.data_dir = data_dir
+        self.live_scan_path = live_scan_path
+        self.readiness = readiness
+        self._readiness_cache = None
+        self._readiness_error = None
+        self._readiness_computing = False
+        self._readiness_lock = threading.Lock()
 
 
 # ---------------------------------------------------------------------------
@@ -166,7 +198,13 @@ def _md_to_html(markdown):
 
 
 def _page(title, body, active=""):
-    """A full HTML document with navigation. Text-first, no scripts."""
+    """A full HTML document with navigation and the Step 55 shell.
+
+    Dark mission-control header (brand, local-only status pill,
+    nav), card-ready main, disclaimer footer, and the vanilla
+    JavaScript that draws charts and sorts tables. No external
+    resources of any kind.
+    """
     nav = [
         ("/", "Home", "home"),
         ("/dashboard", "Dashboard", "dashboard"),
@@ -174,7 +212,7 @@ def _page(title, body, active=""):
         ("/chat", "Chat", "chat"),
         ("/status", "Status", "status"),
     ]
-    links = " | ".join(
+    links = " ".join(
         f'<a href="{href}"{" class=\"active\"" if key == active else ""}>'
         f"{label}</a>"
         for href, label, key in nav
@@ -182,10 +220,15 @@ def _page(title, body, active=""):
     return (
         "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n"
         "<meta charset=\"utf-8\">\n"
+        "<meta name=\"viewport\" content=\"width=device-width, "
+        "initial-scale=1\">\n"
         f"<title>{_esc(title)} — Jarvis</title>\n"
         "<link rel=\"stylesheet\" href=\"/static/style.css\">\n"
         "</head>\n<body>\n"
-        "<header><h1>Jarvis</h1>"
+        "<header><div class=\"brand\">J.A.R.V.I.S."
+        "<small>JUST A RATHER VERY INTELLIGENT SYSTEM</small></div>"
+        "<span class=\"status-pill\">\u25cf LOCAL ONLY \u00b7 "
+        "127.0.0.1</span>"
         f"<nav>{links}</nav></header>\n"
         "<main>\n"
         f"<h2>{_esc(title)}</h2>\n"
@@ -194,8 +237,143 @@ def _page(title, body, active=""):
         "<footer><p>Research, not recommendations. Candidates are "
         "worth a closer look; the final decision is always the "
         "owner's. This interface contains no trading controls by "
-        "design.</p></footer>\n"
+        "design.</p><p>Stored data only — this page re-reads stored "
+        "files on refresh; nothing here updates live.</p></footer>\n"
+        "<script src=\"/static/app.js\"></script>\n"
         "</body>\n</html>\n"
+    )
+
+
+def _card(title, inner, cls=""):
+    """One dashboard card: a titled panel in the grid."""
+    extra = f" {cls}" if cls else ""
+    return (f"<section class=\"card{extra}\">\n"
+            f"<h3>{_esc(title)}</h3>\n{inner}\n</section>")
+
+
+def _badge(text, cls=""):
+    """A coloured badge; ``cls`` is a known badge class suffix."""
+    suffix = f" badge-{cls}" if cls else ""
+    return f"<span class=\"badge{suffix}\">{_esc(text)}</span>"
+
+
+def _money(value):
+    """A dollar amount with two decimals, or an em dash."""
+    if value is None:
+        return "\u2014"
+    try:
+        return f"${float(value):,.2f}"
+    except (TypeError, ValueError):
+        return "\u2014"
+
+
+def _load_live_scan(ui):
+    """(data, error) for the stored Step 54 live-scan JSON.
+
+    ``ui.live_scan_path`` wins when set; otherwise the file is
+    looked for next to the project directory, then inside it.
+    Read-only, never raises — a missing file returns (None,
+    None) and the dashboard says so plainly.
+    """
+    candidates = []
+    if getattr(ui, "live_scan_path", None):
+        candidates.append(Path(ui.live_scan_path))
+    else:
+        root = _project_root()
+        candidates.append(root.parent / "step54-live-scan.json")
+        candidates.append(root / "step54-live-scan.json")
+    for path in candidates:
+        try:
+            if not path.exists():
+                continue
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            return None, f"Could not read {path}: {exc}"
+        if isinstance(data, dict) and isinstance(
+                data.get("results"), list):
+            return data, None
+        return None, f"{path} is not a live-scan file."
+    if getattr(ui, "live_scan_path", None):
+        return None, (f"No live scan stored at "
+                      f"{ui.live_scan_path}.")
+    return None, None
+
+
+def _compute_readiness_background(ui):
+    """Compute the Step 53 readiness report off the request path.
+
+    The secrets check alone takes ~13 s, so a dashboard visit
+    must never wait for it. The result (or the error) is stored
+    on the UI instance; the next dashboard visit shows it.
+    """
+    try:
+        ui._readiness_cache = dep.readiness_report()
+    except Exception as exc:  # noqa: BLE001 - a slow/broken check
+        # must not take the dashboard down; say so plainly.
+        ui._readiness_error = f"Readiness could not be computed: {exc}"
+    finally:
+        with ui._readiness_lock:
+            ui._readiness_computing = False
+
+
+def _readiness(ui):
+    """(report, error) for the Step 53 readiness verdict.
+
+    A precomputed report passed to JarvisUI wins (tests). Otherwise
+    the report is computed ONCE, in a background thread, and cached
+    per UI instance — the secrets check takes seconds and a page
+    load must not wait for it. While it computes, the caller gets
+    (None, "computing") and the dashboard says so plainly.
+    Never raises.
+    """
+    if getattr(ui, "readiness", None) is not None:
+        return ui.readiness, None
+    if getattr(ui, "_readiness_cache", None) is not None:
+        return ui._readiness_cache, None
+    if getattr(ui, "_readiness_error", None) is not None:
+        return None, ui._readiness_error
+    with ui._readiness_lock:
+        if ui._readiness_cache is not None:
+            return ui._readiness_cache, None
+        if ui._readiness_error is not None:
+            return None, ui._readiness_error
+        if not ui._readiness_computing:
+            ui._readiness_computing = True
+            thread = threading.Thread(
+                target=_compute_readiness_background, args=(ui,),
+                daemon=True)
+            thread.start()
+    return None, "computing"
+
+
+def _dcf_chart_html(chart_id, rows):
+    """A canvas DCF-range chart plus its embedded data.
+
+    ``rows`` are dicts with ticker, price, conservative, base,
+    optimistic. The JSON is embedded in a script block (escaped so
+    no value can break out of it); app.js draws the bars.
+    """
+    clean = []
+    for row in rows:
+        clean.append({
+            "ticker": str(row.get("ticker") or ""),
+            "price": row.get("price"),
+            "conservative": (row.get("fair_value_range") or {}).get(
+                "conservative"),
+            "base": (row.get("fair_value_range") or {}).get("base"),
+            "optimistic": (row.get("fair_value_range") or {}).get(
+                "optimistic"),
+        })
+    payload = json.dumps(clean).replace("&", "\\u0026").replace(
+        "<", "\\u003c").replace(">", "\\u003e")
+    return (
+        f"<canvas class=\"dcf-chart\" data-json-id=\"{chart_id}-data\" "
+        f"width=\"900\" height=\"200\"></canvas>\n"
+        f"<script type=\"application/json\" id=\"{chart_id}-data\">"
+        f"{payload}</script>\n"
+        "<p class=\"chart-note\">Bars: conservative (amber), base "
+        "(cyan), optimistic (violet). Red line: price. "
+        "10-year FCF DCF, WACC 11%, terminal growth 2.5%.</p>\n"
     )
 
 
@@ -223,7 +401,6 @@ def _form(action, label, placeholder, value=""):
 
 def home_html(ui, summary_date=None):
     """Home page: daily summary, watchlist view, active alerts."""
-    sections = []
     conn = _open_read_only(ui.db_path)
     try:
         summary = ds.generate_summary(
@@ -231,40 +408,42 @@ def home_html(ui, summary_date=None):
     finally:
         if conn is not None:
             conn.close()
-    sections.append(f"<p>{_esc(summary['headline'])}</p>")
     coverage = summary.get("coverage") or {}
-    sections.append(
+    sections = [_card(
+        "Today",
+        f"<p>{_esc(summary['headline'])}</p>"
         "<p>Coverage: "
         f"{_esc(coverage.get('selected', '?'))} tickers selected, "
-        f"{_esc(coverage.get('scannable', '?'))} scannable.</p>")
-    sections.append("<h3>Candidates worth a closer look</h3>")
-    sections.append(_lines(summary.get("candidate_lines") or []))
+        f"{_esc(coverage.get('scannable', '?'))} scannable.</p>")]
+    sections.append(_card(
+        "Candidates worth a closer look",
+        _lines(summary.get("candidate_lines") or [])))
     if summary.get("trap_lines"):
-        sections.append("<h3>Value traps (not candidates)</h3>")
-        sections.append(_lines(summary["trap_lines"]))
-    sections.append("<h3>Watchlist</h3>")
+        sections.append(_card(
+            "Value traps (not candidates)",
+            _lines(summary["trap_lines"])))
     # Step 35's watchlist_view returns one dict per ticker; the
     # display line is its "note" field, not the whole dict.
     view = wf.watchlist_view(store_dir=ui.store_dir)
     notes = [entry.get("note") if isinstance(entry, dict) else str(entry)
              for entry in view]
-    sections.append(_lines(notes))
-    sections.append("<h3>Active alerts</h3>")
+    sections.append(_card("Watchlist", _lines(notes)))
     try:
         state = wa.load_state(ui.alert_state_path)
         alerts = wa.list_active_alerts(state)
+        alert_body = (_lines(wa.briefing_lines(alerts)) if alerts
+                      else "<p>No active alerts.</p>")
     except Exception as exc:  # noqa: BLE001 - a corrupt state file
         # must not take the home page down; say so plainly.
-        alerts = []
-        sections.append(
+        alert_body = (
             f"<p>Alert state could not be read: {_esc(exc)}</p>")
-    if alerts:
-        sections.append(_lines(wa.briefing_lines(alerts)))
-    else:
-        sections.append("<p>No active alerts.</p>")
-    sections.append("<h3>Limitations</h3>")
-    sections.append(_lines(summary.get("limitations") or []))
-    return _page("Daily summary", "\n".join(sections), active="home")
+    sections.append(_card("Active alerts", alert_body,
+                          cls="alert-card"))
+    sections.append(_card(
+        "Limitations", _lines(summary.get("limitations") or [])))
+    return _page("Daily summary",
+                 "<div class=\"grid\">\n" + "\n".join(sections) +
+                 "\n</div>", active="home")
 
 
 def ticker_html(ui, ticker):
@@ -294,8 +473,30 @@ def ticker_html(ui, ticker):
             for name in report.get("sections", {}))
     )
     header += f"<ul>\n{section_rows}</ul>" if section_rows else ""
+    chart = ""
+    valuation = (report.get("sections") or {}).get(
+        "valuation", {}) or {}
+    range_values = (valuation.get("data") or {}).get(
+        "fair_value_range") or {}
+    if any(isinstance(range_values.get(key), (int, float))
+           for key in ("conservative", "base", "optimistic")):
+        chart = _card(
+            "Intrinsic-value range vs price",
+            _dcf_chart_html("ticker-dcf", [{
+                "ticker": raw,
+                "price": report.get("price"),
+                "fair_value_range": range_values,
+            }]) +
+            f"<p>Price {_money(report.get('price'))} as of "
+            f"{_esc(report.get('price_as_of') or 'unknown')} "
+            f"({_esc(report.get('price_source') or 'unknown')}). "
+            f"Conservative {_money(range_values.get('conservative'))}, "
+            f"base {_money(range_values.get('base'))}, optimistic "
+            f"{_money(range_values.get('optimistic'))}. "
+            "A single-method FCF DCF — research, not a fair-value "
+            "estimate and never a recommendation.</p>")
     body = _md_to_html(rr.report_to_markdown(report))
-    return _page(f"Research report: {raw}", header + body), 200
+    return _page(f"Research report: {raw}", header + chart + body), 200
 
 
 def research_html(ui, question=None):
@@ -315,20 +516,44 @@ def research_html(ui, question=None):
 
 
 def chat_html(ui, request=None):
-    """Chat page: a text box plus the Step 39 orchestrator reply."""
-    body = [_form("/chat", "Ask Jarvis",
-                  "What is the intrinsic value of MSFT?",
-                  value=request or "")]
+    """Chat page: a text box plus the Step 39 orchestrator reply.
+
+    Command chips fill the box (the owner edits before asking);
+    the "what is missing" notice stays visible so the stub model
+    on this machine is never mistaken for a live turn.
+    """
+    commands = ["/research", "/watchlist", "/alerts", "/summary",
+                "/memory", "/dashboard", "/ui", "/voice", "/help",
+                "/quit", "/livescan"]
+    chips = "".join(
+        f"<button type=\"button\" class=\"cmd-chip\" "
+        f"data-command=\"{_esc(cmd)}\">{_esc(cmd)}</button>"
+        for cmd in commands)
+    body = [
+        "<div class=\"notice\"><strong>What is missing here:</strong> "
+        "no live Ollama turn has run through this chat on this "
+        "machine — replies come from a stub model in tests, and "
+        "voice is off by default. What you type is answered from "
+        "stored data and the valuation engines, never from a live "
+        "price feed.</div>",
+        f"<div class=\"cmd-chips\">{chips}</div>",
+        _form("/chat", "Ask Jarvis",
+              "What is the intrinsic value of MSFT?",
+              value=request or ""),
+    ]
     if request:
         result = orch.handle(
             request, model_client=ui.model_client,
             db_path=ui.db_path, store_dir=ui.store_dir,
             news_dir=ui.news_dir, log_dir=ui.log_dir)
         body.append(
-            f"<p>Intent: {_esc(result.get('intent'))} "
+            "<div class=\"chat-reply\">"
+            f"<p class=\"chat-meta\">Intent: "
+            f"{_esc(result.get('intent'))} "
             f"({_esc(result.get('intent_method'))}). "
-            f"Status: {_esc(result.get('status'))}.</p>")
-        body.append(f"<p>{_esc(result.get('reply'))}</p>")
+            f"Status: {_esc(result.get('status'))}.</p>"
+            f"<p>{_esc(result.get('reply'))}</p>"
+            "</div>")
         if result.get("sources"):
             body.append("<h3>Sources</h3>")
             body.append(_lines(result["sources"]))
@@ -336,43 +561,238 @@ def chat_html(ui, request=None):
 
 
 def dashboard_html(ui):
-    """Dashboard page: the Step 49 status snapshot.
+    """Dashboard page: Step 49 status snapshot + Step 54 live scan
+    + Step 53 readiness verdict.
 
     Module health, recent activity, and gaps, read from the logs
-    and state files the other steps already write. Read-only —
+    and state files the other steps already write. The live-scan
+    panel shows the STORED ``step54-live-scan.json`` results —
+    it never re-runs a scan. The readiness panel shows the Step 53
+    verdict (computed once per UI instance and cached). Read-only —
     the page runs nothing, writes nothing, and sends nothing.
     """
     snapshot = dash.collect_status(data_dir=ui.data_dir)
-    sections = [
-        f"<p>Generated {_esc(snapshot.get('generated_at'))}.</p>",
-        "<h3>Modules</h3>",
-    ]
-    rows = []
+    sections = []
+
+    # -- Live watchlist scan (stored Step 54 results) ---------------
+    scan, scan_error = _load_live_scan(ui)
+    if scan is None:
+        scan_body = (
+            "<p>No live scan has been stored yet. "
+            "Run <code>/livescan</code> in main.py (about 20 minutes "
+            "for the 38-ticker watchlist) and the results will "
+            "appear here.</p>")
+        if scan_error:
+            scan_body += f"<p>{_esc(scan_error)}</p>"
+        sections.append(_card("Live watchlist scan", scan_body))
+    else:
+        summary = scan.get("summary") or {}
+        banded = []
+        others = []
+        not_scannable = []
+        band_rank = {"strongest_alert": 0, "watch_discount": 1,
+                     "watch_below_base": 2}
+        for row in scan.get("results") or []:
+            if row.get("status") != "ok":
+                not_scannable.append(row)
+            elif row.get("detection_band"):
+                banded.append(row)
+            else:
+                others.append(row)
+        banded.sort(key=lambda r: (
+            band_rank.get(r.get("detection_band"), 3),
+            -(r.get("margin_of_safety_vs_conservative") or 0)))
+        others.sort(key=lambda r: r.get("ticker") or "")
+        scanned_at = scan.get("scanned_at") or "unknown"
+        as_of = None
+        for row in scan.get("results") or []:
+            if row.get("price_as_of"):
+                as_of = str(row["price_as_of"])[:10]
+                break
+        scan_body = [
+            f"<p>Live scan run {_esc(scanned_at)}"
+            + (f" ({scan.get('run_seconds'):.0f}s)"
+               if isinstance(scan.get("run_seconds"), (int, float))
+               else "")
+            + f"; prices as of {_esc(as_of or 'unknown')}. "
+            f"{_esc(summary.get('selected', '?'))} tickers selected, "
+            f"{_esc(summary.get('scannable', '?'))} scannable, "
+            f"{_esc(summary.get('strongest_alerts', 0))} "
+            "strongest-alert bands, "
+            f"{_esc(summary.get('watch', 0))} watch bands, "
+            f"{_esc(summary.get('provider_unavailable', 0))} "
+            "provider-unavailable, "
+            f"{_esc(summary.get('insufficient_data', 0))} "
+            "insufficient data.</p>",
+            "<p><strong>Margin bands are provisional</strong> — "
+            "business quality and deterioration are unknown from a "
+            "live pull, so no band is a confirmed Step 26 "
+            "candidate. Worth a closer look, never a "
+            "recommendation.</p>",
+        ]
+        if banded:
+            # The chart shows the genuine bands only: the known
+            # exclusions (KSPI's tenge artifact, DBS/OCBC bank
+            # bands) would stretch the scale to meaninglessness.
+            # They stay in the table below, with the notice.
+            chart_rows = [
+                row for row in banded
+                if not (row.get("ticker") == "KSPI"
+                        and row.get("detection_band")
+                        == "strongest_alert")
+                and not (row.get("ticker") in ("DBS", "OCBC")
+                         and row.get("detection_band")
+                         == "watch_discount")]
+            if chart_rows:
+                scan_body.append(
+                    _dcf_chart_html("live-scan-dcf", chart_rows))
+            rows_html = []
+            for row in banded + others:
+                range_values = row.get("fair_value_range") or {}
+                band = row.get("detection_band")
+                tier = row.get("tier") or ""
+                rows_html.append(
+                    "<tr" + (" class=\"row-alert\""
+                             if band == "strongest_alert" else "") +
+                    f"><td>{_esc(row.get('ticker'))}</td>"
+                    f"<td class=\"num\">{_money(row.get('price'))}</td>"
+                    f"<td class=\"num\">"
+                    f"{_money(range_values.get('conservative'))}</td>"
+                    f"<td class=\"num\">"
+                    f"{_money(range_values.get('base'))}</td>"
+                    f"<td class=\"num\">"
+                    f"{_money(range_values.get('optimistic'))}</td>"
+                    f"<td>{_badge(band, band) if band else chr(8212)}"
+                    "</td>"
+                    f"<td>{_badge(tier, tier) if tier else chr(8212)}"
+                    "</td></tr>")
+            scan_body.append(
+                "<table class=\"sortable\">\n<thead><tr>"
+                "<th>Ticker</th><th class=\"num\">Price</th>"
+                "<th class=\"num\">Conservative</th>"
+                "<th class=\"num\">Base</th>"
+                "<th class=\"num\">Optimistic</th>"
+                "<th>Band</th><th>Tier</th></tr></thead>\n<tbody>\n"
+                + "\n".join(rows_html) +
+                "\n</tbody>\n</table>\n"
+                "<p class=\"chart-note\">Click a column header to "
+                "sort. DCF: 10-year FCF DCF on the latest annual "
+                "free cash flow, WACC 11%, terminal growth 2.5%, "
+                "growth 5% / 10% / 15%.</p>")
+        if not_scannable:
+            items = []
+            for row in not_scannable:
+                reason = str(row.get("reason") or
+                             row.get("status") or "")[:160]
+                items.append(
+                    f"{row.get('ticker')}: {row.get('status')} — "
+                    f"{reason}")
+            scan_body.append("<h4>Not scannable</h4>")
+            scan_body.append(_lines(items))
+        # Known exclusions documented in the Step 54 report: the
+        # stored file still carries these bands, so the dashboard
+        # must not present them as candidates. Only shown when
+        # the stored results actually contain them.
+        exclusion_notes = []
+        for row in scan.get("results") or []:
+            if (row.get("ticker") == "KSPI"
+                    and row.get("detection_band")
+                    == "strongest_alert"):
+                exclusion_notes.append(
+                    "KSPI's strongest-alert band is a currency "
+                    "artifact — its free cash flow is in "
+                    "Kazakhstani tenge while the price is in US "
+                    "dollars — so it is not a candidate.")
+            if (row.get("ticker") in ("DBS", "OCBC")
+                    and row.get("detection_band")
+                    == "watch_discount"):
+                exclusion_notes.append(
+                    f"{row.get('ticker')}'s watch-discount band "
+                    "is model-invalid: a free-cash-flow DCF does "
+                    "not apply to banks (Step 22).")
+        if exclusion_notes:
+            seen = []
+            for note in exclusion_notes:
+                if note not in seen:
+                    seen.append(note)
+            scan_body.append(
+                "<div class=\"notice\"><strong>Known exclusions "
+                "in this scan (Step 54 report):</strong> "
+                + " ".join(seen) + " The table above shows the "
+                "stored file as-is; the stored summary counts "
+                "include these bands, but the Step 54 report "
+                "excludes them from the genuine candidate list."
+                "</div>")
+        for line in scan.get("limitations") or []:
+            scan_body.append(f"<p class=\"chart-note\">{_esc(line)}"
+                             "</p>")
+        sections.append(_card("Live watchlist scan",
+                              "\n".join(scan_body)))
+
+    # -- Deployment readiness (Step 53 verdict) ----------------------
+    report, readiness_error = _readiness(ui)
+    if report is None and readiness_error == "computing":
+        readiness_body = (
+            "<p>The readiness verdict is being computed in the "
+            "background (the secrets check takes a few seconds) — "
+            "refresh this page and it will appear here.</p>")
+    elif report is None:
+        readiness_body = (
+            f"<p>{_esc(readiness_error or 'Readiness unavailable.')}</p>")
+    else:
+        verdict = report.get("verdict") or "unknown"
+        badge_cls = ("ready" if verdict == "ready_for_always_on"
+                     else "not_ready")
+        readiness_body = (
+            f"<p>Verdict: {_badge(verdict, badge_cls)} "
+            f"(generated {_esc(report.get('generated_at') or '')}). "
+            "Computed once per server run, in the background — "
+            "the first dashboard visit shows a placeholder while "
+            "it computes.</p>")
+        blockers = report.get("blockers") or []
+        if blockers:
+            readiness_body += (f"<p>{len(blockers)} blocker(s):</p>"
+                               + _lines(blockers))
+        else:
+            readiness_body += ("<p>No blockers — ready for "
+                               "always-on deployment.</p>")
+    sections.append(_card("Deployment readiness", readiness_body))
+
+    # -- Modules (Step 49 snapshot, as cards) ------------------------
+    module_cards = []
     for name, entry in (snapshot.get("modules") or {}).items():
         last = entry.get("last_run_at") or "never"
-        rows.append(
-            f"{name}: {entry.get('status')} — last run {last}"
+        module_cards.append(_card(
+            name,
+            f"<p>{_badge(entry.get('status'), entry.get('status'))}"
+            f" last run { _esc(last)}"
             f"{' (' + entry['age'] + ' ago)' if entry.get('age') and entry.get('last_run_at') else ''}"
-            f"; {entry.get('records')} record(s) — "
-            f"{entry.get('detail')}")
-    sections.append(_lines(rows))
-    sections.append("<h3>Recent activity</h3>")
+            f"; {entry.get('records')} record(s)</p>"
+            f"<p>{_esc(entry.get('detail'))}</p>"))
+    sections.append(
+        "<div class=\"grid\">\n" + "\n".join(module_cards) +
+        "\n</div>")
+
+    # -- Recent activity and gaps ------------------------------------
     activity = snapshot.get("recent_activity") or []
     if activity:
-        sections.append(_lines([
+        activity_body = _lines([
             f"{item.get('at') or 'no date'}: {item.get('kind')} — "
             f"{item.get('summary')} [{item.get('status')}]"
-            for item in activity]))
+            for item in activity])
     else:
-        sections.append("<p>No activity recorded yet.</p>")
-    sections.append("<h3>Gaps</h3>")
+        activity_body = "<p>No activity recorded yet.</p>"
+    sections.append(_card(
+        f"Recent activity (generated "
+        f"{snapshot.get('generated_at')})", activity_body))
     gaps = snapshot.get("gaps") or []
     if gaps:
-        sections.append(_lines([
+        gaps_body = _lines([
             f"{item.get('text')} ({item.get('source')})"
-            for item in gaps]))
+            for item in gaps])
     else:
-        sections.append("<p>None recorded.</p>")
+        gaps_body = "<p>None recorded.</p>"
+    sections.append(_card("Gaps", gaps_body))
     return _page("Dashboard", "\n".join(sections), active="dashboard")
 
 
@@ -398,7 +818,9 @@ def status_html(ui):
         "Statements exist for MSFT only; every other ticker is "
         "shown as insufficient data, never estimated.",
     ]
-    return _page("Status", _lines(items), active="status")
+    return _page("Status",
+                 _card("What this interface can and cannot do",
+                       _lines(items)), active="status")
 
 
 # ---------------------------------------------------------------------------
@@ -419,11 +841,18 @@ class JarvisRequestHandler(BaseHTTPRequestHandler):
 
     def _send(self, status, body, content_type="text/html; charset=utf-8"):
         data = body.encode("utf-8")
-        self.send_response(status)
-        self.send_header("Content-Type", content_type)
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
+        try:
+            self.send_response(status)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+        except (BrokenPipeError, ConnectionResetError):
+            # The client gave up (e.g. its own timeout) before the
+            # response was written — nothing to do; the handler
+            # thread just ends quietly instead of logging a stack
+            # trace.
+            pass
 
     def _read_form(self):
         length = int(self.headers.get("Content-Length") or 0)
@@ -456,6 +885,14 @@ class JarvisRequestHandler(BaseHTTPRequestHandler):
             else:
                 self._send(404, _page("Not found",
                                       "<p>No stylesheet.</p>"))
+        elif path == "/static/app.js":
+            js = _project_root() / "agent" / "ui_static" / "app.js"
+            if js.exists():
+                self._send(200, js.read_text(encoding="utf-8"),
+                           "text/javascript; charset=utf-8")
+            else:
+                self._send(404, _page("Not found",
+                                      "<p>No script.</p>"))
         else:
             self._send(404, _page("Not found",
                                   f"<p>No page at {_esc(path)}.</p>"))
