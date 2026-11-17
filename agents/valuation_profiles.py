@@ -17,10 +17,33 @@ def _resolve_db_path(db_path=None):
     return Path(db_path) if db_path is not None else DB_PATH
 
 
+class _ClosingConnection(sqlite3.Connection):
+    """A connection that closes when its ``with`` block ends.
+
+    Step 61: a plain ``sqlite3.Connection`` only commits or rolls
+    back on ``__exit__`` — it does NOT close.  Every
+    ``with get_connection() as conn:`` site therefore leaked one
+    open connection (one open file handle) for the life of the
+    process.  Linux tolerates that; Windows does not — the open
+    handles block deleting or replacing the database file, and a
+    test run ends in a wall of WinError 32 PermissionErrors.
+    This subclass commits/rolls back exactly like the base class,
+    then closes, so all existing ``with`` sites now close their
+    connection with no call-site change.
+    """
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        try:
+            super().__exit__(exc_type, exc_value, traceback)
+        finally:
+            self.close()
+        return False
+
+
 def get_connection(db_path=None):
     path = _resolve_db_path(db_path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    return sqlite3.connect(path)
+    return sqlite3.connect(path, factory=_ClosingConnection)
 
 
 def initialise_valuation_profiles(db_path=None):

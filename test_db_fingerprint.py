@@ -126,13 +126,15 @@ class FingerprintDetectsChangeTestCase(unittest.TestCase):
 
 
 class CleanupTempDirTestCase(unittest.TestCase):
-    def test_cleanup_removes_dir_with_leaked_connection(self):
-        # Reproduce the Windows failure on Linux: open connections
-        # to the temp copy through the same ``with`` pattern the
-        # product code uses (never closed explicitly), then clean
-        # up.  Without the GC pass in cleanup_temp_dir the
-        # connections stay open; with it the directory is gone
-        # and no file descriptor to the copy remains.
+    def test_cleanup_removes_dir_with_closed_connections(self):
+        # Step 61: the product code now closes its connections,
+        # so this no longer reproduces the Windows failure by
+        # leaking — it proves the opposite.  Open connections to
+        # the temp copy through the same ``with`` pattern the
+        # product code uses, assert none is still open (the old
+        # assertion was the reverse: it expected a leak), and
+        # assert cleanup still removes the directory with no
+        # file descriptor to the copy remaining.
         from agent import memory as memory_mod
 
         tmp = temp_dir_with_db_cleanup()
@@ -143,19 +145,26 @@ class CleanupTempDirTestCase(unittest.TestCase):
             memory_mod.DB_PATH = db_path
             memory_mod.save_message("user", "leak check one")
             memory_mod.save_message("assistant", "leak check two")
-            # The connections are still open here on every
-            # platform (they survive until the cyclic GC runs).
+            # Step 61: the connections are closed when their
+            # ``with`` blocks end, on every platform.  A closed
+            # connection raises on execute, so it is skipped —
+            # only a still-open one to the temp copy counts.
             live = [obj for obj in gc.get_objects()
                     if isinstance(obj, sqlite3.Connection)]
-            has_leak = any(
-                str(db_path) in str(row[2])
-                for obj in live
-                for row in obj.execute(
-                    "PRAGMA database_list").fetchall())
-            self.assertTrue(
+            has_leak = False
+            for obj in live:
+                try:
+                    rows = obj.execute(
+                        "PRAGMA database_list").fetchall()
+                except sqlite3.ProgrammingError:
+                    continue  # closed already — not a leak
+                if any(str(db_path) in str(row[2]) for row in rows):
+                    has_leak = True
+                    break
+            self.assertFalse(
                 has_leak,
-                "expected at least one leaked connection to the "
-                "temp copy before cleanup")
+                "Step 61: no connection to the temp copy should "
+                "still be open after the saves")
             # Release our own references to the connections first:
             # the list above is itself a holder, and the GC pass
             # inside cleanup_temp_dir can only close connections

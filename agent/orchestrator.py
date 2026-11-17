@@ -716,9 +716,13 @@ def handle(request, model_client=None, db_path=None,
         route = "guardrail_schedule_send"
     else:
         conn = _open_read_only(db_path) if db_path else None
-        tickers = extract_tickers(text, conn=conn)
-        if conn is not None:
-            conn.close()
+        try:
+            tickers = extract_tickers(text, conn=conn)
+        finally:
+            # Step 61: the old code closed only on the happy path —
+            # an exception in extract_tickers leaked the connection.
+            if conn is not None:
+                conn.close()
         ticker = tickers[0] if tickers else None
 
         if intent == "valuation":

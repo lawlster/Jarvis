@@ -52,10 +52,15 @@ def load_core():
 
 def dry_run():
     rows, core, rest = load_core()
+    # Step 61: close on the error path too — the old code closed
+    # only after a successful query, leaking the connection when
+    # the query raised.
     conn = sqlite3.connect(f"file:{DATABASE_PATH}?mode=ro", uri=True)
-    db = {(t, e) for t, e in conn.execute(
-        "SELECT ticker, exchange FROM market_universe WHERE country = 'USA'")}
-    conn.close()
+    try:
+        db = {(t, e) for t, e in conn.execute(
+            "SELECT ticker, exchange FROM market_universe WHERE country = 'USA'")}
+    finally:
+        conn.close()
     matched = [r for r in core if (r["ticker"], r["exchange"]) in db]
     unmatched = [r for r in core if (r["ticker"], r["exchange"]) not in db]
     print(f"v4_2 candidate rows: {len(rows)}")

@@ -14,9 +14,32 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH = BASE_DIR / "database" / "assistant.db"
 
 
+class _ClosingConnection(sqlite3.Connection):
+    """A connection that closes when its ``with`` block ends.
+
+    Step 61: a plain ``sqlite3.Connection`` only commits or rolls
+    back on ``__exit__`` — it does NOT close.  Every
+    ``with get_connection() as conn:`` site therefore leaked one
+    open connection (one open file handle) for the life of the
+    process.  Linux tolerates that; Windows does not — the open
+    handles block deleting or replacing the database file, and a
+    test run ends in a wall of WinError 32 PermissionErrors.
+    This subclass commits/rolls back exactly like the base class,
+    then closes, so all existing ``with`` sites now close their
+    connection with no call-site change.
+    """
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        try:
+            super().__exit__(exc_type, exc_value, traceback)
+        finally:
+            self.close()
+        return False
+
+
 def get_connection():
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    return sqlite3.connect(DB_PATH)
+    return sqlite3.connect(DB_PATH, factory=_ClosingConnection)
 
 
 def initialise_scheduler_history():

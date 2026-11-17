@@ -1,6 +1,7 @@
 
 import sqlite3
 import json
+from contextlib import closing
 from pathlib import Path
 from datetime import datetime
 
@@ -13,7 +14,10 @@ DB_PATH = BASE_DIR / "database" / "assistant.db"
 
 def initialise_financial_tracker():
 
-    with sqlite3.connect(DB_PATH) as conn:
+    # Step 61: a plain ``with sqlite3.connect(...)`` only commits
+    # or rolls back — it does NOT close, so this leaked one open
+    # connection per call.  ``closing`` closes it on exit.
+    with closing(sqlite3.connect(DB_PATH)) as conn:
 
         conn.execute("""
             CREATE TABLE IF NOT EXISTS financial_snapshots (
@@ -36,7 +40,7 @@ def save_financial_snapshot(ticker):
     if "error" in financials:
         return financials
 
-    with sqlite3.connect(DB_PATH) as conn:
+    with closing(sqlite3.connect(DB_PATH)) as conn:
 
         conn.execute("""
             INSERT INTO financial_snapshots
@@ -56,7 +60,7 @@ def get_financial_history(ticker):
 
     initialise_financial_tracker()
 
-    with sqlite3.connect(DB_PATH) as conn:
+    with closing(sqlite3.connect(DB_PATH)) as conn:
 
         rows = conn.execute("""
             SELECT snapshot_date, financial_data

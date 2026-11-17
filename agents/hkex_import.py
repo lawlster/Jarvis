@@ -52,10 +52,15 @@ def dry_run():
               f"({r['classification']}, {r['classification_reason']}, "
               f"{r['trading_currency']}, ISIN {r['isin']})")
     # Collision check: do any HK stock codes already exist as tickers?
+    # Step 61: close on the error path too — the old code closed
+    # only after a successful query, leaking the connection when
+    # the query raised.
     conn = sqlite3.connect(f"file:{DATABASE_PATH}?mode=ro", uri=True)
-    existing = {row[0] for row in conn.execute(
-        "SELECT ticker FROM market_universe")}
-    conn.close()
+    try:
+        existing = {row[0] for row in conn.execute(
+            "SELECT ticker FROM market_universe")}
+    finally:
+        conn.close()
     collisions = [r for r in candidates if r["stock_code"] in existing]
     print(f"Ticker collisions with existing DB rows: {len(collisions)}")
     for r in collisions[:10]:

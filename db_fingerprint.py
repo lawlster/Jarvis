@@ -20,21 +20,21 @@ Why this exists — two failures from the owner's Windows run on
     volatile set, dumped in a deterministic order.  Identical
     content gives an identical fingerprint on any machine, and a
     real modification to a protected table changes it.
-2.  Tests open SQLite connections to temp DB copies and never
-    close them — ``with get_connection(...) as conn:`` commits
-    but does not close, and the connection object survives until
-    the cyclic garbage collector runs (verified by tracing live
+2.  Tests open SQLite connections to temp DB copies.  Before
+    Step 61, ``with get_connection(...) as conn:`` committed
+    but did not close, and the connection object survived until
+    the cyclic garbage collector ran (verified by tracing live
     connections after ``agent.memory.save_message``: one leaked
     connection per ``with`` block, accumulating with every turn).
     On Linux deleting an open file succeeds, so nobody noticed;
     on Windows a file cannot be deleted while a connection to
     it is open, so ``TemporaryDirectory.cleanup()`` in tearDown
-    failed with ``PermissionError: [WinError 32]``.  The product
-    code still leaks those connections (a real fix for a later
-    step — closing them changes no behaviour, but this step's
-    scope is tests only); :func:`cleanup_temp_dir` forces a full
-    GC pass before deleting, which closes them deterministically,
-    and never lets a leftover temp dir fail the test.
+    failed with ``PermissionError: [WinError 32]``.  Step 61
+    fixed the product code to close on ``__exit__``, so no leak
+    remains in the normal paths; :func:`cleanup_temp_dir` still
+    forces a full GC pass before deleting as a safety net for
+    any other holder, and never lets a leftover temp dir fail
+    the test.
 
 Volatile tables — written by normal runtime use, so their
 content is excluded from the fingerprint:
@@ -115,11 +115,12 @@ def cleanup_temp_dir(tmp):
     """Delete a :class:`tempfile.TemporaryDirectory` that may hold
     a temp DB copy, without ever failing the calling test.
 
-    Forces a full garbage-collection pass first: SQLite
-    connections opened by ``with get_connection(...) as conn:``
-    are never closed explicitly and survive until the cyclic
-    collector runs, and on Windows a file cannot be deleted while
-    a connection to it is open (WinError 32).  If the first
+    Forces a full garbage-collection pass first: any SQLite
+    connection still open to a copy in the directory (Step 61
+    closes the product code's connections on ``__exit__``, so
+    this is a safety net for other holders) is closed by the
+    collector, and on Windows a file cannot be deleted while a
+    connection to it is open (WinError 32).  If the first
     attempt still fails, one more GC pass is tried; a leftover
     temp dir after that is removed best-effort and never raises.
     """
