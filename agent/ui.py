@@ -20,7 +20,12 @@ the UI derives nothing new about value):
   session (caller-driven, read-only database) and shows the sourced
   brief.
 - ``/chat`` — a text box that runs the Step 39 orchestrator and
-  shows the reply with its sources labelled.
+  shows the reply with its sources labelled. Step 60: turns
+  submit with ``fetch`` to ``/api/chat`` and append to an
+  on-screen conversation history (the plain form post still
+  works without JavaScript); the Step 58 live fallback is on
+  when the UI instance enables it, and the model notice names
+  the model client actually wired in.
 - ``/status`` — what the UI can and cannot do.
 - ``/dashboard`` — Step 49: the status snapshot (module health,
   recent activity, gaps) over the logs and state files the other
@@ -41,6 +46,12 @@ and nothing on it updates live; a refresh re-reads the stored
 files. Step 56 adds browser voice to the chat page (Web Speech
 API — microphone input and spoken replies, opt-in, off by
 default, no wake word, no audio ever leaves the browser).
+Step 60 rebuilds the chat so it works like a real chat: the
+Step 58 live fallback wired into the chat, ticker and research
+pages; turns submitted with ``fetch`` to ``/api/chat`` and
+appended to an on-screen conversation history; the model notice
+reflects the model client actually wired in (a stub warning
+only when a stub is in use).
 
 Rules the UI enforces:
 
@@ -70,11 +81,13 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from agent import cloud_models as cm
 from agent import dashboard as dash
 from agent import deployment as dep
 from agent import orchestrator as orch
 from agent import research_agents as ra
 from agents import daily_summary as ds
+from agents import live_fallback as lfb
 from agents import research_report as rr
 from agents import scheduled_scan as ss
 from agents import watchlist_alerts as wa
@@ -131,12 +144,18 @@ class JarvisUI:
     (tests); when None the dashboard computes it once per UI
     instance and caches it, because the secrets check takes
     seconds and a page load must not re-run it.
+    ``live_fallback`` (Step 60) is the Step 58 live fallback for
+    the chat, ticker and research pages — off by default, the
+    same rule as everywhere else; ``main.py`` and ``run_local``
+    turn it on for the owner's PC. ``live_fetcher`` injects the
+    live pull (None means the real Yahoo fetch).
     """
 
     def __init__(self, db_path=None, store_dir=None, news_dir=None,
                  events_dir=None, alert_state_path=None,
                  model_client=None, log_dir=None, data_dir=None,
-                 live_scan_path=None, readiness=None):
+                 live_scan_path=None, readiness=None,
+                 live_fallback=False, live_fetcher=None):
         base = _project_root()
         self.db_path = db_path or str(base / "database" / "assistant.db")
         self.store_dir = store_dir
@@ -148,6 +167,8 @@ class JarvisUI:
         self.data_dir = data_dir
         self.live_scan_path = live_scan_path
         self.readiness = readiness
+        self.live_fallback = live_fallback
+        self.live_fetcher = live_fetcher
         self._readiness_cache = None
         self._readiness_error = None
         self._readiness_computing = False
@@ -407,15 +428,158 @@ def _lines(items):
         f"<li>{_esc(item)}</li>" for item in items) + "\n</ul>"
 
 
-def _form(action, label, placeholder, value=""):
+def _form(action, label, placeholder, value="", form_id=None):
+    ident = f" id=\"{_esc(form_id)}\"" if form_id else ""
     return (
-        f"<form method=\"post\" action=\"{action}\">\n"
+        f"<form method=\"post\" action=\"{action}\"{ident}>\n"
         f"<label for=\"q\">{_esc(label)}</label><br>\n"
         f"<input type=\"text\" id=\"q\" name=\"q\" size=\"80\" "
         f"placeholder=\"{_esc(placeholder)}\" value=\"{_esc(value)}\">\n"
         "<input type=\"submit\" value=\"Ask\">\n"
         "</form>\n"
     )
+
+
+# ---------------------------------------------------------------------------
+# Step 60 — chat rebuild: live fallback, model notice, conversation
+# ---------------------------------------------------------------------------
+
+def _model_client_kind(client):
+    """'live' | 'stub' | 'none' | 'unknown' for the model client.
+
+    'live' is a real model client — the local Ollama client or
+    the Step 40 local-first router (which answers from Ollama
+    unless its cloud fallback is configured and used).  A stub
+    test client is 'stub'; no client at all is 'none'.  Anything
+    else is 'unknown': the notice names it and claims neither a
+    live model nor a stub.
+    """
+    if client is None:
+        return "none"
+    if isinstance(client, orch.OllamaModelClient):
+        return "live"
+    if isinstance(client, orch.StubModelClient):
+        return "stub"
+    if isinstance(client, cm.ModelRouter):
+        return "live"
+    return "unknown"
+
+
+def _model_notice(ui):
+    """(heading, text) for the chat page's model notice.
+
+    The notice reflects the model client actually wired into
+    this UI instance — never a stub claim when the real Ollama
+    client is wired, never a live-model claim when a stub is.
+    """
+    kind = _model_client_kind(ui.model_client)
+    voice_tail = (" Switch voice on in the Voice panel below to "
+                  "talk and hear replies (Chrome or Edge).")
+    if kind == "live":
+        return ("Model:",
+                "Live model connected: Ollama on this machine "
+                "(qwen3:8b) — replies come from the local model, "
+                "not a stub. Valuation answers use stored data "
+                "first and live data only when the stored path "
+                "has none — a live-derived value is always "
+                "labelled provisional. What you type is answered "
+                "from stored data and the valuation engines, never "
+                "from a live price feed except through that "
+                f"labelled fallback. Voice is off by default.{voice_tail}")
+    if kind == "none":
+        return ("What is missing here:",
+                "No model is connected, so general questions "
+                "cannot be answered — and no answer is invented "
+                "instead. Valuation and watchlist questions are "
+                "still answered from stored data and the valuation "
+                "engines, never from a live price feed except "
+                "through the labelled live fallback. Voice is off "
+                f"by default.{voice_tail}")
+    if kind == "unknown":
+        name = type(ui.model_client).__name__
+        return ("Model:",
+                f"Model client: {name} — the model type could not "
+                "be confirmed from here, so this page claims "
+                "neither a live model nor a stub. Valuation "
+                "answers use stored data and the valuation engines, "
+                "never from a live price feed except through the "
+                f"labelled live fallback. Voice is off by default.{voice_tail}")
+    return ("What is missing here:",
+            "no live Ollama turn has run through this chat on this "
+            "machine — replies come from a stub model in tests, and "
+            "voice is off by default. What you type is answered from "
+            "stored data and the valuation engines, never from a live "
+            "price feed. Switch voice on in the Voice panel below to "
+            "talk and hear replies (Chrome or Edge).")
+
+
+def _answer_question(ui, question):
+    """One chat turn through the Step 39 orchestrator.
+
+    The Step 58 live fallback is on exactly when this UI
+    instance enables it (``main.py`` and ``run_local`` do, for
+    the owner's PC) — so asking about a ticker with no stored
+    statements returns the labelled live-derived value instead
+    of "I do not have enough data".
+    """
+    return orch.handle(
+        question, model_client=ui.model_client,
+        db_path=ui.db_path, store_dir=ui.store_dir,
+        news_dir=ui.news_dir, log_dir=ui.log_dir,
+        live_fallback=ui.live_fallback,
+        live_fetcher=ui.live_fetcher,
+        live_scan_path=ui.live_scan_path)
+
+
+def _recent_turns(ui, limit=10):
+    """Recent orchestrator turns (oldest first) from the turn log.
+
+    The log is the Step 39 JSON-lines turn log — the same
+    conversation the terminal writes, so turns asked in the
+    terminal appear here too.  Read-only; a missing or
+    unreadable log returns no turns, never a crash.  When
+    logging is off (``log_dir=False``) there is no history to
+    read.
+    """
+    if ui.log_dir is False:
+        return []
+    log_dir = Path(ui.log_dir) if ui.log_dir else orch.DEFAULT_LOG_DIR
+    records, _skipped = dash._read_json_lines(
+        log_dir / orch.DEFAULT_LOG_NAME)
+    turns = [record for record in records
+             if isinstance(record, dict) and record.get("request")]
+    return turns[-limit:]
+
+
+def _turn_html(turn, latest=False):
+    """One conversation turn: the question, the reply, its sources.
+
+    The latest turn's reply paragraph carries
+    id="jarvis-reply-text" so the Step 56 voice panel can speak
+    it; exactly one element on the page ever has that id.
+    """
+    reply_id = " id=\"jarvis-reply-text\"" if latest else ""
+    sources = turn.get("sources") or []
+    sources_html = ""
+    if sources:
+        sources_html = (
+            "<p class=\"chat-sources\"><strong>Sources:</strong> "
+            + _esc("; ".join(str(source) for source in sources))
+            + "</p>")
+    return (
+        "<div class=\"chat-turn\">"
+        f"<p class=\"chat-question\"><strong>You:</strong> "
+        f"{_esc(turn.get('request'))}</p>"
+        "<div class=\"chat-reply\">"
+        f"<p class=\"chat-meta\">Intent: "
+        f"{_esc(turn.get('intent'))} "
+        f"({_esc(turn.get('intent_method'))}). "
+        f"Status: {_esc(turn.get('status'))}.</p>"
+        f"<p class=\"chat-reply-text\"{reply_id}>"
+        f"{_esc(turn.get('reply'))}</p>"
+        f"{sources_html}"
+        "</div>"
+        "</div>")
 
 
 # ---------------------------------------------------------------------------
@@ -469,6 +633,36 @@ def home_html(ui, summary_date=None):
                  "\n</div>", active="home")
 
 
+def _live_valuation_card(ui, ticker):
+    """A Step 58 live-derived value card for a ticker page.
+
+    Only called when the Step 29 report has no valuation range
+    (``insufficient_data``).  The Step 58 exclusions run here
+    exactly as in the terminal — banks / insurers / REITs never
+    get an FCF DCF, a currency mismatch is refused, a negative
+    FCF is insufficient data, and the 95% magnitude guard is
+    the backstop — and a live-derived value is always labelled
+    provisional.  A refusal is shown as a refusal with its
+    reason; no figure is ever estimated.  Visiting the ticker
+    page is the owner explicitly naming the ticker, so the
+    watchlist gate is satisfied the same way as the chat's
+    ``explicitly_named``.  The stored scan is preferred, so a
+    watchlist ticker with a fresh stored scan needs no network;
+    otherwise one live pull is made for this one ticker.
+    """
+    result = lfb.live_valuation(
+        ticker, store_dir=ui.store_dir, fetcher=ui.live_fetcher,
+        live_scan_path=ui.live_scan_path, explicitly_named=True)
+    if result["status"] == "ok":
+        return _card("Live-derived value (Step 58)",
+                     f"<p>{_esc(lfb.format_live_valuation(result))}"
+                     "</p>")
+    return _card(
+        "Live-derived value (Step 58)",
+        "<p>No live-derived value: "
+        f"{_esc(result.get('reason') or result['status'])}.</p>")
+
+
 def ticker_html(ui, ticker):
     """Ticker page: the Step 29 research report for one ticker."""
     raw = (ticker or "").strip().upper()
@@ -519,17 +713,35 @@ def ticker_html(ui, ticker):
             "A single-method FCF DCF — research, not a fair-value "
             "estimate and never a recommendation.</p>")
     body = _md_to_html(rr.report_to_markdown(report))
-    return _page(f"Research report: {raw}", header + chart + body), 200
+    live_card = ""
+    if ui.live_fallback and (report.get("sections") or {}).get(
+            "valuation", {}).get("status") == "insufficient_data":
+        # The stored report has no valuation range for this
+        # ticker — the Step 58 fallback fills the gap with a
+        # labelled live-derived value (or a stated refusal).
+        live_card = _live_valuation_card(ui, raw)
+    return _page(f"Research report: {raw}",
+                 header + chart + live_card + body), 200
 
 
 def research_html(ui, question=None):
-    """Research page: a question box plus the Step 41 sourced brief."""
+    """Research page: a question box plus the Step 41 sourced brief.
+
+    The Step 58 live fallback is on exactly when this UI
+    instance enables it, so a research session about a ticker
+    with no stored statements uses the labelled live-derived
+    value for its scan and valuation steps (the Step 29 report
+    step still has no fallback, as in Step 58).
+    """
     body = [_form("/research", "Research question",
                   "Research MSFT", value=question or "")]
     if question:
         brief = ra.run_research_session(
             question, db_path=ui.db_path, news_dir=ui.news_dir,
-            events_dir=ui.events_dir, save_dir=False)
+            events_dir=ui.events_dir, save_dir=False,
+            store_dir=ui.store_dir, live_fallback=ui.live_fallback,
+            live_fetcher=ui.live_fetcher,
+            live_scan_path=ui.live_scan_path)
         body.append(
             f"<p>Kind: {_esc(brief.get('kind'))}. "
             f"Status: {_esc(brief.get('status'))} — "
@@ -541,17 +753,28 @@ def research_html(ui, question=None):
 def chat_html(ui, request=None):
     """Chat page: a text box plus the Step 39 orchestrator reply.
 
-    Command chips fill the box (the owner edits before asking);
-    the "what is missing" notice stays visible so the stub model
-    on this machine is never mistaken for a live turn.
+    Step 60 rebuild: the conversation stays on screen — turns
+    are submitted with ``fetch`` to ``/api/chat`` (see
+    ``agent/ui_static/app.js``) and appended to the history
+    below, instead of a full-page reload that showed only the
+    latest reply. The page still works without JavaScript: the
+    form posts to ``/chat`` and the server renders the same
+    history from the Step 39 turn log (or from the turn just
+    answered, when logging is off). The model notice reflects
+    the model client actually wired in — a stub warning only
+    when a stub is in use. The Step 58 live fallback is on
+    exactly when this UI instance enables it, so asking about
+    a ticker with no stored statements returns the labelled
+    live-derived value instead of "I do not have enough data".
 
+    Command chips fill the box (the owner edits before asking).
     Step 56 adds the browser-voice panel: a microphone button,
     a voice on/off switch (OFF by default, honouring the stored
     text preference), a hands-free toggle, and a reply-voice
     picker — all Web Speech API in the browser, no server
-    endpoint, no audio ever sent anywhere. The reply paragraph
-    carries id="jarvis-reply-text" so the page script can speak
-    it when voice is on.
+    endpoint, no audio ever sent anywhere. The latest reply
+    paragraph carries id="jarvis-reply-text" so the page script
+    can speak it when voice is on.
     """
     commands = ["/research", "/watchlist", "/alerts", "/summary",
                 "/memory", "/dashboard", "/ui", "/voice", "/help",
@@ -588,36 +811,41 @@ def chat_html(ui, request=None):
         "a British male voice when the browser offers one.</p>\n"
         "</div>\n"
     )
+    heading, notice = _model_notice(ui)
+    turns = _recent_turns(ui)
+    if request:
+        result = _answer_question(ui, request)
+        # The turn was just logged (unless logging is off), so
+        # do not render it twice — but when logging is off the
+        # turn exists only in memory and must be rendered.
+        if (not turns or turns[-1].get("request") != request
+                or turns[-1].get("reply") != result.get("reply")):
+            turns = turns + [{
+                "request": request,
+                "intent": result.get("intent"),
+                "intent_method": result.get("intent_method"),
+                "status": result.get("status"),
+                "reply": result.get("reply"),
+                "sources": result.get("sources") or [],
+            }]
+    if turns:
+        history = ("<div id=\"chat-history\">\n" + "\n".join(
+            _turn_html(turn, latest=(index == len(turns) - 1))
+            for index, turn in enumerate(turns)) + "\n</div>")
+    else:
+        history = ("<div id=\"chat-history\">"
+                   "<p class=\"chat-empty\">No conversation yet — "
+                   "ask something below.</p></div>")
     body = [
-        "<div class=\"notice\"><strong>What is missing here:</strong> "
-        "no live Ollama turn has run through this chat on this "
-        "machine — replies come from a stub model in tests, and "
-        "voice is off by default. What you type is answered from "
-        "stored data and the valuation engines, never from a live "
-        "price feed. Switch voice on in the Voice panel below to "
-        "talk and hear replies (Chrome or Edge).</div>",
+        f"<div class=\"notice\"><strong>{_esc(heading)}</strong> "
+        f"{_esc(notice)}</div>",
         f"<div class=\"cmd-chips\">{chips}</div>",
+        history,
         _form("/chat", "Ask Jarvis",
               "What is the intrinsic value of MSFT?",
-              value=request or ""),
+              value=request or "", form_id="chat-form"),
         voice_panel,
     ]
-    if request:
-        result = orch.handle(
-            request, model_client=ui.model_client,
-            db_path=ui.db_path, store_dir=ui.store_dir,
-            news_dir=ui.news_dir, log_dir=ui.log_dir)
-        body.append(
-            "<div class=\"chat-reply\">"
-            f"<p class=\"chat-meta\">Intent: "
-            f"{_esc(result.get('intent'))} "
-            f"({_esc(result.get('intent_method'))}). "
-            f"Status: {_esc(result.get('status'))}.</p>"
-            f"<p id=\"jarvis-reply-text\">{_esc(result.get('reply'))}</p>"
-            "</div>")
-        if result.get("sources"):
-            body.append("<h3>Sources</h3>")
-            body.append(_lines(result["sources"]))
     return _page("Chat", "\n".join(body), active="chat")
 
 
@@ -1020,12 +1248,29 @@ class JarvisRequestHandler(BaseHTTPRequestHandler):
             # trace.
             pass
 
-    def _read_form(self):
+    def _read_question(self):
+        """The 'q' question from a JSON or form-encoded POST body.
+
+        The chat page submits turns as JSON to ``/api/chat``;
+        the plain form posts (and the research page) send
+        ``application/x-www-form-urlencoded``.  A missing or
+        unreadable body is an empty question, never a crash.
+        """
         length = int(self.headers.get("Content-Length") or 0)
         if length <= 0 or length > MAX_POST_BYTES:
-            return {}
-        raw = self.rfile.read(length).decode("utf-8", "replace")
-        return urllib.parse.parse_qs(raw)
+            return ""
+        raw = self.rfile.read(length)
+        content_type = self.headers.get("Content-Type") or ""
+        if "application/json" in content_type:
+            try:
+                payload = json.loads(raw.decode("utf-8"))
+            except ValueError:
+                return ""
+            if isinstance(payload, dict):
+                return str(payload.get("q") or "").strip()
+            return ""
+        form = urllib.parse.parse_qs(raw.decode("utf-8", "replace"))
+        return (form.get("q") or [""])[0].strip()
 
     def do_GET(self):  # noqa: N802 - BaseHTTPRequestHandler name
         path = urllib.parse.urlparse(self.path).path
@@ -1065,12 +1310,27 @@ class JarvisRequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):  # noqa: N802 - BaseHTTPRequestHandler name
         path = urllib.parse.urlparse(self.path).path
-        form = self._read_form()
-        question = (form.get("q") or [""])[0].strip()
+        question = self._read_question()
         if path == "/research":
             self._send(200, research_html(self.ui, question or None))
         elif path == "/chat":
             self._send(200, chat_html(self.ui, question or None))
+        elif path == "/api/chat":
+            # Step 60: one chat turn as JSON, for the fetch-based
+            # chat page — the same orchestrator call (with the
+            # live fallback when enabled) as the form post, so
+            # the two paths can never disagree about an answer.
+            result = _answer_question(self.ui, question)
+            payload = {
+                "request": result.get("request"),
+                "intent": result.get("intent"),
+                "intent_method": result.get("intent_method"),
+                "status": result.get("status"),
+                "reply": result.get("reply"),
+                "sources": result.get("sources") or [],
+            }
+            self._send(200, json.dumps(payload),
+                       "application/json; charset=utf-8")
         else:
             self._send(404, _page("Not found",
                                   f"<p>No page at {_esc(path)}.</p>"))
@@ -1103,8 +1363,15 @@ def serve(ui, host=DEFAULT_HOST, port=DEFAULT_PORT):
 
 
 def run_local(port=DEFAULT_PORT):
-    """Start the UI with the project's defaults (owner's PC path)."""
-    ui = JarvisUI(model_client=orch.OllamaModelClient())
+    """Start the UI with the project's defaults (owner's PC path).
+
+    The real Ollama client is wired, and the Step 58 live
+    fallback is on — the same configuration ``main.py`` starts
+    the UI with — so the chat answers about a ticker with no
+    stored statements instead of "I do not have enough data".
+    """
+    ui = JarvisUI(model_client=orch.OllamaModelClient(),
+                  live_fallback=True)
     print(f"Jarvis UI on http://127.0.0.1:{port}/ "
           "(local only — open it in a browser)")
     serve(ui, port=port)

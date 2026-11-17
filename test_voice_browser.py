@@ -12,7 +12,9 @@ unverified until the owner tries it on his PC.
 
 The database is a temp copy; the model client is a stub; no
 production writes, no audio is ever sent anywhere (the served
-JavaScript contains no network call).
+JavaScript makes no call to any host other than this same
+localhost server — Step 60: the chat submits turns with fetch
+to /api/chat on this server, nothing else).
 """
 
 import re
@@ -302,11 +304,17 @@ class TestVoiceJavaScript(_ServerCase):
         self.assertIn("Microphone access was denied", js)
         self.assertIn("Spoken replies are not supported", js)
 
-    def test_voice_js_makes_no_network_calls(self):
+    def test_voice_js_makes_no_external_network_calls(self):
+        # Step 60: the chat submits turns with fetch to /api/chat
+        # on this same localhost server — the only fetch in the
+        # served JavaScript, and a relative URL, so nothing ever
+        # leaves this machine. Voice itself still sends nothing
+        # anywhere.
         js = self.chat_js()
         self.assertNotIn("http://", js)
         self.assertNotIn("https://", js)
-        self.assertNotIn("fetch(", js)
+        self.assertEqual(js.count("fetch("), 1)
+        self.assertIn('fetch("/api/chat"', js)
         self.assertNotIn("XMLHttpRequest", js)
 
     def test_css_has_voice_styles(self):

@@ -1,9 +1,11 @@
 /* Step 55 — Jarvis mission-control UI, vanilla JavaScript only.
  *
- * No frameworks, no CDN, no network calls. The page embeds the
+ * No frameworks, no CDN, no external network calls. The page embeds the
  * data it needs in <script type="application/json"> blocks; this
  * file only draws charts from that data, sorts tables, and fills
- * the chat box when a command chip is clicked.
+ * the chat box when a command chip is clicked. Step 60: the chat
+ * submits turns with fetch to /api/chat on this same localhost
+ * server — still no call to any other host.
  */
 (function () {
   "use strict";
@@ -175,6 +177,114 @@
   });
 })();
 
+/* Step 60 — Chat that works like a real chat.
+ *
+ * Turns submit with fetch to POST /api/chat on this same
+ * localhost server (no call to any other host) and append to
+ * the on-screen conversation history instead of reloading the
+ * whole page. The plain form post to /chat still works when
+ * JavaScript is off — the server renders the same history from
+ * the turn log. After a reply arrives, the latest reply
+ * paragraph carries id="jarvis-reply-text" and a "jarvis-reply"
+ * event is dispatched so the Step 56 voice panel can speak it.
+ * All text is inserted with textContent, never innerHTML, so
+ * nothing in a question or reply can break out of the page.
+ */
+(function () {
+  "use strict";
+
+  function appendTurn(historyEl, question) {
+    var empty = historyEl.querySelector(".chat-empty");
+    if (empty) { empty.parentNode.removeChild(empty); }
+    var turnEl = document.createElement("div");
+    turnEl.className = "chat-turn";
+    var questionEl = document.createElement("p");
+    questionEl.className = "chat-question";
+    var youEl = document.createElement("strong");
+    youEl.textContent = "You:";
+    questionEl.appendChild(youEl);
+    questionEl.appendChild(document.createTextNode(" " + question));
+    turnEl.appendChild(questionEl);
+    var replyBox = document.createElement("div");
+    replyBox.className = "chat-reply";
+    var metaEl = document.createElement("p");
+    metaEl.className = "chat-meta";
+    replyBox.appendChild(metaEl);
+    var replyEl = document.createElement("p");
+    replyEl.className = "chat-reply-text";
+    replyBox.appendChild(replyEl);
+    var sourcesEl = document.createElement("p");
+    sourcesEl.className = "chat-sources";
+    replyBox.appendChild(sourcesEl);
+    turnEl.appendChild(replyBox);
+    historyEl.appendChild(turnEl);
+    return { metaEl: metaEl, replyEl: replyEl, sourcesEl: sourcesEl };
+  }
+
+  function fillTurn(parts, turn) {
+    // Exactly one element on the page carries the speakable
+    // reply id: the latest reply.
+    var prev = document.getElementById("jarvis-reply-text");
+    if (prev) { prev.removeAttribute("id"); }
+    parts.metaEl.textContent = "Intent: " + (turn.intent || "") +
+      " (" + (turn.intent_method || "") + "). Status: " +
+      (turn.status || "") + ".";
+    parts.replyEl.textContent = turn.reply || "";
+    parts.replyEl.setAttribute("id", "jarvis-reply-text");
+    if (turn.sources && turn.sources.length) {
+      parts.sourcesEl.textContent =
+        "Sources: " + turn.sources.join("; ");
+    } else {
+      parts.sourcesEl.textContent = "";
+    }
+    document.dispatchEvent(new CustomEvent("jarvis-reply"));
+  }
+
+  function wireChat() {
+    var form = document.getElementById("chat-form");
+    if (!form) { return; }
+    var input = form.querySelector("input[name='q']");
+    var historyEl = document.getElementById("chat-history");
+    if (!input || !historyEl) { return; }
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var question = input.value.trim();
+      if (!question) { return; }
+      // No fetch (a very old browser): fall back to the plain
+      // form post, which reloads the page with the same history.
+      if (typeof fetch !== "function") {
+        form.submit();
+        return;
+      }
+      var askBtn = form.querySelector("input[type='submit']");
+      var parts = appendTurn(historyEl, question);
+      parts.metaEl.textContent = "Waiting for Jarvis…";
+      parts.replyEl.textContent = "Thinking…";
+      if (askBtn) { askBtn.disabled = true; }
+      fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ q: question })
+      }).then(function (resp) { return resp.json(); })
+      .then(function (turn) {
+        fillTurn(parts, turn);
+      }).catch(function () {
+        parts.metaEl.textContent = "Status: error.";
+        parts.replyEl.textContent = "Could not reach Jarvis — the " +
+          "server did not answer. Reload the page and try again.";
+      }).then(function () {
+        if (askBtn) { askBtn.disabled = false; }
+        input.value = "";
+        input.focus();
+      });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    wireChat();
+  });
+})();
+
 /* Step 56 — Browser voice (Web Speech API, Chrome/Edge).
  *
  * Talk to Jarvis and hear it reply, as close to the movie as a
@@ -196,9 +306,10 @@
  *   actor; recognition accuracy depends on the microphone and
  *   accent. Language: en-SG first, en-US if the browser does
  *   not support en-SG.
- * - Only works while the chat page is open; each chat turn is
- *   a page reload, so voice state (on/off, hands-free, chosen
- *   voice) is kept in localStorage, never on the server.
+ * - Only works while the chat page is open; turns now append
+ *   to the conversation without a page reload (Step 60), and
+ *   voice state (on/off, hands-free, chosen voice) is kept in
+ *   localStorage, never on the server.
  */
 (function () {
   "use strict";
@@ -380,7 +491,15 @@
           input.value = finalText || interim;
         }
         if (finalText && form) {
-          form.submit();
+          // Step 60: requestSubmit (not submit) so the chat's
+          // submit handler runs and the turn goes through the
+          // fetch path — a plain submit would bypass it and
+          // reload the page. Very old browsers fall back.
+          if (form.requestSubmit) {
+            form.requestSubmit();
+          } else {
+            form.submit();
+          }
         }
       };
       rec.onend = function () {
@@ -488,11 +607,15 @@
         window.speechSynthesis.onvoiceschanged = populateVoices;
       }
     }
+    // Step 60: turns can also arrive with no page reload — the
+    // chat code dispatches a "jarvis-reply" event after each
+    // fetch turn — so speak those too. Listening never starts
+    // here — only a microphone click (or a spoken reply ending
+    // with hands-free on) starts it.
+    document.addEventListener("jarvis-reply", speakReply);
     applyVoiceOn();
-    // After a spoken turn the page reloads with the reply: speak
-    // it when voice is on. Listening never starts here — only a
-    // microphone click (or a spoken reply ending with hands-free
-    // on) starts it.
+    // Speak the latest reply when the page loads with one
+    // already rendered (for example after a plain form post).
     speakReply();
   }
 

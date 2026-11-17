@@ -469,7 +469,13 @@ class JarvisApp:
             news_dir=self.news_dir, events_dir=self.events_dir,
             alert_state_path=self.alert_state_path,
             model_client=self.model_client, log_dir=self.log_dir,
-            data_dir=self.data_dir)
+            data_dir=self.data_dir,
+            # Step 60: the chat, ticker and research pages get
+            # the same Step 58 live fallback as the terminal, so
+            # asking about a ticker with no stored statements
+            # returns the labelled live-derived value instead of
+            # "I do not have enough data".
+            live_fallback=True, live_fetcher=self.live_fetcher)
         server = make_server(ui, host="127.0.0.1", port=self.ui_port)
         thread = threading.Thread(
             target=server.serve_forever, daemon=True)

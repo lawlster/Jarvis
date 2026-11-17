@@ -265,6 +265,17 @@ input[type="submit"]:hover { background: #67e8f9; }
 }
 .chat-meta { color: var(--text-dim); font-size: 0.9em; }
 
+/* -- Conversation history (Step 60) --------------------------------
+ * Turns append here without a page reload; the latest reply
+ * carries the voice panel's speakable id. */
+#chat-history { margin: 1em 0; }
+.chat-turn { margin: 0 0 0.4em; }
+.chat-turn .chat-reply { margin: 0.4em 0 0; }
+.chat-question { margin: 0.6em 0 0; }
+.chat-question strong { color: var(--cyan); }
+.chat-sources { color: var(--text-dim); font-size: 0.85em; }
+.chat-empty { color: var(--text-dim); font-style: italic; }
+
 /* -- Voice (Step 56) ------------------------------------------------
  * Browser voice panel on the chat page: microphone button with a
  * pulsing ring while listening or speaking, on/off and hands-free
